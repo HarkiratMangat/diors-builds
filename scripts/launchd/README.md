@@ -39,6 +39,34 @@ tail -f ~/Library/Logs/dioreo/dev-portal.log
 
 🔴 **THE DISCORD REDIRECT URI IS THE ONE THING HERE THAT IS UNVERIFIED, AND IT IS THE LIKELIEST FAILURE.** `docs/db-deferred-list.md` records Harkirat registering `https://dev.portal.dioreo.app/auth/callback` on the `Dioreo (Dev)` application on 2026-08-28 — **the DOT form**. The hostname changed to `dev-portal` afterwards, because Universal SSL covers one label and not two, and **that entry was never updated**. So the URI this portal actually sends may not be registered. ⚠️ **It cannot be probed from a terminal**: measured 2026-09-05 14:46 EDT, an obviously unregistered `redirect_uri` returns the SAME 302 to Discord's login as the real one, so a curl check here cannot fail and proves nothing. **The only test is a sign-in.** If it errors with *Invalid OAuth2 redirect_uri*, add `https://dev-portal.dioreo.app/auth/callback` to the dev application's redirect list and retry.
 
+## Cloudflare Access sits in front of it, since 2026-09-05 16:24 EDT
+
+**A stranger no longer reaches this Mac at all.** Cloudflare stops the request at its own edge and 302s to `fragrant-hall-1c8b.cloudflareaccess.com`; the tunnel is never dialled and the laptop never sees the connection. Before this, an unauthenticated request got the portal's own login page — every data route already answered 401, so the lock held, but the door was reachable by anyone who guessed the name and it was reachable **whenever the Mac was on**, which is what the launchd agents changed.
+
+| Who | How they get in |
+|---|---|
+| **Harkirat** | A one-time PIN emailed to `harkirat117@gmail.com`. That is Cloudflare's built-in identity provider — no Google or GitHub app to configure — and it was the only one on the account. Session lasts 24h, then Discord OAuth still runs behind it as before |
+| **Automated checks** | The service token `dioreo-dev-portal-checks`, as two headers. `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` are in the gitignored `.env` |
+
+```bash
+curl -H "CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID" -H "CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET" \
+     https://dev-portal.dioreo.app/
+```
+
+⚠️ **THE LOCAL INSTRUMENTS ARE UNAFFECTED AND THAT IS NOT LUCK** — `portalRealWalk` and the rest drive `http://127.0.0.1:8787` directly, so they never cross Cloudflare. Only something addressing the public hostname needs the headers.
+
+🔴 **THE SERVICE-TOKEN SECRET WAS RETURNED ONCE AND CANNOT BE READ BACK.** It is in `.env` and nowhere else; losing it means creating a new token and updating the policy. It expires **2027-09-05**.
+
+**To remove the gate entirely** — the portal's own Discord OAuth still guards everything, so this is a downgrade in defence rather than an opening:
+
+```bash
+# app "Dioreo dev portal" on account 74780789a06110c70565abfc71a894d6
+curl -X DELETE -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  https://api.cloudflare.com/client/v4/accounts/74780789a06110c70565abfc71a894d6/access/apps/ebe6d549-6c9e-48ba-bf19-4afe0f599714
+```
+
+⚠️ **Verified when it was built, including the half that could have been vacuous**: anonymous → **302** to the Access login · service token → **200** and the portal's own title · **a WRONG secret → 302**, which is what makes the 200 evidence rather than a check that passes no matter what.
+
 ⚠️ **A SLEEPING MAC IS A 502, AND IT IS NOT A PORTAL BUG.** The origin is this machine, so the hostname answers only while the Mac is awake with both agents running. Cloudflare returns its own error page — **502/1033 means the tunnel reached nothing, not that the portal is broken**, and the first thing to check is whether the Mac was asleep rather than anything in `portal/`. Carried here from the deferred entry that predicted it, because a warning in a tracker is not at the point of failure.
 
 ⚠️ **`.env.dev` IS READ ONCE, AT START.** `KeepAlive` restarts the process on a crash, never on a file change, so rotating a dev secret leaves the running portal on the old value with nothing to indicate it. Same remedy as the line below.
