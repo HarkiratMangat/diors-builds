@@ -6,7 +6,7 @@ import { Shell, NoAccess, Masthead, MastheadNew } from './shell.js';
 import { Manifest } from './manifest.js';
 import { fetchJson } from './httpClient.js';
 import { useAsync, RealmShell } from './async.js';
-import { useOverlay } from './overlay.js';
+import { Drawer, useOverlay } from './overlay.js';
 import { Icon } from './icons.js';
 
 // ⚠️ SESSION_COLUMNS IS GONE WITH THE MANIFEST IT FED. Sessions are a view now — see the Sessions component for why the shared table was the wrong home and how it produced a hardcoded `state: 'live'` on every row.
@@ -21,39 +21,84 @@ function relTime(value) {
     return `${Math.round(secs / 86400)}d ago`;
 }
 
+// D1/pin32 — the always-visible `.addrow` (the block this replaces) rendered at the FOOT of the whole grid and did nothing when clicked from the masthead's "+ Grant access" button beyond scrolling to it ("the portal literally does nothing"). It is now a drawer, opened from the masthead, matching Broadcast's PostForm (portal/ui/broadcast.js:248) — a real modal with its own typed-confirmation gate, rather than a form permanently sitting under the table.
+//
+// 🔴 pin32: A DISCORD ID TYPED INTO A BOX WAS NEVER CHECKED AGAINST DISCORD ITSELF. Nothing stopped an admin from granting a typo'd id, or an id for an account that does not exist — the grant would silently succeed and sit in the grid as an unreachable row. GET /api/discord/user (portal/api/access.js) resolves the id against the bot's own Discord API access before Grant is allowed to enable, and the preview card (avatar/username/globalName/id) is the thing that lets a human actually confirm "yes, that's them" rather than trusting a string of digits.
+//
+// Debounced 400ms so every keystroke does not fire a Discord API call, and only once the id LOOKS like a snowflake (17–20 digits) — an in-progress id is not a failed lookup, it is simply not a ready one yet, and treating it as an error would flash a warning on every keystroke.
+function useDiscordLookup(discordId) {
+    const [state, setState] = useState({ status: 'idle' });
+    useEffect(() => {
+        if (!/^\d{17,20}$/.test(discordId)) { setState({ status: 'idle' }); return undefined; }
+        setState({ status: 'loading' });
+        let cancelled = false;
+        const t = setTimeout(async () => {
+            const res = await fetchJson(`/api/discord/user?id=${discordId}`);
+            if (cancelled) return;
+            if (res && res.id) setState({ status: 'ok', user: res });
+            else setState({ status: 'error', reason: (res && res.reason) || 'That id did not resolve to a Discord account.' });
+        }, 400);
+        return () => { cancelled = true; clearTimeout(t); };
+    }, [discordId]);
+    return state;
+}
+
 // "By admin is the grid you grant from" (spec §8.2) — a review pass found the API's grant/revoke routes had no caller anywhere: this form is what was missing. Grant/revoke both require the admin to type the exact target Discord ID as the tier-3 confirmation (portal/api/access.js's confirmMatchesTarget) — there is no separate export step for a permission change. 🔴 IT ASKED SOMEBODY TO TYPE A VOCABULARY FROM MEMORY, into a comma-separated box, to hand out permissions. Eleven scope tokens exist, `manage` silently covers eight of them, and a typo produced a grant that looked accepted and covered nothing — the grid beside it renders every one of those tokens as a labelled cell, so the vocabulary was on screen and unusable in the one control that needed it. The chips come from the SAME `matrix.scopes` the grid is built from, which is the enumeration `singlePointsOfFailure` walks, so there is no second list to drift.
 //
 // ⚠️ THE OWNER-ONLY LOCK IS SHOWN, NOT ENFORCED HERE. `destructive` is excluded from `all` and grantable only by the owner — the server decides that, and a chip that hid it would leave an owner unable to grant the one permission only they can grant. The mark says why it is different.
-function GrantForm({ onGrant, scopes }) {
+//
+// ⚠️ grantReady (access.logic.js) is the single source for when the Grant button may fire and what the `.why` line says when it may not — kept pure and unit-tested (scripts/portalSession.test.js) precisely so this readiness rule can be checked without a DOM.
+function GrantForm({ onGrant, scopes, onCancel }) {
     const [discordId, setDiscordId] = useState('');
     const [picked, setPicked] = useState([]);
+    const [note, setNote] = useState('');
     const [confirmText, setConfirmText] = useState('');
-    const ready = discordId && confirmText === discordId;
+    const lookup = useDiscordLookup(discordId);
     const toggle = (key) => setPicked(picked.includes(key) ? picked.filter((k) => k !== key) : [...picked, key]);
+    const { ready, why } = grantReady({ discordId, lookupStatus: lookup.status, pickedCount: picked.length, confirmText });
+
     return html`
-        <!-- 🔴 A PLACEHOLDER IS NOT A LABEL, and these two inputs look identical the moment either has
-             text in it — one takes the account to grant, the other takes the SAME id typed back as the
-             tier-3 confirmation. A screen-reader label existed; a visible one did not, so the only thing
-             distinguishing them on screen was a hint that disappears when you start typing. The dwfield class
-             is the sheet's own labelled field, used by every other form in the portal. -->
-        <div class="addrow">
-            <label class="dwfield" for="grant-discordid"><span>Discord ID to grant</span>
-                <input id="grant-discordid" placeholder="19 digits" value=${discordId} onInput=${(e) => setDiscordId(e.target.value)} /></label>
-            <label class="dwfield" for="grant-confirm"><span>Type it again to confirm <i>the same id, not the word "grant"</i></span>
-                <input id="grant-confirm" placeholder="the same 19 digits" value=${confirmText} onInput=${(e) => setConfirmText(e.target.value)} /></label>
-            <button class="accent-fill" disabled=${!ready} onClick=${() => onGrant(discordId, picked, confirmText)}>
-                ${picked.length ? `Grant ${picked.length}` : 'Grant nothing yet'}</button>
-            <div class="tokgrid">
-                ${(scopes || []).map((sc) => html`
-                    <button key=${sc.key} class=${'chip topic' + (picked.includes(sc.key) ? ' on' : '')}
-                            style=${sc.hex ? `--c:${sc.hex}` : null} aria-pressed=${picked.includes(sc.key) ? 'true' : 'false'}
-                            title=${sc.key} onClick=${() => toggle(sc.key)}>
-                        <i></i>${sc.label || sc.key}${sc.ownerOnly ? html`<b class="ownly-k" aria-label="owner-grantable only">🔒</b>` : null}
-                    </button>`)}
+        <${Drawer} eyebrow="admin.grant · tier 3" title="Grant portal access" onClose=${onCancel}
+                   actions=${html`
+                       <button class="btn" onClick=${onCancel}>Cancel</button>
+                       <button class="btn go" disabled=${!ready} onClick=${() => onGrant(discordId, picked, confirmText, note)}>Grant now</button>`}>
+            <div class="dwbody">
+                <!-- 🔴 A PLACEHOLDER IS NOT A LABEL, and these two inputs look identical the moment either has
+                     text in it — one takes the account to grant, the other takes the SAME id typed back as the
+                     tier-3 confirmation. A screen-reader label existed; a visible one did not, so the only thing
+                     distinguishing them on screen was a hint that disappears when you start typing. The dwfield class
+                     is the sheet's own labelled field, used by every other form in the portal. -->
+                <div class="dwfield"><label for="grant-discordid">Discord ID</label>
+                    <input id="grant-discordid" placeholder="17–20 digits" inputmode="numeric" autocomplete="off"
+                           value=${discordId} onInput=${(e) => setDiscordId(e.target.value.trim())} /></div>
+                ${lookup.status === 'loading' ? html`<p class="dw-p">Looking that id up…</p>` : null}
+                ${lookup.status === 'error' ? html`<p class="dw-p" style="color:var(--warn)">${lookup.reason}</p>` : null}
+                ${lookup.status === 'ok' ? html`
+                    <div class="grantpreview">
+                        <span class="gp-av" aria-hidden="true" style=${`--av-src:url(${lookup.user.avatarUrl})`}></span>
+                        <span class="gp-n"><b>${lookup.user.globalName || lookup.user.username}</b>
+                            <span>@${lookup.user.username} · …${discordId.slice(-6)}</span></span>
+                    </div>` : null}
+                <div class="tokgrid">
+                    ${(scopes || []).map((sc) => html`
+                        <button key=${sc.key} class=${'chip topic' + (picked.includes(sc.key) ? ' on' : '')}
+                                style=${sc.hex ? `--c:${sc.hex}` : null} aria-pressed=${picked.includes(sc.key) ? 'true' : 'false'}
+                                title=${sc.key} onClick=${() => toggle(sc.key)}>
+                            <i></i>${sc.label || sc.key}${sc.ownerOnly ? html`<b class="ownly-k" aria-label="owner-grantable only">🔒</b>` : null}
+                        </button>`)}
+                </div>
+                <div class="dwfield" style="margin-top:14px"><label for="grant-note">Label (optional)</label>
+                    <input id="grant-note" placeholder="How you will recognise them" value=${note} onInput=${(e) => setNote(e.target.value)} /></div>
+                <div class="dwfield"><label for="grant-confirm">Type the Discord ID again to confirm</label>
+                    <input id="grant-confirm" placeholder=${discordId || 'the same digits'} autocomplete="off"
+                           value=${confirmText} onInput=${(e) => setConfirmText(e.target.value)} /></div>
+                <p class="dw-p"><b>This commits immediately.</b> A permission change is not staged and has no review
+                    screen — typing the id is the entire gate, because there is no data to export and nothing
+                    meaningful to preview. The allowlist cache is invalidated on write, so it is live in the bot on
+                    their very next click.</p>
+                ${why ? html`<p class="why" role="status">${why}</p>` : null}
             </div>
-            <span class="hint">A new admin starts with nothing granted — there is no default. Type the Discord ID twice: once to
-                name them, once to confirm. <b>manage</b> covers every page at once, which is why the grid marks those cells inherited.</span>
-        </div>
+        <//>
     `;
 }
 
@@ -124,7 +169,7 @@ function RevokeControl({ discordId, onRevoke }) {
 // 🔴 SO THE CELLS EDIT, AND THEY STAGE RATHER THAN FIRE. A click marks the cell pending — the matrix reads as the state you are about to save, not the one you are leaving — and the row's Save opens the same typed drawer every other destructive act in this realm goes through, with the target's own Discord ID as the word. No new server route: /api/access/grant already replaces the whole permission list, which is exactly what a recomputed set is.
 //
 // ⚠️ AN INHERITED CELL DOES NOT TOGGLE. Holding a bare `manage` covers every page at once, so there is no such thing as revoking one of them — the honest response to that click is to say so, not to quietly rewrite the token into eight explicit ones. Two things the grid does that the string cannot are INHERITANCE (visible rather than remembered) and, in the By-scope view below, SINGLE POINTS OF FAILURE. Data comes from GET /api/access/matrix, built over the same scope enumeration singlePointsOfFailure() uses — never a second list that could drift.
-function ByAdmin({ matrix, spof, onGrant, onSave, onRevoke, onExplain, isOwnerId }) {
+function ByAdmin({ matrix, spof, onSave, onRevoke, onExplain, isOwnerId, highlightId }) {
     const [pending, setPending] = useState({});     // { "discordId|scope": true|false }
     const scopes = matrix.scopes || [];
     const commands = scopes.filter((s) => s.kind === 'command');
@@ -215,7 +260,7 @@ function ByAdmin({ matrix, spof, onGrant, onSave, onRevoke, onExplain, isOwnerId
                                 const rp = rowPending(a.discordId);
                                 const changes = Object.keys(rp).length;
                                 return html`
-                                    <tr key=${a.discordId} class=${owner ? 'ownerrow' : ''}>
+                                    <tr key=${a.discordId} class=${(owner ? 'ownerrow' : '') + (a.discordId === highlightId ? ' just-granted' : '')}>
                                         <td class="mxwho"><span class="mxid">
                                             <span class="mxav" aria-hidden="true">${(a.note ? a.note[0] : a.discordId.slice(-1)).toUpperCase()}</span>
                                             <span class="mxn">
@@ -279,7 +324,6 @@ function ByAdmin({ matrix, spof, onGrant, onSave, onRevoke, onExplain, isOwnerId
                      whose next line opens with a tag renders as one run-on word. Both gates fired on this paragraph. -->
                 <p class="racknote">${(matrix.scopes || []).length} permissions: four commands — <code>manage</code> · <code>autobuild</code> · <code>bot</code> · <code>destructive</code> — and eight <code>/manage</code> pages. <code>all</code> is an input-only convenience that expands to the three ORIGINAL commands and <b>never to <code>destructive</code></b> — a convenience that quietly hands out irreversibility is the opposite of one. An admin must always hold at least one permission: an admin with nothing granted should be revoked, not parked in limbo. <b>🔒 <code>destructive</code> is a real permission in the bot</b> and the only one the <code>all</code> shorthand never includes — it can arrive only by being typed deliberately.</p>
             `}
-            <${GrantForm} onGrant=${onGrant} scopes=${matrix.scopes} />
         </div>
     `;
 }
@@ -343,6 +387,14 @@ export function AccessRealm({ session }) {
     const [notice, setNotice] = useState('');
     const [view, setView] = useState('By admin');
     const overlay = useOverlay();
+    // D1/pin32 — the grant drawer's own open state, and delight/pin5's one-time row highlight after a grant lands. Cleared on a timer rather than on the next render: the grid re-renders on every poll/refresh, and a highlight that survived only until "something else redraws" would flicker on and off unpredictably.
+    const [showGrant, setShowGrant] = useState(false);
+    const [highlightId, setHighlightId] = useState(null);
+    useEffect(() => {
+        if (!highlightId) return undefined;
+        const t = setTimeout(() => setHighlightId(null), 2400);
+        return () => clearTimeout(t);
+    }, [highlightId]);
 
     const refresh = load.reload;
 
@@ -425,13 +477,23 @@ export function AccessRealm({ session }) {
         refresh();
     }
 
-    async function grant(discordId, permissions, confirmText) {
+    async function grant(discordId, permissions, confirmText, note) {
         const body = await fetchJson('/api/access/grant', {
             method: 'POST', headers: { 'content-type': 'application/json', 'x-csrf-token': session.csrfToken },
-            body: JSON.stringify({ discordId, permissions, confirmText }),
+            body: JSON.stringify({ discordId, permissions, confirmText, note }),
         });
         setNotice(body.ok ? '' : (body.reason || body.error || 'Grant failed'));
         refresh();
+        return body;
+    }
+
+    // D1/pin32 delight — the drawer's own success path: close it, highlight the new row once, and say what happened. Kept separate from grant() itself because grant() is also the grid's own save path (confirmSave below), which already has its own "Permissions saved." toast and must not also close a drawer that was never open.
+    async function handleGrant(discordId, permissions, confirmText, note) {
+        const body = await grant(discordId, permissions, confirmText, note);
+        if (!body || !body.ok) return;
+        setShowGrant(false);
+        setHighlightId(discordId);
+        overlay.say(`Granted ${permissions.length} permission${permissions.length === 1 ? '' : 's'} to …${discordId.slice(-6)}.`);
     }
 
     async function revoke(discordId, confirmText) {
@@ -485,12 +547,6 @@ export function AccessRealm({ session }) {
             ${anyLock ? html`<span class="l" data-note><i style="background:none">🔒</i>owner-grantable only</span>` : null}
         </span>`;
 
-    // ⚠️ THE FORM IS AT THE FOOT OF A GRID, so the masthead button has to travel rather than toggle: there is no second copy to reveal, and building one would be two grant forms that can disagree. The focus lands on the field, not merely the scroll position — a page that moves and leaves the caret behind has not actually taken you there.
-    const scrollToGrant = () => requestAnimationFrame(() => {
-        const el = document.querySelector('.grantform input, #grant-id');
-        if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.focus({ preventScroll: true }); }
-    });
-
     // A session is "signed in now" if it was seen in the last 15 minutes -- the same rough threshold 06-access-and-analytics.html's own "2 signed in now" stat line implies. Not a stored flag: a browser session has no logout event unless someone clicks it, so recency is the only honest signal there is.
     const activeSessions = data.sessions.filter((s) => Date.now() - new Date(s.lastSeenAt).getTime() < 15 * 60000).length;
 
@@ -501,7 +557,7 @@ export function AccessRealm({ session }) {
                   badges=${{ review: data.stagedUnknown ? 0 : (data.stagedOps || []).length }}
                   stagedOps=${data.stagedUnknown ? null : data.stagedOps}
                   exports=${exportScopes} exportLabel="Export" overlayFor=${overlay}
-                  overlaySlot=${overlay.render()}
+                  overlaySlot=${html`${overlay.render()}${showGrant ? html`<${GrantForm} onGrant=${handleGrant} scopes=${matrix.scopes} onCancel=${() => setShowGrant(false)} />` : null}`}
                   masthead=${html`<${Masthead} title="Access" sub="Who can do what — and where you are the only one who can do it."
                                                stats=${[
                                                    { value: data.admins.length, label: 'granted', lead: true, accent: 'var(--r-access)' },
@@ -512,8 +568,8 @@ export function AccessRealm({ session }) {
                                                      tone: (data.singlePointsOfFailure || []).length ? 'warn' : undefined },
                                                ]}
                                                actions=${html`<${MastheadNew} label="Grant access" hint="n"
-                                                                              tip="Jump to the grant form"
-                                                                              onClick=${() => { setView('By admin'); scrollToGrant(); }} />`} />`}
+                                                                              tip="Grant a new admin access"
+                                                                              onClick=${() => { setView('By admin'); setShowGrant(true); }} />`} />`}
                   contextSlot=${html`
                       <!-- The design opens the page with this, and it is the one thing a reader cannot work out
                            from the grid: this realm has no grantable permission at all. portal/api/realmAccess.js
@@ -540,7 +596,7 @@ export function AccessRealm({ session }) {
                       ${notice ? html`<p style="color:var(--warn);padding:0 var(--gut)">${notice}</p>` : null}
                       ${view === 'By admin'
                           ? html`<${ByAdmin} matrix=${matrix} spof=${data.singlePointsOfFailure}
-                                             onGrant=${grant} onRevoke=${confirmRevoke} onSave=${confirmSave}
+                                             onRevoke=${confirmRevoke} onSave=${confirmSave} highlightId=${highlightId}
                                              onExplain=${explainInherited} isOwnerId=${session.discordId} />`
                           : html`<${ByScope} matrix=${matrix} spof=${data.singlePointsOfFailure} ownerId=${session.discordId} />`}
                   `} />

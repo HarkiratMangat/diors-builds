@@ -133,7 +133,7 @@
         }
       ],
       "known": [],
-      "expect": ".nwhost .nw-form .nw-f-name"
+      "expect": ".drawer .nw-form .nw-f-name"
     },
     {
       "name": "composer · the paste box",
@@ -148,7 +148,7 @@
         }
       ],
       "known": [],
-      "expect": ".nwhost .nw-paste"
+      "expect": ".drawer .nw-paste"
     },
     {
       "name": "day drawer · what runs on one day",
@@ -156,14 +156,40 @@
       "flags": {},
       "steps": [
         {
-          "clickText": {
-            "sel": ".chip",
-            "text": "Open a day"
-          }
+          "click": ".zoomer button.today"
         }
       ],
       "known": [],
       "expect": ".drawer .daylist"
+    },
+    {
+      "name": "composer · the items preview",
+      "realm": "season",
+      "flags": {},
+      "steps": [
+        {
+          "clickText": {
+            "sel": ".mh-t",
+            "text": "Draw"
+          }
+        },
+        {
+          "type": {
+            "sel": "#nw-items",
+            "text": "m Ghost"
+          }
+        }
+      ],
+      "known": [],
+      "expect": ".nw-items .pz-rows"
+    },
+    {
+      "name": "staged strip · under the view bar",
+      "realm": "season",
+      "flags": {},
+      "steps": [],
+      "known": [],
+      "expect": ".stg-strip .ss-d"
     },
     {
       "name": "manifest · the selection bar",

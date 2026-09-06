@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "F=\"${CLAUDE_PROJECT_DIR:-/Applications/Claude Code/Diors-Builds}/docs/SESSION-START.md\"; if [ -f \"$F\" ]; then cat \"$F\"; else echo \"⚠️ SESSION-START.md NOT FOUND at $F — session-start guidance did NOT load. Tell Harkirat, and fix the SessionStart hook path in .claude/settings.local.json.\"; fi | jq -Rs '{hookSpecificOutput: {hookEventName: \"SessionStart\", additionalContext: .}}'",
+            "command": "F=\"${CLAUDE_PROJECT_DIR:-/Applications/Claude Code/Diors-Builds}/docs/SESSION-START.md\"; if [ -f \"$F\" ]; then cat \"$F\"; else echo \"\u26a0\ufe0f SESSION-START.md NOT FOUND at $F \u2014 session-start guidance did NOT load. Tell Harkirat, and fix the SessionStart hook path in .claude/settings.local.json.\"; fi | jq -Rs '{hookSpecificOutput: {hookEventName: \"SessionStart\", additionalContext: .}}'",
             "timeout": 5
           }
         ]
@@ -53,7 +53,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "F=\"${CLAUDE_PROJECT_DIR:-/Applications/Claude Code/Diors-Builds}/docs/ideas/diors-notes.md\"; H=\"${CLAUDE_PROJECT_DIR:-/Applications/Claude Code/Diors-Builds}/.claude/hooks/notes-followups.sh\"; if [ -f \"$F\" ] && [ -x \"$H\" ]; then out=$(bash \"$H\" \"$F\"); if [ -n \"$out\" ]; then printf 'FOLLOW-UP MARKS AWAITING YOU -- these are ※ exchanges in docs/ideas/diors-notes.md that are still open. An ANSWERED follow-up whose reply asks Harkirat something is NOT resolved: one sat unseen for ~5 sessions because it was below the open-items scan boundary, was not a \"- [ ]\" item, and no hook matched the mark. RAISE each of these with him in your FIRST message this session -- do not just read them.\\n%s' \"$out\"; fi; fi | jq -Rs 'if . == \"\" then empty else {hookSpecificOutput:{hookEventName:\"SessionStart\",additionalContext:.}} end'",
+            "command": "F=\"${CLAUDE_PROJECT_DIR:-/Applications/Claude Code/Diors-Builds}/docs/ideas/diors-notes.md\"; H=\"${CLAUDE_PROJECT_DIR:-/Applications/Claude Code/Diors-Builds}/.claude/hooks/notes-followups.sh\"; if [ -f \"$F\" ] && [ -x \"$H\" ]; then out=$(bash \"$H\" \"$F\"); if [ -n \"$out\" ]; then printf 'FOLLOW-UP MARKS AWAITING YOU -- these are \u203b exchanges in docs/ideas/diors-notes.md that are still open. An ANSWERED follow-up whose reply asks Harkirat something is NOT resolved: one sat unseen for ~5 sessions because it was below the open-items scan boundary, was not a \"- [ ]\" item, and no hook matched the mark. RAISE each of these with him in your FIRST message this session -- do not just read them.\\n%s' \"$out\"; fi; fi | jq -Rs 'if . == \"\" then empty else {hookSpecificOutput:{hookEventName:\"SessionStart\",additionalContext:.}} end'",
             "timeout": 5
           }
         ]
@@ -128,7 +128,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "printf '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"[clock] Real current time: %s. Use THIS for any timestamp you write — never estimate elapsed time from how long the session feels. On 2026-08-02 a single date call at 12:57 followed by guessing produced 30 fabricated stamps drifting 4.5h into the future, in a released CHANGELOG and a git tag.\"}}' \"$(date '+%Y-%m-%d %H:%M %Z')\"",
+            "command": "printf '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"[clock] Real current time: %s. Use THIS for any timestamp you write \u2014 never estimate elapsed time from how long the session feels. On 2026-08-02 a single date call at 12:57 followed by guessing produced 30 fabricated stamps drifting 4.5h into the future, in a released CHANGELOG and a git tag.\"}}' \"$(date '+%Y-%m-%d %H:%M %Z')\"",
             "timeout": 5
           }
         ]
@@ -364,7 +364,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "S=\"${CLAUDE_PROJECT_DIR:-/Applications/Claude Code/Diors-Builds}/.claude/hooks/timestamp-check.sh\"; if [ -r \"$S\" ]; then bash \"$S\"; else jq -n '{hookSpecificOutput:{hookEventName:\"PostToolUse\",additionalContext:\"TIMESTAMP CHECK DID NOT RUN — .claude/hooks/timestamp-check.sh is unreadable, so nothing is checking dates OR catching impossible (future) timestamps. On 2026-08-02 that failure mode put 30 fabricated stamps into records. Verify any timestamp you write by hand.\"}}'; fi",
+            "command": "S=\"${CLAUDE_PROJECT_DIR:-/Applications/Claude Code/Diors-Builds}/.claude/hooks/timestamp-check.sh\"; if [ -r \"$S\" ]; then bash \"$S\"; else jq -n '{hookSpecificOutput:{hookEventName:\"PostToolUse\",additionalContext:\"TIMESTAMP CHECK DID NOT RUN \u2014 .claude/hooks/timestamp-check.sh is unreadable, so nothing is checking dates OR catching impossible (future) timestamps. On 2026-08-02 that failure mode put 30 fabricated stamps into records. Verify any timestamp you write by hand.\"}}'; fi",
             "timeout": 8
           },
           {
@@ -394,6 +394,17 @@
             "type": "command",
             "command": "S=\"${CLAUDE_PROJECT_DIR:-/Applications/Claude Code/Diors-Builds}/.claude/hooks/typos-check.sh\"; [ -r \"$S\" ] && bash \"$S\" || exit 0",
             "timeout": 8
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/skills/impeccable/scripts/hook.mjs\"",
+            "timeout": 5,
+            "statusMessage": "Checking UI changes"
           }
         ]
       }
@@ -430,7 +441,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "S=\"${CLAUDE_PROJECT_DIR:-/Applications/Claude Code/Diors-Builds}/.claude/hooks/outstanding-not-filed.sh\"; if [ -r \"$S\" ]; then bash \"$S\"; else jq -n '{decision:\"block\",reason:\"OUTSTANDING-NOT-FILED GATE MISSING — .claude/hooks/outstanding-not-filed.sh is unreadable, so nothing is checking whether items you named as outstanding actually got filed. Restore it or say explicitly that you are proceeding without it.\"}'; fi",
+            "command": "S=\"${CLAUDE_PROJECT_DIR:-/Applications/Claude Code/Diors-Builds}/.claude/hooks/outstanding-not-filed.sh\"; if [ -r \"$S\" ]; then bash \"$S\"; else jq -n '{decision:\"block\",reason:\"OUTSTANDING-NOT-FILED GATE MISSING \u2014 .claude/hooks/outstanding-not-filed.sh is unreadable, so nothing is checking whether items you named as outstanding actually got filed. Restore it or say explicitly that you are proceeding without it.\"}'; fi",
             "timeout": 10
           }
         ]
@@ -441,6 +452,16 @@
             "type": "command",
             "command": "input=$(cat); active=$(printf '%s' \"$input\" | jq -r '.stop_hook_active // false'); if [ \"$active\" = \"true\" ]; then exit 0; fi; tp=$(printf '%s' \"$input\" | jq -r '.transcript_path // empty'); S=\"${CLAUDE_PROJECT_DIR:-/Applications/Claude Code/Diors-Builds}/.claude/hooks/completeness-sweep.sh\"; if [ -r \"$S\" ]; then bash \"$S\" main \"$tp\" stop; else jq -n '{decision:\"block\",reason:\"COMPLETENESS SWEEP MISSING: .claude/hooks/completeness-sweep.sh is not readable, so passes 2 and 3 (conservation + angles-not-taken) did NOT run. Do not read this as a clean sweep.\"}'; fi",
             "timeout": 30
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/skills/impeccable/scripts/hook.mjs\"",
+            "timeout": 30,
+            "statusMessage": "Design deep pass"
           }
         ]
       }

@@ -20,6 +20,13 @@ const dday = (from, to) => Math.round((new Date(dayOf(to) + 'T00:00:00Z') - new 
 const todayIso = () => (typeof document !== 'undefined' && document.documentElement.dataset.today)
     || new Date().toISOString().slice(0, 10);
 
+// The masthead's fourth figure, reduced to a pure function so scripts/home*.test.js can exercise both edges without a DOM: a season with every deadline TBD or unset (seasonLastDeadline returns '') is `null`, never a stray number, and a deadline already in the past clamps to 0 rather than going negative — the same convention season.logic.js's countdownParts already uses for "today or past" elsewhere on this page. Exported for the test file; nothing else in this realm calls it from outside HomeRealm.
+export function seasonDaysLeft(season, today) {
+    const iso = seasonLastDeadline(season);
+    if (!iso) return null;
+    return Math.max(0, dday(today, iso));
+}
+
 // Every dated thing in the season as ONE list, which is what both clock columns read. The realms keep their arrays separate because each has its own schema; Home only ever asks "when".
 function seasonItems(live) {
     if (!live) return [];
@@ -159,10 +166,11 @@ function HomeClock({ season, today }) {
         return () => clearInterval(id);
     }, [moments.length]);
 
-    if (!moments.length) return html`<section class="hclock"><span class="sc-none">No season deadline set.</span></section>`;
+    // ⚠️ ONBOARD, 2026-09-06 — both empty states now name the next action rather than leaving the reader to already know Season is where a deadline gets set. Home's build-out row asks for exactly this: an empty state carries a button/link to the realm that would fix it.
+    if (!moments.length) return html`<section class="hclock"><span class="sc-none">No season deadline set. <a href="#/season">Set one in Season</a>.</span></section>`;
     const next = moments[0], rest = moments.slice(1);
     const p = countdownParts(next.iso, Date.now());
-    if (!p || p.past) return html`<section class="hclock"><span class="sc-none">This season has ended.</span></section>`;
+    if (!p || p.past) return html`<section class="hclock"><span class="sc-none">This season has ended. <a href="#/season">Start the next one in Season</a>.</span></section>`;
 
     const items = seasonItems(season);
     const upcoming = items.filter((i) => i.start > today && i.start <= next.iso).sort((a, b) => (a.start < b.start ? -1 : 1));
@@ -240,7 +248,7 @@ function LiveNow({ season, broadcast, today }) {
                     <p class="lmore">${items.length - SHOW} more running · <a href="#/season">open the Track</a></p>` : null}
                 ${!items.length ? html`
                     <p class="lmore">Nothing is scheduled for today. The season runs, but no draw, event or playlist
-                        opens or closes.</p>` : null}
+                        opens or closes. <a href="#/season">Open Season</a>.</p>` : null}
             </div>
             <div class="lp">
                 <h2>Showing to players</h2>
@@ -292,13 +300,18 @@ export function HomeRealm({ session }) {
 
     // The LEAD is "needs you", because that is what this page IS. Its colour is the state it reports — warn when there is something, plain ink at zero — which is the same rule every other masthead follows. A zero lead keeps its SIZE and drops its COLOUR.
     //
-    // 🔴 THREE FIGURES, NOT FOUR, AND `days left` WAS THE FOURTH. §16.6 and §5.9z.5 both name four — days left · live now · staged · needs you — but the design RENDERS three, and the mockup is the authority the conformance pass is measured against. The countdown also sits ~200px below in Home's own clock panel, which states the same deadline and earns two item columns off it, so a masthead figure was a second copy of a fact the page already carries. Harkirat, 2026-09-03 21:20 EDT: conform to three now, and let `days left` come back on merit in the redesign phase rather than by inheritance — filed in docs/db-deferred-list.md. **Do not "restore" it as a missing figure.**
+    // 🔴 FOUR FIGURES AGAIN, 2026-09-06 01:29 EDT — THE BUILD-OUT PLAN REOPENS THIS ON MERIT, NOT BY INHERITANCE. The 2026-09-03 cut to three was itself explicit that `days left` could "come back on merit in the redesign phase" (docs/db-deferred-list.md) rather than being restored as a figure nobody re-examined — this is that merit pass, ordered directly in docs/superpowers/plans/2026-09-06-portal-build-out.md's Unit E row. The countdown still sits ~200px below in Home's own clock panel, so the masthead figure and the clock panel now agree on purpose rather than by accident, the same way every other realm's masthead states a headline the view beneath it elaborates.
+    const daysLeft = seasonDaysLeft(data.season?.live, today);
     const stats = [
         { value: rows.length, label: 'needs you', lead: true, accent: rows.length ? 'var(--warn)' : 'var(--ink)' },
         // The two non-lead figures carry their own state rather than plain ink: a live count reads in the live colour and a staged count in the staged one, which is the same shape-and-colour rule every mark in this portal follows. A zero keeps its size and drops its colour. ⚠️ NO `tone: 'live'` HERE, AND THE ABSENCE IS THE POINT. It was added to clear a coverage entry and there is no `.stat.live` rule anywhere — `.stat.stg .v` and `.stat.warn .v` exist, `.stat.live` does not — so the class styled nothing and existed only to make a number move. The live figure reads in plain ink because that is what the design gives it.
-        { value: live === null ? '—' : live, label: 'live now' },
+        //
+        // ⚠️ RENAMED "live now" → "announcements live", 2026-09-06 01:29 EDT (build-out plan, `clarify` lens). This counts LIVE ANNOUNCEMENTS specifically (broadcast.live.length), which is a different question from "Running right now" 200px below it — the old label read as the same question the clock and LiveNow panels already answer, so it now names what it counts.
+        { value: live === null ? '—' : live, label: 'announcements live' },
         // 🔴 THE STAGED FIGURE IS NOT A MASTHEAD STAT ON HOME — removed 2026-09-04 22:54 EDT. This screen stated one number four times: the header commit chip, the rail badge, this stat, and the resume strip 60px below it — which is the only one of the four that says WHICH realms and what "staged" costs. On a page titled "What needs you", whose job is ranking, a bare repeated digit is the weakest of the four and it goes. ⚠️ HOME ONLY. Every other realm's masthead staged figure is scoped to that realm and says something its neighbours do not.
-
+        //
+        // 🔴 RESTORED, READING THE SEASON'S LAST DEADLINE — never `bpEnd` alone, for the same reason `seasonItems` above does not: the dev document leaves `bpEnd` unset, and a fallback keyed on it alone silently reads the wrong wall on the one environment nobody had measured. Absent (no season, or every deadline TBD) reads as an em dash with a label that says why, matching the portal's "a figure that cannot be known must not read as zero" rule — see broadcast.js:326.
+        { value: daysLeft == null ? '—' : daysLeft, label: daysLeft == null ? 'no deadline set' : 'days left' },
     ];
 
     return html`

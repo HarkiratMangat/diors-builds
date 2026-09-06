@@ -181,12 +181,15 @@ async function handleCallback(req, res, url) {
     // The SAME origin the login used — Discord verifies that the exchange repeats the redirect_uri it was given, and the callback necessarily arrives on that host, so reading the request is exact.
     const redirectUri = `${originOf(req)}/auth/callback`;
 
-    let discordId;
+    let discordId, username, globalName, avatarHash;
     try {
         const token = await exchangeCode({ code, clientId, clientSecret, redirectUri });
         const user = await fetchDiscordUser(token.access_token);
         discordId = user.id;
-        // `token` and `user` fall out of scope here — no Discord credential is ever persisted.
+        // D3 — `username`/`global_name`/`avatar` are ordinary profile fields the `identify` scope already returns; the OAuth token and the raw `user` object still fall out of scope here — no Discord CREDENTIAL is ever persisted, only these three display fields, so the portal's own header can say whose session it is instead of a grey disc (see shell.js's Account/Header).
+        username = user.username || '';
+        globalName = user.global_name || '';
+        avatarHash = user.avatar || null;
     } catch (error) {
         console.error('Portal OAuth exchange failed:', error);
         res.writeHead(502, { 'content-type': 'text/plain' });
@@ -197,6 +200,9 @@ async function handleCallback(req, res, url) {
     await PortalSession.create({
         sessionHash: hashSession(rawSessionId),
         discordId,
+        username,
+        globalName,
+        avatarHash,
         userAgent: (req.headers['user-agent'] || '').slice(0, 300),
     });
 
@@ -216,8 +222,11 @@ async function sessionFor(req) {
     if (Date.now() - new Date(row.lastSeenAt).getTime() > 60_000) {
         PortalSession.updateOne({ sessionHash }, { lastSeenAt: new Date() }).catch((e) => console.error('Portal lastSeenAt update failed:', e));
     }
-    // createdAt rides along so /auth/csrf can tell the browser when this session expires — the account panel states a fact about the reader rather than restating the 12-hour policy at them.
-    return { discordId: row.discordId, sessionId: sessionHash, createdAt: row.createdAt };
+    // createdAt rides along so /auth/csrf can tell the browser when this session expires — the account panel states a fact about the reader rather than restating the 12-hour policy at them. D3 — username/globalName/avatarHash ride along the same way, for the header identity chip (shell.js's Account/Header). Absent on a session created before this field existed; the chip falls back to an initial letter rather than guessing.
+    return {
+        discordId: row.discordId, sessionId: sessionHash, createdAt: row.createdAt,
+        username: row.username || '', globalName: row.globalName || '', avatarHash: row.avatarHash || null,
+    };
 }
 
 function csrfToken(session) {
@@ -259,7 +268,7 @@ function registerAuthRoutes(route) {
             : null;
         // 🔴 `destructive` IS NOT A REALM AND MUST NOT BE INFERRED FROM ONE. utils/adminAccess.js keeps it out of `all` on purpose — the owner typing "all" is asking for broad access, not for somebody else to be able to purge the season — so the portal has to ask for it by name. Sent on the session because the one-way strip has to render DISABLED WITH THE REASON for an admin who lacks it, which it cannot do if it does not know.
         const canDestroy = owner || await hasCommandAccess(session.discordId, 'destructive');
-        sendJson(res, 200, { csrfToken: csrfToken(session), discordId: session.discordId, isOwner: owner, canDestroy, visibleRealms: realms, sessionExpiresAt: expiresAt });
+        sendJson(res, 200, { csrfToken: csrfToken(session), discordId: session.discordId, username: session.username, globalName: session.globalName, avatarHash: session.avatarHash, isOwner: owner, canDestroy, visibleRealms: realms, sessionExpiresAt: expiresAt });
     }));
     route('POST', /^\/auth\/logout$/, requireAdmin(async (req, res, url, session) => {
         await PortalSession.updateOne({ sessionHash: session.sessionId }, { revokedAt: new Date() });

@@ -1029,6 +1029,8 @@ check(
       if (!f.endsWith(".md")) continue;
       // Plugin-owned, on someone else's schema — not ours to annotate.
       if (f.includes("hookify")) continue;
+      // Impeccable's surface briefs carry the SKILL's own front matter (version/slug/primary_target) and its writer REGENERATES that block from fixed keys on every write, so a kind:/status: added here would be dropped by the next `surface-brief.mjs write`. Tool-owned, on the tool's schema, same as hookify above. Added 2026-09-06 00:56 EDT.
+      if (f.startsWith(".impeccable/")) continue;
       const expected = fmExpected(f);
       if (expected === null) {
         out.push({

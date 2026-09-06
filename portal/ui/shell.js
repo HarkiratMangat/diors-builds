@@ -216,8 +216,15 @@ export function MastheadAnchor({ id }) {
 //
 // 🔴 AND IT IS BUILT FROM WHAT THE PORTAL ACTUALLY KNOWS, WHICH IS LESS THAN THE MOCKUP ASSUMED. The approved design leads with a Discord banner, an avatar and a display name, because "the fastest possible answer to whose session this is, is the face the person already recognises". The portal has no face: `GET /auth/csrf` returns `discordId`, `isOwner` and `visibleRealms`, and nothing in this codebase stores a username or an avatar hash. Rendering the mockup's markup anyway would produce `url(undefined)` — a real request, from a page whose whole premise is that it asks for nothing it did not say it would. So the head is quiet on purpose: `--banner`/`--av-src` are set to `none` (a VALID value, so the CSS falls through to its designed `--sunk` ground rather than being dropped as invalid-at-computed-value-time and painting transparent), the disc carries Discord's own mark, and the identity is the id — whole, as the design insists, in the one slot whose type size fits nineteen digits.
 //
-// ⚠️ The OWNER badge is ABSENT for a non-owner rather than reading "ADMIN", the same rule the commit chip follows: a badge every account carries states nothing, and "Dioreo admin" above it already says what the account is.
-const DISCORD_MARK = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.5c1.6.4 2.9 1 4.2 1.8a16.6 16.6 0 0 0-14.7 0A17 17 0 0 1 8.9 3.5L8.6 3a19.7 19.7 0 0 0-4.9 1.4C.9 8.5.2 12.5.5 16.4a19.9 19.9 0 0 0 6 3l1.2-1.9c-.7-.2-1.3-.5-1.9-.9l.4-.3a14.2 14.2 0 0 0 11.6 0l.5.3c-.6.4-1.3.7-2 .9l1.2 1.9a19.8 19.8 0 0 0 6-3c.5-4.6-.6-8.6-3.2-12zM8.5 14.2c-1.2 0-2.1-1.1-2.1-2.4S7.3 9.4 8.5 9.4s2.2 1.1 2.2 2.4-1 2.4-2.2 2.4zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4z';
+// ⚠️ The OWNER badge is ABSENT for a non-owner rather than reading "ADMIN", the same rule the commit chip follows: a badge every account carries states nothing, and "Dioreo admin" above it already says what the account is. D3 — a session's Discord avatar as a CDN url, or null when there is no hash yet (a session created before this field existed, or an account with no custom avatar — Discord's own default-avatar CDN path needs the id's snowflake bits, which is the lookup endpoint's job (portal/api/access.js's defaultAvatarUrl), not the identity chip's). Callers fall back to an initial letter rather than guessing.
+function avatarUrlOf(session) {
+    if (!session || !session.avatarHash) return null;
+    return `https://cdn.discordapp.com/avatars/${session.discordId}/${session.avatarHash}.png?size=64`;
+}
+function initialOf(session) {
+    const src = (session && (session.globalName || session.username)) || (session && session.discordId) || '?';
+    return String(src).slice(0, 1).toUpperCase();
+}
 
 // ⚠️ "SESSION · 12 HOURS" STATES THE POLICY; THIS STATES A FACT ABOUT THE READER. models/PortalSession.js expires a row 12 hours after `createdAt` via a Mongo TTL index, so the deadline is real and knowable — /auth/csrf now sends it. Absent (an older session, or a fetch that predates the field) reads as an em dash rather than a guessed countdown. ⚠️ IT IS A COUNTDOWN, so it reads in the live voice rather than as another grey label. The account panel's other rows are facts that do not move; this one is the only thing on that panel that is running down while you look at it.
 function sessionLeft(expiresAt) {
@@ -262,22 +269,32 @@ function Account({ session, staged, onSignOut, chrome }) {
     const id = String(session.discordId);
     const realms = (session.visibleRealms || []).filter((r) => r !== 'review');
     const reach = session.isOwner ? 'everything' : `${realms.length} realm${realms.length === 1 ? '' : 's'}`;
+    const avatarUrl = avatarUrlOf(session);
 
     return html`
         <span class="who">
             <button class="whobtn" aria-expanded=${open ? 'true' : 'false'} aria-haspopup="menu"
                     onClick=${(e) => { e.stopPropagation(); setOpen(!open); }}>
-                <span class="av" aria-hidden="true"></span>
-                <span class="id" title=${id}>…${id.slice(-4)}</span>
+                <span class="av" data-src=${avatarUrl ? '' : null}
+                      style=${avatarUrl ? `--av-src:url(${avatarUrl})` : null} aria-hidden="true">${avatarUrl ? '' : initialOf(session)}</span>
+                ${''/* 2026-09-06 01:49 EDT — pin 5, "missing my username/avatar": the chip read the id's last four digits even once the session carried a name. The display name is what a person recognises as themselves; the id stays in the title and in the menu. */}
+                <span class="id" title=${id}>${session.globalName || session.username || ('…' + id.slice(-4))}</span>
                 <span class="cv" aria-hidden="true"></span>
             </button>
             <div class="umenu" role="menu" aria-label="Account" hidden=${!open}>
                 <div class="ubanner" style="--banner:none" aria-hidden="true"></div>
                 <div class="uid">
-                    <span class="uav" style="--av-src:none" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="20" height="20" style="opacity:.7"><path fill="currentColor" d=${DISCORD_MARK} /></svg>
+                    <!-- D3 — the real Discord avatar and name, replacing a grey disc and the literal string
+                         "Dioreo admin" that named nobody. globalName is the display line; the muted line
+                         beneath is the @username, matching how Discord itself distinguishes the two. A session
+                         with no avatarHash yet (predates this field) falls back to an initial letter rather
+                         than an icon that could be anyone's. -->
+                    <span class="uav" data-src=${avatarUrl ? '' : null}
+                          style=${`--av-src:${avatarUrl ? `url(${avatarUrl})` : 'none'}`} aria-hidden="true">
+                        ${avatarUrl ? null : html`<b class="uinit">${initialOf(session)}</b>`}
                     </span>
-                    <span class="un"><b>Dioreo admin</b><span>${id}</span></span>
+                    <span class="un"><b>${session.globalName || session.username || 'Dioreo admin'}</b>
+                        <span>${session.username ? `@${session.username}` : id}</span></span>
                     ${session.isOwner ? html`<span class="rolebadge">OWNER</span>` : null}
                 </div>
                 <div class="usec">
@@ -476,7 +493,7 @@ export function Shell({ realm, session, view, viewOptions, onSetView, viewSlot, 
 
 
     return html`
-        <div class="app">
+        <div class="app" data-realm=${realm}>
             <${Header} realm=${realm} view=${view} session=${session} staged=${staged} chrome=${chrome}
                        commands=${allCommands} onSignOut=${signOut} />
             <${Rail} realm=${realm} realms=${session?.visibleRealms} badges=${badges} />

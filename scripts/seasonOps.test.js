@@ -140,6 +140,19 @@ check('toManifestRows treats every row as live when no changesets are open', () 
     assert.strictEqual(rows[0].state, 'live');
 });
 
+// 🔴 THE COMPOSER CAN NOW EMIT TWO OPS FROM ONE ENTRY, AND BOTH HAVE TO BE REAL. buildSeasonAddOps turns a draw with a closing date into draw.add + calendar.add — the second is the draw WINDOW, which stopped being a kind you pick on 2026-09-06 01:29 EDT. The payload shapes are asserted in scripts/composerForm.test.js; what only THIS file can check is that the two types it names are types core/ops actually registers, since an op type that resolves to nothing stages a changeset that can never commit.
+check('both op types the composer can emit from one entry are registered ops', () => {
+    const { buildSeasonAddOps } = require('../portal/ui/season.logic');
+    const pair = buildSeasonAddOps('draw', { title: 'X', startDate: '', endDate: '2026-09-21', windowEnd: '2026-10-05' });
+    assert.strictEqual(pair.length, 2, 'a closing date is a second op, not a second field');
+    for (const op of pair) {
+        const impl = ops.resolveOp(op.type);
+        assert.strictEqual(typeof impl.apply, 'function', `${op.type} is not a registered op`);
+    }
+    // The falsifier: with no closing date there is exactly one, so the two-op path is a real branch.
+    assert.strictEqual(buildSeasonAddOps('draw', { title: 'X', startDate: '', endDate: '2026-09-21' }).length, 1);
+});
+
 check('every season op type declares a tier', () => {
     for (const t of ops.listOpTypes().filter(t => t.startsWith('season.'))) {
         assert.ok([1, 2, 3].includes(ops.resolveOp(t).tier), `${t} has no tier`);

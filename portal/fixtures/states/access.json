@@ -1,0 +1,57 @@
+{
+  "surface": "Access",
+  "note": "Registered while building out Access (unit D, 2026-09-06 01:46 EDT). The Grant drawer is the first creation form this realm has had: before it, + Grant access only scrolled to an always-open row at the foot of the grid.",
+  "states": [
+    {
+      "name": "grant drawer · opens from the masthead",
+      "realm": "access",
+      "flags": {},
+      "steps": [
+        {
+          "clickText": {
+            "sel": ".mh-new, .pill.lead",
+            "text": "Grant access"
+          }
+        }
+      ],
+      "known": [],
+      "expect": ".drawer.open #grant-discordid"
+    },
+    {
+      "name": "grant drawer · the reason line before anything is typed",
+      "realm": "access",
+      "flags": {},
+      "steps": [
+        {
+          "clickText": {
+            "sel": ".mh-new, .pill.lead",
+            "text": "Grant access"
+          }
+        }
+      ],
+      "known": [],
+      "expect": ".drawer.open .dwbody .why"
+    },
+    {
+      "name": "grant drawer · a typed id resolves to a preview card",
+      "realm": "access",
+      "flags": {},
+      "steps": [
+        {
+          "clickText": {
+            "sel": ".mh-new, .pill.lead",
+            "text": "Grant access"
+          }
+        },
+        {
+          "type": {
+            "sel": "#grant-discordid",
+            "text": "1139845545754632283"
+          }
+        }
+      ],
+      "known": [],
+      "expect": ".drawer.open .grantpreview .gp-n b"
+    }
+  ]
+}

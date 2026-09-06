@@ -11,7 +11,7 @@
 import { h } from '../vendor/preact.mjs';
 import { html } from '../vendor/htm-preact.mjs';
 import { useState, useCallback, useRef } from '../vendor/preact-hooks.mjs';
-import { Fold } from './icons.js';
+import { Fold, Icon } from './icons.js';
 import { useMeasured } from './useMeasured.js';
 /* global inkOnTopic, flaggedIds, findingRows, findingBarIds */
 
@@ -445,7 +445,7 @@ export function Repairs({ data, window: visible, season, onClamp }) {
 // 🔴 A FIXED WINDOW CANNOT BE WRONG, ONLY USELESS. `seasonWindow()` spans everything the season holds — six to ten weeks for a real CODM season — so fourteen draws and twenty calendar items shared one axis, and the single-day ones (eleven of the fourteen) computed to under two pixels each. The plot was complete and unreadable.
 //
 // ⚠️ FIT IS DISABLED WHEN IT WOULD DO NOTHING, and the readout says the SPAN rather than a zoom level: "42 days shown" is a fact about the picture; "1.4×" is a fact about the control.
-export function Zoomer({ win, full, onWindow }) {
+export function Zoomer({ win, full, onWindow, onToday }) {
     const days = windowDays(win);
     const fitted = days >= windowDays(full);
     return html`
@@ -457,6 +457,17 @@ export function Zoomer({ win, full, onWindow }) {
                     onClick=${() => onWindow(zoomWindow(win, 0.625, full))}>+</button>
             <button class="wide" title="Fit everything" disabled=${fitted}
                     onClick=${() => onWindow(null)}>FIT</button>
+            <!-- 🔴 THE WAY INTO THE DAY DRAWER, AND IT USED TO BE A LONE PILL FLOATING UNDER THE TRACK.
+                 "Open a day…" sat in a plain hint paragraph at x=111 while every band above it began at x=123,
+                 so the one control on the page agreeing with no other left edge was the one nothing else
+                 explained. It is a Track control — it lists what runs on a date the Track is drawing — so it
+                 belongs in the Track's own toolbar, beside the zoom. It opens on TODAY, which is the day
+                 somebody checking "what is running" almost always wants, and the drawer steps from there.
+                 ⚠️ The glyph is the Lucide sprite, never a text character: reference_never_text_glyphs_for_icons. -->
+            ${onToday ? html`
+                <button class="wide today" onClick=${onToday}
+                        data-tip="Everything running on one day — steps a day at a time from there">
+                    <${Icon} name="calendar-days" cls="sm" />Today</button>` : null}
             <span class="rd"><b>${days} ${days === 1 ? 'day' : 'days'}</b> shown</span>
             <!-- The window's actual dates, at the far right of the bar, where season.html puts them. "44 days
                  shown" is a length and this is a position; the Track is a calendar, so the reader needs both. -->

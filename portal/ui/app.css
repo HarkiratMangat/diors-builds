@@ -22,7 +22,7 @@
 
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:var(--desk);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{background:var(--desk);color:var(--ink);font-family:var(--ui);font-size:var(--t-lg);line-height:1.5;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 /* 🔴 A <button> with no background declared falls through to the UA's `ButtonFace`, which
  * in Chrome is near-white — that is the white slab that appeared in the drawer footer next
@@ -66,7 +66,7 @@ input:hover,select:hover,textarea:hover{border-color:var(--ink4)}
 input:focus,select:focus,textarea:focus{border-color:var(--patch);outline:none}
 input::placeholder{color:var(--ink3)}
 input:disabled,select:disabled{opacity:.45;cursor:not-allowed}
-label{font-size:12px;color:var(--ink2);font-weight:600;display:block;margin-bottom:5px}
+label{font-size:var(--t-sm);color:var(--ink2);font-weight:600;display:block;margin-bottom:5px}
 
 /* ═══ SHELL ═══ */
 .app{display:grid;grid-template-columns:var(--rail-w) 1fr;grid-template-rows:var(--hdr-h) 1fr;height:100vh}
@@ -81,12 +81,12 @@ main .panel, main section{min-width:0}
 .mscroll{max-width:100%}
 header{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--paper);
   border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:40}
-.mk{font-family:var(--data);font-size:11.5px;letter-spacing:.16em;font-weight:600;white-space:nowrap}
+.mk{font-family:var(--data);font-size:var(--t-sm);letter-spacing:.16em;font-weight:600;white-space:nowrap}
 .mk b{color:var(--patch);font-weight:600}
-.crumb{font-size:13px;color:var(--ink3);letter-spacing:.02em}
+.crumb{font-size:var(--t-base);color:var(--ink3);letter-spacing:.02em}
 .crumb b{color:var(--ink2);font-weight:500}
 header .sp{margin-left:auto}
-.who{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2)}
+.who{display:flex;align-items:center;gap:8px;font-size:var(--t-base);color:var(--ink2)}
 .who .av{width:24px;height:24px;border-radius:var(--rad-round);border:1px solid var(--rule2);flex:none;
   background:linear-gradient(140deg,#3A4C5A,#1C242C) center/cover no-repeat}
 /* The real Discord avatar. It is not decoration: this is the one place the portal says WHOSE
@@ -96,13 +96,14 @@ header .sp{margin-left:auto}
 
 nav.rail{background:var(--sunk);border-right:1px solid var(--rule);display:flex;flex-direction:column;padding-top:8px;gap:2px;overflow:auto}
 .realm{background:none;border:0;color:var(--ink3);padding:11px 4px;display:grid;gap:5px;justify-items:center;
-  position:relative;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;text-decoration:none;min-height:var(--tap)}
+  position:relative;font-size:var(--t-xs);letter-spacing:.12em;text-transform:uppercase;font-weight:700;text-decoration:none;min-height:var(--tap)}
 .realm svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6}
 .realm:hover{color:var(--ink2);background:rgba(255,255,255,.03)}
 .realm[aria-current]{color:var(--ink)}
 .realm[aria-current]::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--patch)}
-.realm .cnt{position:absolute;top:6px;right:12px;font-family:var(--data);font-size:9px;color:var(--staged)}
-main{overflow:auto;padding-bottom:96px}
+.realm .cnt{position:absolute;top:6px;right:12px;font-family:var(--data);font-size:var(--t-micro);color:var(--staged)}
+/* 140, not 96 (2026-09-06 09:15 EDT): the floating staged tray is 104px tall and sits 20px off the bottom, so the last 124px of any realm scrolled to its end sat under it — Access's "Revoking an admin in Discord does not end their browser session" was 64% hidden. The page now ends clear of the tray. */
+main{overflow:auto;padding-bottom:140px}
 
 /* masthead — every realm states its own job */
 /* 23, not 22 and not 24: .panel is margin 22 + border 1, so panel CONTENT starts at 23.
@@ -110,24 +111,24 @@ main{overflow:auto;padding-bottom:96px}
    realm title and every panel heading below it sit on two different left edges. Measured on
    2026-08-25 with a grid overlay: masthead content 24->1180, panel content 23->1181. */
 .masthead{padding:20px 23px 14px}
-.masthead h1{margin:0 0 3px;font-size:24px;font-weight:600;letter-spacing:-.015em}
-.masthead .job{font-family:var(--data);font-size:10.5px;letter-spacing:.11em;color:var(--patch);text-transform:uppercase}
-.masthead p{margin:9px 0 0;font-size:13.5px;color:var(--ink3);max-width:78ch}
+.masthead h1{margin:0 0 3px;font-size:var(--t-hero);font-weight:600;letter-spacing:-.015em}
+.masthead .job{font-family:var(--data);font-size:var(--t-xs);letter-spacing:.11em;color:var(--patch);text-transform:uppercase}
+.masthead p{margin:9px 0 0;font-size:var(--t-md);color:var(--ink3);max-width:78ch}
 .masthead p b{color:var(--ink2);font-weight:600}
-.mh-stats{display:flex;gap:22px;margin-top:12px;flex-wrap:wrap}
-.stat .v{font-family:var(--data);font-size:19px;font-weight:600}
-.stat .k{font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--ink3);font-weight:700}
+.mh-stats{display:flex;gap:22px;margin-top:var(--s4);flex-wrap:wrap}
+.stat .v{font-family:var(--data);font-size:var(--t-xl);font-weight:600}
+.stat .k{font-size:var(--t-micro);text-transform:uppercase;letter-spacing:.13em;color:var(--ink3);font-weight:700}
 .stat.warn .v{color:var(--warn)} .stat.stg .v{color:var(--staged)}
 
 /* ═══ PANEL + VIEW SWITCHER (the top layer) ═══ */
 .panel{margin:0 22px;border:1px solid var(--rule);border-radius:var(--rad-2);background:var(--paper);overflow:hidden}
-.ph{display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--raised);border-bottom:1px solid var(--rule);flex-wrap:wrap}
-.ph .t{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:var(--ink2)}
+.ph{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--raised);border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.ph .t{font-size:var(--t-xs);letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:var(--ink2)}
 /* flex:1 so an EMPTY spacer still occupies the row, which is what the design's own does: measured 246x16
    there against 0x0 here, and a zero-width spacer lets whatever follows it drift 8px. */
-.ph .sp{margin-left:auto;font-family:var(--data);font-size:10.5px;color:var(--ink3)}
+.ph .sp{margin-left:auto;font-family:var(--data);font-size:var(--t-xs);color:var(--ink3)}
 .seg{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:var(--rad-2);padding:2px}
-.seg button{background:none;border:0;color:var(--ink3);font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:var(--rad-1);min-height:32px}
+.seg button{background:none;border:0;color:var(--ink3);font-size:var(--t-sm);font-weight:600;padding:5px 11px;border-radius:var(--rad-1);min-height:32px}
 /* 🔴 A `role="tab"` CARRIES `aria-selected`, NEVER `aria-pressed` — `aria-pressed` is the pressed
    state of a toggle BUTTON and a tab simply drops it, so every view switcher and mode switcher in
    this portal announced no selected tab at all while looking perfectly correct on screen. The
@@ -137,7 +138,7 @@ main{overflow:auto;padding-bottom:96px}
    role puts on it rather than forcing one role to lie. */
 .seg button[aria-pressed=true],.seg button[aria-selected=true]{background:var(--hi);color:var(--ink)}
 .seg button:hover{color:var(--ink2)}
-.key{display:flex;gap:13px;font-family:var(--data);font-size:10px;color:var(--ink3);flex-wrap:wrap}
+.key{display:flex;gap:13px;font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);flex-wrap:wrap}
 .key i{display:inline-block;width:16px;height:9px;margin-right:5px;vertical-align:-1px;border-radius:var(--rad-1)}
 .key .l i{background:var(--ink3)}
 .key .s i{border:1.5px dashed var(--ink3)}
@@ -162,11 +163,11 @@ main{overflow:auto;padding-bottom:96px}
 /* The mode group shares the view bar with .seg, so it has to share its height: .seg is 32px of button
    inside 2px of padding inside a 1px border. .modesw has no padding, so its buttons carry the whole 38px. */
 .ph .modesw button{min-height:38px;padding:0 14px}
-.layer-note{font-family:var(--data);font-size:9px;letter-spacing:.14em;color:var(--ink3);text-transform:uppercase;padding:5px 12px;background:var(--sunk);border-bottom:1px solid var(--rule)}
+.layer-note{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.14em;color:var(--ink3);text-transform:uppercase;padding:5px 12px;background:var(--sunk);border-bottom:1px solid var(--rule)}
 
 /* ═══ SHAPE CARRIES STATE — the one rule that must never invert ═══ */
 .bar{position:absolute;top:50%;transform:translateY(-50%);height:22px;border-radius:var(--rad-2);display:flex;align-items:center;
-  padding:0 8px;font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;cursor:pointer;z-index:2;
+  padding:0 8px;font-size:var(--t-sm);font-weight:600;white-space:nowrap;overflow:hidden;cursor:pointer;z-index:2;
   transition:filter .12s,box-shadow .12s}
 .bar:hover{filter:brightness(1.15);box-shadow:0 0 0 2px rgba(255,255,255,.16)}
 .bar.saved{background:var(--c);color:var(--on-accent);border:1px solid var(--c)}
@@ -212,7 +213,7 @@ main{overflow:auto;padding-bottom:96px}
 .ruler{position:relative;height:26px;border-bottom:1px solid var(--rule);
   margin-left:var(--gutter);margin-right:1px}
 .ruler span{position:absolute;top:0;line-height:26px;padding-left:6px;border-left:1px solid var(--rule);
-  font-family:var(--data);font-size:10px;color:var(--ink3);white-space:nowrap}
+  font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);white-space:nowrap}
 .lanes{position:relative;padding-bottom:4px}
 /* A LANE IS A CARD. Not a row with a hairline — its own object, with a ground the page does not
    share, an edge in its own topic accent, and padding so nothing it holds touches its boundary. */
@@ -251,7 +252,7 @@ main{overflow:auto;padding-bottom:96px}
    rule 13 reported it the first time a view pass made the Airtime track visible. The fix is to
    delete the second contract, not to compensate for it. */
 .lane .nm{position:absolute;left:0;top:0;bottom:0;width:var(--gutter);display:flex;align-items:center;
-  padding:0 11px 0 9px;font:700 10px/1.2 var(--data);letter-spacing:.1em;text-transform:uppercase;
+  padding:0 11px 0 9px;font:700 var(--t-xs)/1.2 var(--data);letter-spacing:.1em;text-transform:uppercase;
   color:var(--ink3);white-space:normal;word-break:break-word;overflow:hidden}
 /* The plot area carries its own grid, at the same scale in every lane, so the columns align
    across the cards while the surfaces stay separate. `--tk-pad` keeps a bar off the card's edge;
@@ -263,7 +264,7 @@ main{overflow:auto;padding-bottom:96px}
 .tk{position:relative;flex:1;min-height:100%;overflow:hidden;padding:5px 0;
   background-image:linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
   background-size:64px 100%;background-position:0 0}
-.divider{padding:9px 0 5px 96px;font-family:var(--data);font-size:9.5px;letter-spacing:.16em;color:var(--ink3);
+.divider{padding:9px 0 5px 96px;font-family:var(--data);font-size:var(--t-micro);letter-spacing:.16em;color:var(--ink3);
   text-transform:uppercase;border-top:1px solid var(--rule);margin-top:5px}
 /* 🔴 ONE COORDINATE AUTHORITY. Every dated element on the Track is placed by a PERCENTAGE,
    which means its pixel position is a function of the box it sits in — so two containers with
@@ -292,20 +293,20 @@ main{overflow:auto;padding-bottom:96px}
 .now{position:absolute;top:0;bottom:0;width:1px;background:var(--patch);opacity:.55}
 /* The pill IS the clock. `attr()` rather than a second element, so NOW cannot become two
    objects that drift apart — which is exactly what the loose `.nowt` timestamp did. */
-.now::after{content:attr(data-now);position:absolute;top:-21px;left:-12px;font-family:var(--data);font-size:9px;font-weight:600;
+.now::after{content:attr(data-now);position:absolute;top:-21px;left:-12px;font-family:var(--data);font-size:var(--t-micro);font-weight:600;
   letter-spacing:.1em;color:var(--patch);white-space:nowrap}
 .win{position:absolute;top:0;bottom:0;background:rgba(31,138,94,.10);border-left:1px solid rgba(31,138,94,.45);
   border-right:1px solid rgba(31,138,94,.45)}
-.win::after{content:attr(data-l);position:absolute;top:-21px;left:4px;font-family:var(--data);font-size:9px;
+.win::after{content:attr(data-l);position:absolute;top:-21px;left:4px;font-family:var(--data);font-size:var(--t-micro);
   letter-spacing:.1em;color:var(--ev-ink);white-space:nowrap}
 
 /* defect flags — name the FIX, not just the problem */
 .flags{display:flex;gap:9px;flex-wrap:wrap;padding:12px;border-top:1px solid var(--rule)}
 .flag{display:flex;align-items:center;gap:10px;padding:8px 11px;border:1px solid var(--rule);border-left:2px solid var(--warn);
-  border-radius:var(--rad-2);font-size:12.5px;color:var(--ink2);background:var(--sunk)}
+  border-radius:var(--rad-2);font-size:var(--t-base);color:var(--ink2);background:var(--sunk)}
 .flag.info{border-left-color:var(--ink4)}
 .flag b{color:var(--ink);font-weight:600}
-.flag button{background:none;border:1px solid var(--rule2);color:var(--ink2);font-size:11.5px;padding:5px 10px;
+.flag button{background:none;border:1px solid var(--rule2);color:var(--ink2);font-size:var(--t-sm);padding:5px 10px;
   border-radius:var(--rad-2);font-weight:600;min-height:32px;white-space:nowrap}
 .flag button:hover{color:var(--ink);border-color:var(--ink3)}
 
@@ -313,7 +314,7 @@ main{overflow:auto;padding-bottom:96px}
 .cols{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:14px}
 .col{background:var(--sunk);border:1px solid var(--rule);border-radius:var(--rad-2);padding:10px;min-height:220px}
 .col.over{border-color:var(--patch);background:rgba(242,194,48,.05)}
-.col h4{margin:0 0 10px;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);font-weight:700;
+.col h4{margin:0 0 10px;font-size:var(--t-micro);letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);font-weight:700;
   display:flex;align-items:center;gap:7px}
 .col h4 .ct{margin-left:auto;font-family:var(--data);color:var(--ink3)}
 .col h4 .bad{color:var(--warn)}
@@ -322,15 +323,15 @@ main{overflow:auto;padding-bottom:96px}
 .card:hover{transform:translateY(-1px);box-shadow:0 6px 18px -8px rgba(0,0,0,.8)}
 .card.drag{opacity:.4}
 .card .ch{display:flex;align-items:center;gap:7px;margin-bottom:4px}
-.card .tr{font-family:var(--data);font-size:8.5px;letter-spacing:.08em;padding:1px 5px;border-radius:var(--rad-1);
+.card .tr{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.08em;padding:1px 5px;border-radius:var(--rad-1);
   border:1px solid var(--rule2);color:var(--ink3);font-weight:600}
 .card.t3 .tr{color:var(--warn);border-color:var(--warn)}
-.card .cn{font-size:12.5px;color:var(--ink);font-weight:600}
-.card .cd{font-family:var(--data);font-size:10px;color:var(--ink3);display:block}
+.card .cn{font-size:var(--t-base);color:var(--ink);font-weight:600}
+.card .cd{font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);display:block}
 .card.blocked{border-left:2px solid var(--warn)}
-.card .why{margin-top:6px;font-size:10.5px;color:var(--warn);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.card .why button{background:none;border:1px solid var(--warn);color:var(--warn);font-size:10px;padding:3px 8px;border-radius:var(--rad-1);font-weight:600}
-.commit{width:100%;background:var(--patch);color:var(--on-accent);border:0;border-radius:var(--rad-2);font-size:13px;font-weight:700;
+.card .why{margin-top:6px;font-size:var(--t-xs);color:var(--warn);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.card .why button{background:none;border:1px solid var(--warn);color:var(--warn);font-size:var(--t-xs);padding:3px 8px;border-radius:var(--rad-1);font-weight:600}
+.commit{width:100%;background:var(--patch);color:var(--on-accent);border:0;border-radius:var(--rad-2);font-size:var(--t-base);font-weight:700;
   padding:10px;min-height:var(--tap)}
 .commit:hover:not(:disabled){filter:brightness(1.08)}
 .commit:disabled{background:var(--raised);color:var(--ink3);border:1px solid var(--rule2);cursor:not-allowed}
@@ -350,13 +351,13 @@ main{overflow:auto;padding-bottom:96px}
    rewriting 93 markup sites: `.chip` is queried by name in six pages of JS, and a mass rename
    would have traded a styling inconsistency for a functional break. Same rules, same radius,
    same hover lift, same focus ring — one language, and every existing call site inherits it. */
-.chip{background:var(--sunk);border:1px solid var(--rule2);color:var(--ink2);font-size:11.5px;font-weight:600;
+.chip{background:var(--sunk);border:1px solid var(--rule2);color:var(--ink2);font-size:var(--t-sm);font-weight:600;
   padding:6px 11px;border-radius:var(--rad-pill);min-height:32px}
 .chip[aria-pressed=true]{background:var(--hi);color:var(--ink);border-color:var(--ink4)}
 .chip:hover{color:var(--ink)}
-.mtools .rt{margin-left:auto;font-family:var(--data);font-size:11px;color:var(--ink3)}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-th{text-align:left;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:700;
+.mtools .rt{margin-left:auto;font-family:var(--data);font-size:var(--t-sm);color:var(--ink3)}
+table{width:100%;border-collapse:collapse;font-size:var(--t-md)}
+th{text-align:left;font-size:var(--t-micro);letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:700;
   padding:9px 11px;border-bottom:1px solid var(--rule);background:var(--sunk);white-space:nowrap;position:sticky;top:0}
 /* The <th> keeps the sorted-state styling; the BUTTON is the control. A th carrying an onclick
    was mouse-only sorting on four realms — invisible to a keyboard pass that selects by role. */
@@ -364,7 +365,7 @@ th.sortable{user-select:none;padding:0}
 th.sortable .sortbtn{all:unset;display:block;width:100%;box-sizing:border-box;cursor:pointer;
   padding:inherit;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit}
 th.sortable .sortbtn:focus-visible{outline:2px solid var(--patch);outline-offset:-2px;border-radius:var(--rad-1)}
-th.sortable .sortbtn::after{content:"↕";margin-left:6px;color:var(--ink3);font-size:10px}
+th.sortable .sortbtn::after{content:"↕";margin-left:6px;color:var(--ink3);font-size:var(--t-xs)}
 th.sorted-asc::after{content:"↑";color:var(--patch)} th.sorted-desc::after{content:"↓";color:var(--patch)}
 td{padding:9px 11px;border-bottom:1px solid var(--rule3);color:var(--ink2);vertical-align:middle}
 tbody tr{cursor:pointer}
@@ -372,39 +373,39 @@ tbody tr:hover td{background:#1A222A}
 tbody tr.sel td{background:rgba(242,194,48,.06)}
 tbody tr.on td{background:#20303B;box-shadow:inset 2px 0 0 var(--patch)}
 td.n{color:var(--ink);font-weight:500}
-td.d{font-family:var(--data);font-size:11.5px;color:var(--ink3);white-space:nowrap}
+td.d{font-family:var(--data);font-size:var(--t-sm);color:var(--ink3);white-space:nowrap}
 .cb{width:16px;height:16px;border:1.5px solid var(--rule2);border-radius:var(--rad-1);display:inline-block;vertical-align:-3px;position:relative;background:var(--sunk)}
 .cb.on{background:var(--patch);border-color:var(--patch)}
 .cb.on::after{content:"";position:absolute;left:4.5px;top:1px;width:4px;height:9px;border:solid var(--on-accent);border-width:0 2px 2px 0;transform:rotate(42deg)}
 .dot{display:inline-block;width:9px;height:9px;border-radius:var(--rad-1);margin-right:8px;vertical-align:-1px;background:var(--c)}
-.stt{font-family:var(--data);font-size:9px;letter-spacing:.08em;padding:2px 7px;border-radius:var(--rad-1);font-weight:600;white-space:nowrap}
+.stt{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.08em;padding:2px 7px;border-radius:var(--rad-1);font-weight:600;white-space:nowrap}
 .stt.saved{background:var(--c);color:var(--on-accent)}
 .stt.staged{border:1.5px dashed var(--c);color:var(--c)}
 .stt.conflict{border:1.5px dashed var(--warn);color:var(--warn);
   background-image:repeating-linear-gradient(45deg,transparent 0 3px,rgba(255,122,69,.5) 3px 4px)}
 .bulk{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--hi);border-top:1px solid var(--rule2);flex-wrap:wrap}
-.bulk .c{font-family:var(--data);font-size:11.5px;color:var(--patch)}
-.bulk button{background:var(--sunk);border:1px solid var(--rule2);color:var(--ink2);font-size:12px;font-weight:600;
+.bulk .c{font-family:var(--data);font-size:var(--t-sm);color:var(--patch)}
+.bulk button{background:var(--sunk);border:1px solid var(--rule2);color:var(--ink2);font-size:var(--t-sm);font-weight:600;
   padding:7px 11px;border-radius:var(--rad-2);min-height:36px}
 .bulk button:hover{color:var(--ink);border-color:var(--ink3)}
 .bulk button.danger{color:var(--danger-ink);border-color:#54322F}
-.bulk .sp{margin-left:auto;font-size:11.5px;color:var(--ink3)}
-.empty{padding:34px 16px;text-align:center;color:var(--ink3);font-size:13.5px}
-.empty b{display:block;color:var(--ink2);font-size:15px;margin-bottom:6px}
+.bulk .sp{margin-left:auto;font-size:var(--t-sm);color:var(--ink3)}
+.empty{padding:34px 16px;text-align:center;color:var(--ink3);font-size:var(--t-md)}
+.empty b{display:block;color:var(--ink2);font-size:var(--t-lg);margin-bottom:6px}
 
 /* ═══ TRAY — the magazine ═══ */
 .tray{position:fixed;right:20px;bottom:20px;width:320px;max-width:calc(100vw - 32px);background:var(--paper);
   border:1px solid var(--rule2);border-radius:var(--rad-2);box-shadow:0 24px 60px -18px rgba(0,0,0,.9);z-index:50}
 .tray[hidden]{display:none}
 .tray-h{display:flex;align-items:center;gap:9px;padding:10px 12px;border-bottom:1px solid var(--rule);cursor:pointer}
-.tray-h .t{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--ink2)}
-.tray-h .n{margin-left:auto;font-family:var(--data);font-size:11px;color:var(--staged)}
+.tray-h .t{font-size:var(--t-xs);letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--ink2)}
+.tray-h .n{margin-left:auto;font-family:var(--data);font-size:var(--t-sm);color:var(--staged)}
 .rounds{display:flex;flex-direction:column-reverse;padding:6px 0;max-height:220px;overflow:auto}
-.round{display:flex;align-items:center;gap:9px;padding:7px 12px;font-size:12.5px;color:var(--ink2);
+.round{display:flex;align-items:center;gap:9px;padding:7px 12px;font-size:var(--t-base);color:var(--ink2);
   border-left:2px solid var(--staged);margin:1px 0}
 .round.t3{border-left-color:var(--warn)}
 .round b{color:var(--ink);font-weight:500}
-.round .tier{font-family:var(--data);font-size:9px;letter-spacing:.08em;color:var(--ink3);border:1px solid var(--rule2);
+.round .tier{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.08em;color:var(--ink3);border:1px solid var(--rule2);
   padding:0 4px;border-radius:var(--rad-1)}
 .round.t3 .tier{color:var(--warn);border-color:var(--warn)}
 /* Per-row undo. Quiet by default — it is an escape hatch, not a call to action — and it takes
@@ -431,7 +432,7 @@ td.d{font-family:var(--data);font-size:11.5px;color:var(--ink3);white-space:nowr
   text-transform:uppercase;color:var(--ink3);flex:none;align-self:center;margin-right:2px}
 @media (max-width:768px){ .mtools .mlabel{display:none} }
 .tray-f{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--rule)}
-.btn{flex:1;border-radius:var(--rad-2);font-size:12.5px;font-weight:700;padding:9px;min-height:var(--tap);
+.btn{flex:1;border-radius:var(--rad-2);font-size:var(--t-base);font-weight:700;padding:9px;min-height:var(--tap);
   background:var(--raised);color:var(--ink2);border:1px solid var(--rule2);
   transition:background var(--dur-1) var(--ease),color var(--dur-1) var(--ease),
   border-color var(--dur-1) var(--ease)}
@@ -440,7 +441,7 @@ td.d{font-family:var(--data);font-size:11.5px;color:var(--ink3);white-space:nowr
 .btn.go:hover{filter:brightness(1.09)}
 .btn.no{background:none;color:var(--ink3);border:1px solid var(--rule2)}
 .btn.no:hover{color:var(--ink2)}
-.hint{padding:0 12px 10px;font-size:11px;color:var(--ink3);line-height:1.4}
+.hint{padding:0 12px 10px;font-size:var(--t-sm);color:var(--ink3);line-height:1.4}
 
 /* ═══ PREVIEW DRAWER (the real Discord render) ═══ */
 .scrim{position:fixed;inset:0;background:rgba(6,9,11,.66);backdrop-filter:blur(3px);z-index:44;
@@ -463,22 +464,23 @@ td.d{font-family:var(--data);font-size:11.5px;color:var(--ink3);white-space:nowr
 .dw-h{display:flex;align-items:flex-start;gap:14px;padding:18px 20px 14px;flex:none;
   border-bottom:1px solid var(--rule);background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
 .dw-ttl{min-width:0;display:flex;flex-direction:column;gap:6px}
-.dw-eye{font-family:var(--data);font-size:9.5px;letter-spacing:.09em;color:var(--ink3);
+.dw-eye{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.09em;color:var(--ink3);
   text-transform:uppercase}
-.dw-h h2{margin:0;font:600 19px/1.25 var(--ui);color:var(--ink);letter-spacing:-.015em}
+.dw-h h2{margin:0;font:600 var(--t-xl)/1.25 var(--ui);color:var(--ink);letter-spacing:-.015em}
 .dw-h .x{margin-left:auto;flex:none;background:transparent;border:1px solid var(--rule2);
-  color:var(--ink3);border-radius:var(--rad-2);width:30px;height:30px;cursor:pointer;font-size:12px}
+  color:var(--ink3);border-radius:var(--rad-2);width:30px;height:30px;cursor:pointer;font-size:var(--t-sm)}
 .dw-h .x:hover{color:var(--ink);border-color:var(--ink4);background:var(--hi)}
 .dw-b{padding:18px 20px;overflow:auto;flex:1 1 auto}
 /* `.btn{flex:1}` above was written for a 420px drawer. On a `wide` one it produced two
    400px-wide buttons — a button's width should follow its label, not the dialog. Scoped to
    `.wide` so every existing confirm dialog is untouched. */
-.drawer.wide .dw-f .btn{flex:0 0 auto;min-width:132px}
+/* one footer rule for every drawer width: the buttons hug the right at a fixed minimum, never stretch to a 50/50 split in a narrow drawer. */
+.dw-f .btn{flex:0 0 auto;min-width:132px}
 .dw-f{display:flex;gap:9px;justify-content:flex-end;padding:14px 20px;flex:none;
   border-top:1px solid var(--rule);background:var(--sunk)}
-.drawer h5{margin:0 0 10px;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:700;
+.drawer h5{margin:0 0 10px;font-size:var(--t-micro);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:700;
   display:flex;align-items:center;gap:8px}
-.drawer h5 em{font-style:normal;font-family:var(--data);font-size:9px;color:var(--ink3);margin-left:auto}
+.drawer h5 em{font-style:normal;font-family:var(--data);font-size:var(--t-micro);color:var(--ink3);margin-left:auto}
 .drawer .x{background:none;border:1px solid var(--rule2);color:var(--ink3);border-radius:var(--rad-2);width:28px;height:28px}
 .dcard{background:#2B2D31;border-radius:8px/* foreign-radius: Discord's own corner, like --dc-*. The preview must look like Discord, not like the portal. */;border-left:4px solid var(--c);padding:11px 13px;color:#DBDEE1;font-size:12.5px}
 .dcard h6{margin:0 0 3px;font-size:14px;color:#F2F3F5;font-weight:700}
@@ -490,8 +492,8 @@ td.d{font-family:var(--data);font-size:11.5px;color:var(--ink3);white-space:nowr
 
 /* toast */
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--raised);border:1px solid var(--rule2);
-  border-radius:var(--rad-2);padding:10px 16px;font-size:13px;z-index:80;box-shadow:0 12px 32px -12px #000;display:flex;align-items:center;gap:12px}
-.toast button{background:none;border:0;color:var(--patch);font-weight:700;font-size:12.5px}
+  border-radius:var(--rad-2);padding:10px 16px;font-size:var(--t-base);z-index:80;box-shadow:0 12px 32px -12px #000;display:flex;align-items:center;gap:12px}
+.toast button{background:none;border:0;color:var(--patch);font-weight:700;font-size:var(--t-base)}
 
 /* ═══ RESPONSIVE — two breakpoints, exactly ═══ */
 /* 🔴 The page-level horizontal overflow at 390px was the HEADER, not the table.
@@ -521,13 +523,13 @@ header .crumb{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:now
      the chip is the first thing crushed. Hidden rather than floored because the rail badge already carries the
      staged count at this width and Review is one tap away — a 2px control is worse than an absent one. */
   header .hdr-commit{display:none}
-  header .mk{font-size:11px}
+  header .mk{font-size:var(--t-sm)}
 }
 @media (max-width:768px){
   .app{grid-template-columns:1fr}
   nav.rail{position:fixed;bottom:0;left:0;right:0;top:auto;flex-direction:row;border-right:0;border-top:1px solid var(--rule);
     padding:0;z-index:60;justify-content:space-around}
-  .realm{flex:1;padding:8px 2px;font-size:9px}
+  .realm{flex:1;padding:8px 2px;font-size:var(--t-micro)}
   .realm[aria-current]::before{left:8px;right:8px;top:0;bottom:auto;width:auto;height:2px}
   main{padding-bottom:150px}
   .panel{margin:0 12px}
@@ -554,7 +556,7 @@ header .crumb{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:now
 .mk .glyph{width:16px;height:16px;border-radius:var(--rad-1);background:linear-gradient(135deg,var(--patch),var(--warn));flex:none}
 
 /* ═══ SEASON IDENTITY — the editor that was missing entirely ═══ */
-.identity{margin:0 22px 16px;border:1px solid var(--rule);border-radius:var(--rad-2);background:var(--paper);overflow:hidden}
+.identity{margin:0 22px var(--s5);border:1px solid var(--rule);border-radius:var(--rad-2);background:var(--paper);overflow:hidden}
 /* The old single-grid identity editor (.id-grid/.fld/.tbd/.hintline) is gone — it modelled
    fields the schema does not have. Its rules are deleted rather than left orphaned: the generic
    .tbd pill was still matching the new `class="left tbd"` state span and painting it as a
@@ -596,7 +598,7 @@ header .crumb{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:now
    interlock this console does not have. */
 .tghost{position:absolute;top:50%;transform:translateY(-50%);height:22px;border-radius:var(--rad-2);border:1.5px dashed var(--patch);
   background:rgba(242,194,48,.08);pointer-events:none;display:flex;align-items:center;padding:0 8px;
-  font-size:11px;color:var(--patch);white-space:nowrap;z-index:5}
+  font-size:var(--t-sm);color:var(--patch);white-space:nowrap;z-index:5}
 
 /* markers are draggable controls, not decoration */
 .now{touch-action:none}
@@ -609,20 +611,20 @@ header .crumb{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:now
 
 /* live readout while dragging */
 .tip{position:fixed;z-index:90;background:var(--raised);border:1px solid var(--rule2);border-radius:var(--rad-2);
-  padding:6px 10px;font-family:var(--data);font-size:11px;color:var(--ink);pointer-events:none;white-space:nowrap;
+  padding:6px 10px;font-family:var(--data);font-size:var(--t-sm);color:var(--ink);pointer-events:none;white-space:nowrap;
   box-shadow:0 8px 24px -10px #000}
 .tip b{color:var(--patch);font-weight:600}
-.tip .sub{display:block;color:var(--ink3);font-size:10px;margin-top:2px}
+.tip .sub{display:block;color:var(--ink3);font-size:var(--t-xs);margin-top:2px}
 
 /* ═══ BOARD v2 — content state, not pipeline state ═══ */
-.bcard{background:var(--raised);border:1px solid var(--rule2);border-left:3px solid var(--c);border-radius:var(--rad-2);
+.bcard{background:var(--raised);border:1px solid var(--rule2);border-left:2px solid var(--c);border-radius:var(--rad-2);
   padding:9px 10px;margin-bottom:8px;cursor:grab}
 .bcard.staged{background:transparent;border:1.5px dashed var(--c);border-left-width:3px}
 .bcard.ended{opacity:.6}
 .bcard:hover{transform:translateY(-1px);box-shadow:0 6px 18px -8px rgba(0,0,0,.8)}
-.bcard .bn{font-size:12.5px;color:var(--ink);font-weight:600;display:block;margin-bottom:3px}
-.bcard .bd{font-family:var(--data);font-size:10px;color:var(--ink3);display:block}
-.bcard .bmeta{margin-top:6px;font-size:10.5px;color:var(--ink3)}
+.bcard .bn{font-size:var(--t-base);color:var(--ink);font-weight:600;display:block;margin-bottom:3px}
+.bcard .bd{font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);display:block}
+.bcard .bmeta{margin-top:6px;font-size:var(--t-xs);color:var(--ink3)}
 /* 🔴 EVERY RELATIVE-TIME FIGURE ON THE BOARD WAS PAINTED IN THE ALARM COLOUR — all 39 cards,
    "released 15d ago" as loudly as "releases in 1d". A colour that fires on 100% of rows carries
    no information, and this is the fourth instance of that one defect in this package (Armory's
@@ -643,8 +645,8 @@ header .crumb{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:now
 .rephits li{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;padding:6px 9px;
   background:var(--paper);border-left:2px solid var(--warn);cursor:pointer}
 .rephits li:hover{background:var(--hi)}
-.rephits li b{font:600 12px/1.3 var(--ui);color:var(--ink)}
-.rephits li span{font-size:11px;color:var(--ink3)}
+.rephits li b{font:600 var(--t-sm)/1.3 var(--ui);color:var(--ink)}
+.rephits li span{font-size:var(--t-sm);color:var(--ink3)}
 /* ⚠️ AND THE BUTTON INSIDE IT IS RESET. The row carries the padding, the ground and the severity edge;
    the button is a full-width click target with none of its own. Without this it took the row's padding a
    second time — measured 41px against the design's 29, on sixteen findings — which reads as a spacing
@@ -681,7 +683,7 @@ header .crumb{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:now
 input.err,select.err{border-color:var(--del);background:rgba(255,107,107,.06)}
 .errmsg{display:flex;align-items:flex-start;gap:6px;margin-top:6px;font-size:var(--t-sm);color:var(--del);line-height:1.4}
 .errmsg::before{content:"!";flex:none;width:14px;height:14px;border-radius:var(--rad-round);border:1px solid var(--del);
-  font-family:var(--data);font-size:9px;display:grid;place-items:center;margin-top:1px}
+  font-family:var(--data);font-size:var(--t-micro);display:grid;place-items:center;margin-top:1px}
 
 /* the Discord preview now reads from the namespaced foreign palette */
 .dcard{background:var(--dc-bg);color:var(--dc-body)}
@@ -887,12 +889,12 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
    have at all — so the shape here is three identical rows on purpose.
    ══════════════════════════════════════════════════════════════════ */
 .idhead{display:flex;align-items:center;gap:10px;margin-bottom:2px}
-.idop{font-family:var(--data);font-size:9.5px;letter-spacing:.06em;color:var(--ink3);
+.idop{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.06em;color:var(--ink3);
   border:1px solid var(--rule);border-radius:var(--rad-1);padding:2px 7px;white-space:nowrap}
 .idop b{color:var(--ink3);font-weight:600}
 
 .f-main{margin:0 0 4px}
-.f-main label{display:block;font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+.f-main label{display:block;font-size:var(--t-xs);letter-spacing:.09em;text-transform:uppercase;
   color:var(--ink3);margin-bottom:5px;font-weight:600}
 .f-main input{width:100%;background:var(--sunk);border:1px solid var(--rule);border-radius:var(--rad-2);
   color:var(--ink);font:600 17px/1.3 var(--ui);padding:10px 12px;letter-spacing:-.01em}
@@ -900,17 +902,17 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 
 .dlines{display:flex;flex-direction:column;gap:7px;margin-top:12px}
 .dline{display:grid;grid-template-columns:106px minmax(140px,1fr) 148px 84px 104px;gap:12px;align-items:center;
-  background:var(--sunk);border:1px solid var(--rule);border-left:3px solid var(--c);
+  background:var(--sunk);border:1px solid var(--rule);border-left:2px solid var(--c);
   border-radius:var(--rad-2);padding:9px 12px 9px 11px;transition:border-color .15s,background .15s}
 .dline:focus-within{border-color:var(--rule2);border-left-color:var(--c);background:var(--desk)}
 .dline.dirty{border-color:var(--staged)}
-.dline .trk{font-family:var(--data);font-size:9.5px;letter-spacing:.1em;color:var(--c);font-weight:600}
+.dline .trk{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.1em;color:var(--c);font-weight:600}
 .dline input[type=text]{width:100%;background:transparent;border:none;border-bottom:1px solid transparent;
-  color:var(--ink);font:500 13.5px/1.4 var(--ui);padding:3px 0}
+  color:var(--ink);font:500 var(--t-md)/1.4 var(--ui);padding:3px 0}
 .dline input[type=text]:hover{border-bottom-color:var(--rule2)}
 .dline input[type=text]:focus{outline:none;border-bottom-color:var(--c)}
 .dline input[type=date]{width:100%;background:var(--paper);border:1px solid var(--rule);border-radius:var(--rad-2);
-  color:var(--ink);font:500 12px/1 var(--data);padding:6px 8px;color-scheme:dark}
+  color:var(--ink);font:500 var(--t-sm)/1 var(--data);padding:6px 8px;color-scheme:dark}
 .dline input[type=date]:focus{outline:none;border-color:var(--c)}
 .dline input[type=date]:disabled{opacity:.3}
 .dline .tbdsw{justify-self:start}
@@ -920,10 +922,10 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
    segmented choice, not a stray button hanging off the date field. */
 .tbdsw{display:inline-flex;border:1px solid var(--rule);border-radius:var(--rad-2);overflow:hidden;flex:none}
 .tbdsw button{background:transparent;border:none;color:var(--ink3);cursor:pointer;
-  font:600 9px/1 var(--data);letter-spacing:.07em;padding:6px 7px;transition:background .13s,color .13s}
+  font:600 var(--t-micro)/1 var(--data);letter-spacing:.07em;padding:6px 7px;transition:background .13s,color .13s}
 .tbdsw button[aria-pressed=true]{background:var(--c);color:var(--on-accent)}
 .tbdsw button:not([aria-pressed=true]):hover{color:var(--ink2);background:var(--hi)}
-.dline .dl-left{font-family:var(--data);font-size:10.5px;color:var(--ink3);text-align:right;white-space:nowrap}
+.dline .dl-left{font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);text-align:right;white-space:nowrap}
 .dline .left b{color:var(--ink);font-weight:600}
 .dline .dl-left.is-tbd{color:var(--sched)}
 .dline .dl-left.is-over{color:var(--del)}
@@ -934,7 +936,7 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
    both at once is the thing the portal can do that the bot cannot. ── */
 .lnsw{display:inline-flex;background:var(--sunk);border:1px solid var(--rule);border-radius:var(--rad-2);padding:2px;gap:2px}
 .lnsw button{background:transparent;border:none;border-radius:var(--rad-1);color:var(--ink3);cursor:pointer;
-  font:600 10.5px/1 var(--ui);letter-spacing:.04em;padding:6px 12px;display:flex;align-items:center;gap:6px}
+  font:600 var(--t-xs)/1 var(--ui);letter-spacing:.04em;padding:6px 12px;display:flex;align-items:center;gap:6px}
 .lnsw button[aria-pressed=true]{background:var(--raised);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.4)}
 .lnsw button:not([aria-pressed=true]):hover{color:var(--ink2)}
 .lnsw .pip{width:6px;height:6px;border-radius:var(--rad-round);background:var(--ok)}
@@ -943,8 +945,8 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 
 .draftbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding:11px 13px;
   background:var(--sunk);border:1.5px dashed var(--staged);border-radius:var(--rad-2)}
-.draftbar .dt{font:600 11.5px/1 var(--ui);color:var(--staged);letter-spacing:.02em}
-.draftbar .dsub{font-size:11.5px;color:var(--ink3)}
+.draftbar .dt{font:600 var(--t-sm)/1 var(--ui);color:var(--staged);letter-spacing:.02em}
+.draftbar .dsub{font-size:var(--t-sm);color:var(--ink3)}
 .draftbar .sp{margin-left:auto}
 .draftbar>button{flex:none;white-space:nowrap}
 .draftbar .commit{width:auto;padding:8px 16px}
@@ -968,14 +970,14 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
    rather than a wall of identical rows. */
 .diff{margin-top:12px;border:1px solid var(--rule);border-radius:var(--rad-2);overflow:hidden}
 .diff-h{display:grid;grid-template-columns:112px 1fr 1fr;gap:0;background:var(--sunk);
-  border-bottom:1px solid var(--rule);font:600 9.5px/1 var(--data);letter-spacing:.08em;color:var(--ink3)}
+  border-bottom:1px solid var(--rule);font:600 var(--t-micro)/1 var(--data);letter-spacing:.08em;color:var(--ink3)}
 .diff-h span{padding:8px 12px}
 .diff-h span+span{border-left:1px solid var(--rule)}
-.diff-r{display:grid;grid-template-columns:112px 1fr 1fr;font-size:12.5px;border-top:1px solid var(--rule3)}
+.diff-r{display:grid;grid-template-columns:112px 1fr 1fr;font-size:var(--t-base);border-top:1px solid var(--rule3)}
 .diff-r:first-child{border-top:none}
 .diff-r>span{padding:9px 12px;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .diff-r>span+span{border-left:1px solid var(--rule3)}
-.diff-none{padding:18px 14px;text-align:center;font-size:12px;color:var(--ink3)}
+.diff-none{padding:18px 14px;text-align:center;font-size:var(--t-sm);color:var(--ink3)}
 
 /* ══════════════════ TRACK ZOOM — explicit, bounded, always escapable ══════
    The previous build zoomed on a bare wheel event, which on a trackpad IS
@@ -986,18 +988,18 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .zoomer{display:inline-flex;align-items:center;gap:1px;background:var(--sunk);
   border:1px solid var(--rule);border-radius:var(--rad-2);padding:2px}
 .zoomer button{background:transparent;border:none;color:var(--ink2);cursor:pointer;border-radius:var(--rad-1);
-  font:600 11px/1 var(--ui);padding:0;width:26px;height:26px;display:grid;place-items:center;
+  font:600 var(--t-sm)/1 var(--ui);padding:0;width:26px;height:26px;display:grid;place-items:center;
   transition:background .12s,color .12s}
-.zoomer button.wide{width:auto;padding:0 10px;font-size:10.5px;letter-spacing:.04em}
+.zoomer button.wide{width:auto;padding:0 10px;font-size:var(--t-xs);letter-spacing:.04em}
 .zoomer button:hover:not(:disabled){background:var(--hi);color:var(--ink)}
 .zoomer button:disabled{opacity:.3;cursor:not-allowed}
-.zoomer .rd{font-family:var(--data);font-size:10px;color:var(--ink3);padding:0 9px;
+.zoomer .rd{font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);padding:0 9px;
   white-space:nowrap;border-left:1px solid var(--rule);margin-left:2px}
 .zoomer .rd b{color:var(--ink2);font-weight:600}
 /* The window's dates, pushed to the far right of the view bar — a position to go with the length beside
    it. Mono and tabular so the two dates hold their columns as the window is dragged. */
-.zhint{font-size:10.5px;color:var(--ink3);margin-left:8px}
-.zhint kbd{font-family:var(--data);font-size:9.5px;background:var(--sunk);border:1px solid var(--rule);
+.zhint{font-size:var(--t-xs);color:var(--ink3);margin-left:8px}
+.zhint kbd{font-family:var(--data);font-size:var(--t-micro);background:var(--sunk);border:1px solid var(--rule);
   border-bottom-width:2px;border-radius:var(--rad-1);padding:1px 4px;color:var(--ink3)}
 
 /* Ranked + DMZ end markers alongside BP END. Three deadlines exist in the
@@ -1005,7 +1007,7 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 
 /* ══════════════════ BOARD — collapsible columns ══════════════════ */
 .bbar{display:flex;align-items:center;gap:10px;padding:0 2px 11px}
-.bbar-t{font-family:var(--data);font-size:10.5px;color:var(--ink3);letter-spacing:.05em}
+.bbar-t{font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);letter-spacing:.05em}
 .bbar .sp{margin-left:auto}
 .bcols{display:flex;gap:12px;align-items:flex-start}
 .bcol{flex:1 1 0;min-width:0;transition:flex .26s cubic-bezier(.2,.8,.3,1)}
@@ -1022,10 +1024,10 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
   margin-left:1px;transition:transform .2s}
 .bcol-h[aria-expanded=true] .chev{transform:rotate(90deg) translateX(-1px)}
 .bcol-h:hover .chev{border-left-color:var(--ink2)}
-.bcol-t{font:600 10.5px/1 var(--data);letter-spacing:.09em;color:var(--ink2);white-space:nowrap}
-.bcol-n{font-family:var(--data);font-size:10px;color:var(--ink3);background:var(--raised);
+.bcol-t{font:600 var(--t-xs)/1 var(--data);letter-spacing:.09em;color:var(--ink2);white-space:nowrap}
+.bcol-n{font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);background:var(--raised);
   border:1px solid var(--rule2);border-radius:var(--rad-3);padding:1px 7px;flex:none;line-height:1.5}
-.bcol-sum{font-size:10.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;
+.bcol-sum{font-size:var(--t-xs);color:var(--ink3);white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;margin-left:auto;padding-left:6px}
 
 /* Collapsed: a readable rail, not just a thin one. Label rotates, count stays upright so it
@@ -1040,25 +1042,25 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .bcol-body{display:flex;flex-direction:column;gap:9px;min-height:56px}
 .bcol.drop .bcol-body{outline:1.5px dashed var(--staged);outline-offset:5px;border-radius:var(--rad-2)}
 .bempty{border:1px dashed var(--rule);border-radius:var(--rad-2);padding:18px 10px;text-align:center;
-  font-size:11px;color:var(--ink3);margin:0}
+  font-size:var(--t-sm);color:var(--ink3);margin:0}
 .bcard .dot2{color:var(--ink3);padding:0 2px}
 
 /* ══════════════════ HEADER identity + sign out ══════════════════ */
 .who{position:relative}
 .whobtn{display:flex;align-items:center;gap:8px;background:transparent;border:1px solid transparent;
   border-radius:var(--rad-2);padding:4px 8px 4px 5px;cursor:pointer;color:var(--ink2);
-  font:500 11.5px/1 var(--ui);transition:background .13s,border-color .13s}
+  font:500 var(--t-sm)/1 var(--ui);transition:background .13s,border-color .13s}
 .whobtn:hover,.whobtn[aria-expanded=true]{background:var(--hi);border-color:var(--rule)}
-.whobtn .cv{font-size:8px;color:var(--ink3)}
+.whobtn .cv{font-size:var(--t-micro);color:var(--ink3)}
 .umenu[hidden]{display:none}
 .umenu button.mi.danger{color:var(--danger-ink)}
 .umenu button.mi.danger:hover{background:var(--danger-edge)}
 
 /* ── confirm drawer (Shell.confirm) ── */
-.opline{font-family:var(--data);font-size:9.5px;letter-spacing:.06em;color:var(--ink3);
+.opline{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.06em;color:var(--ink3);
   border:1px solid var(--rule);border-radius:var(--rad-1);padding:3px 8px;display:inline-block;margin-bottom:12px}
 .opline b{color:var(--ink3);font-weight:600}
-.dwbody{font-size:13px;line-height:1.6;color:var(--ink2)}
+.dwbody{font-size:var(--t-base);line-height:1.6;color:var(--ink2)}
 .dw-p{margin:0 0 10px}
 .dw-p b{color:var(--ink);font-weight:600}
 .dwact{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--rule)}
@@ -1075,7 +1077,7 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .pal-retired{background:var(--sunk);border:1px solid var(--rule);border-radius:var(--rad-2);padding:5px 8px;
   cursor:pointer;color:var(--ink3);display:flex;align-items:center;transition:color .13s,border-color .13s}
 .pal:hover{color:var(--ink2);border-color:var(--rule2)}
-.pal kbd{font-family:var(--data);font-size:10px;letter-spacing:.04em}
+.pal kbd{font-family:var(--data);font-size:var(--t-xs);letter-spacing:.04em}
 .who .av.lg{width:34px;height:34px;flex:none}
 
 /* ── ⌘K palette ── */
@@ -1085,7 +1087,7 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .pbox{width:min(560px,92vw);background:var(--raised);border:1px solid var(--rule2);border-radius:var(--rad-3);
   box-shadow:0 24px 60px -14px rgba(0,0,0,.85);overflow:hidden}
 .pbox input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--rule);
-  color:var(--ink);font:500 15px/1 var(--ui);padding:16px 18px}
+  color:var(--ink);font:500 var(--t-lg)/1 var(--ui);padding:16px 18px}
 /* The palette input keeps a RING rather than nothing — corrected 2026-09-04 22:43 EDT. Of the fifteen `outline:none`
    rules in this sheet, twelve substitute a border, a box-shadow or a background; `.cb-in` is compensated by
    `.cmdbar:focus-within` on its parent; this one had neither, and it is the input you land in when the command
@@ -1093,12 +1095,12 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .pbox input:focus{outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--patch) 55%,transparent)}
 .plist{max-height:min(52vh,420px);overflow:auto;padding:6px}
 .pitem{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--rad-2);cursor:pointer;
-  font-size:13px;color:var(--ink2)}
+  font-size:var(--t-base);color:var(--ink2)}
 .pitem[aria-selected=true]{background:var(--hi);color:var(--ink)}
-.pitem .pk{font-family:var(--data);font-size:9px;letter-spacing:.07em;color:var(--ink3);
+.pitem .pk{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.07em;color:var(--ink3);
   border:1px solid var(--rule);border-radius:var(--rad-1);padding:2px 6px;margin-left:auto}
 .pitem .pi{width:8px;height:8px;border-radius:var(--rad-1);background:var(--c);flex:none}
-.pnone{padding:22px;text-align:center;font-size:12.5px;color:var(--ink3)}
+.pnone{padding:22px;text-align:center;font-size:var(--t-base);color:var(--ink3)}
 
 /* ── the editor is collapsible: at full height it is 415px, which pushed the Track — the
    reason this page exists — entirely below a 728px fold. Collapsed is the default; the
@@ -1121,30 +1123,30 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 /* ── calendar banners: three independent images, one per /calendar page ── */
 .bansec{margin-top:14px;border-top:1px solid var(--rule);padding-top:13px}
 .bansec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:9px}
-.bansec-h span:first-child{font:600 10px/1 var(--ui);letter-spacing:.11em;text-transform:uppercase;color:var(--ink3)}
-.bansec-n{font-family:var(--data);font-size:9.5px;color:var(--ink3)}
+.bansec-h span:first-child{font:600 var(--t-xs)/1 var(--ui);letter-spacing:.11em;text-transform:uppercase;color:var(--ink3)}
+.bansec-n{font-family:var(--data);font-size:var(--t-micro);color:var(--ink3)}
 .bans{display:flex;flex-direction:column;gap:6px}
 .ban{display:grid;grid-template-columns:78px 40px minmax(0,1fr) 118px;gap:11px;align-items:center;
-  background:var(--sunk);border:1px solid var(--rule);border-left:3px solid var(--c);
+  background:var(--sunk);border:1px solid var(--rule);border-left:2px solid var(--c);
   border-radius:var(--rad-2);padding:7px 12px 7px 11px}
 .ban:focus-within{border-color:var(--rule2);border-left-color:var(--c)}
-.ban .bl{font-family:var(--data);font-size:9.5px;letter-spacing:.09em;color:var(--c);font-weight:600}
+.ban .bl{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.09em;color:var(--c);font-weight:600}
 .ban .bthumb{height:24px;border-radius:var(--rad-1);border:1px dashed var(--rule2);display:grid;place-items:center;
-  font-family:var(--data);font-size:8px;color:var(--ink3);letter-spacing:.05em}
+  font-family:var(--data);font-size:var(--t-micro);color:var(--ink3);letter-spacing:.05em}
 .ban .bthumb.has{border-style:solid;border-color:var(--c);
   background:linear-gradient(120deg,var(--c),transparent 140%);opacity:.85}
 .ban input{width:100%;background:transparent;border:none;border-bottom:1px solid transparent;
-  color:var(--ink2);font:400 11.5px/1.4 var(--data);padding:3px 0}
+  color:var(--ink2);font:400 var(--t-sm)/1.4 var(--data);padding:3px 0}
 .ban input:hover{border-bottom-color:var(--rule2)}
 .ban input:focus{outline:none;border-bottom-color:var(--c);color:var(--ink)}
 .ban input::placeholder{color:var(--ink3)}
-.ban .bst{font-family:var(--data);font-size:9.5px;color:var(--ink3);text-align:right;letter-spacing:.04em}
+.ban .bst{font-family:var(--data);font-size:var(--t-micro);color:var(--ink3);text-align:right;letter-spacing:.04em}
 
 /* Card actions sit INSIDE content — three full-width filled buttons stacked down a column
    pulled the eye harder than the items they act on. Compact and right-aligned; the primary
    still reads as primary, just at card scale. */
 .bcard .actions{display:flex;gap:6px;justify-content:flex-end;margin-top:9px}
-.bcard .actions button{flex:none;padding:5px 11px;font-size:10.5px;border-radius:var(--rad-2)}
+.bcard .actions button{flex:none;padding:5px 11px;font-size:var(--t-xs);border-radius:var(--rad-2)}
 .bcard .actions button:not(.go){background:transparent;border:1px solid var(--rule2);color:var(--ink3)}
 .bcard .actions button:not(.go):hover{color:var(--danger-ink);border-color:var(--danger-edge)}
 
@@ -1153,7 +1155,7 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
    while expanded, so the editor was a one-way door that survived a reload. Every collapsible
    thing on this page now has a control visible in BOTH states. */
 .idclose{display:flex;align-items:center;gap:6px;background:var(--sunk);border:1px solid var(--rule2);
-  border-radius:var(--rad-2);color:var(--ink3);cursor:pointer;font:600 10px/1 var(--data);letter-spacing:.09em;
+  border-radius:var(--rad-2);color:var(--ink3);cursor:pointer;font:600 var(--t-xs)/1 var(--data);letter-spacing:.09em;
   padding:7px 11px;transition:color .13s,border-color .13s,background .13s}
 .idclose:hover{color:var(--ink);border-color:var(--ink4);background:var(--hi)}
 .identity.collapsed .idclose{display:none}
@@ -1162,7 +1164,7 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
    reads the same way everywhere. The values always swapped correctly; nothing said so. */
 .draftnote{display:none;align-items:center;gap:8px;margin-bottom:12px;padding:9px 12px;
   background:rgba(95,212,232,.06);border:1px dashed var(--staged);border-radius:var(--rad-2);
-  font-size:12px;color:var(--ink2)}
+  font-size:var(--t-sm);color:var(--ink2)}
 .draftnote b{color:var(--staged);font-weight:600}
 .identity.editing-draft .draftnote{display:flex}
 .identity.editing-draft{border-color:var(--staged)}
@@ -1170,7 +1172,7 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .identity.editing-draft .f-main input:focus{border-color:var(--staged);box-shadow:0 0 0 3px rgba(95,212,232,.13)}
 
 /* ══════════ DIFF ══════════ */
-.diff-r .dk{font-family:var(--data);font-size:10px;color:var(--ink3);letter-spacing:.05em}
+.diff-r .dk{font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);letter-spacing:.05em}
 .diff-r .dwas{color:var(--ink3);text-decoration:line-through;text-decoration-color:var(--rule2)}
 .diff-r .dnow{color:var(--ok);font-weight:500}
 .diff-r .dnow.add{color:var(--staged)}
@@ -1194,9 +1196,9 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .mtable th,.mtable td{padding:8px 12px}
 .mtable th:first-child,.mtable td:first-child{padding-right:0}
 .mtable td{vertical-align:middle;line-height:1.35}
-.mtable .nums{font-family:var(--data);font-size:11.5px;color:var(--ink2);white-space:nowrap}
+.mtable .nums{font-family:var(--data);font-size:var(--t-sm);color:var(--ink2);white-space:nowrap}
 .mtable .nums .arw{color:var(--ink3);padding:0 1px}
-.mtable .det{color:var(--ink3);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mtable .det{color:var(--ink3);font-size:var(--t-base);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mtable .ta-r{text-align:right}
 /* `.rowmeta` is a SUBTITLE LINE, so it has to be block — inline it runs straight into the
  * title it sits under and the two read as one mangled string. Caught 2026-08-24 on the
@@ -1211,12 +1213,12 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 /* A staged item that ALSO outlives the season needs both facts visible. The badge keeps
    carrying staging state; the conflict gets its own mark rather than overloading a word. */
 .warnmark{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:var(--rad-round);
-  border:1.5px solid var(--warn);color:var(--warn);font:700 10px/1 var(--data);
+  border:1.5px solid var(--warn);color:var(--warn);font:700 var(--t-xs)/1 var(--data);
   margin-right:6px;vertical-align:1px;cursor:help}
 /* "NOT LIVE" had two causes — staged against the live season, or belonging to the staged
    NEXT season — and the manifest showed both identically. */
 .nextmark{color:var(--staged);border:1px solid var(--staged);border-radius:var(--rad-1);padding:1px 5px;
-  font-size:8.5px;letter-spacing:.07em}
+  font-size:var(--t-micro);letter-spacing:.07em}
 
 /* ══════════ SCRUBBER — figure/ground the right way round ══════════
    Recorded failure: the SELECTION was tinted gold, so a wide window washed the entire bar
@@ -1256,7 +1258,7 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
    so the window box slid over the word and at full width hid it completely. */
 .scrub{display:flex;align-items:stretch;gap:10px;height:44px;margin-bottom:10px;
   background:var(--sunk);border:1px solid var(--rule);border-radius:var(--rad-2);padding:5px 7px}
-.scrub-label{flex:none;align-self:center;font-family:var(--data);font-size:9px;letter-spacing:.14em;
+.scrub-label{flex:none;align-self:center;font-family:var(--data);font-size:var(--t-micro);letter-spacing:.14em;
   text-transform:uppercase;color:var(--ink3);padding-right:2px}
 .scrub-track{position:relative;flex:1;min-width:0;overflow:hidden;border-radius:var(--rad-1);
   background:rgba(0,0,0,.28);cursor:crosshair}
@@ -1285,7 +1287,7 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .dflag,.dspan{position:absolute;top:0;transform:translateX(-1px);display:flex;align-items:center;gap:6px;
   background:var(--sunk);border:1px solid var(--c,var(--rule2));border-radius:var(--rad-2);
   padding:3px 7px;cursor:ew-resize;white-space:nowrap;color:var(--c,var(--ink3));
-  font-family:var(--data);font-size:9px;letter-spacing:.08em;line-height:1.4;touch-action:none;
+  font-family:var(--data);font-size:var(--t-micro);letter-spacing:.08em;line-height:1.4;touch-action:none;
   box-shadow:0 2px 8px -4px rgba(0,0,0,.8)}
 .dflag:hover,.dflag:focus-visible{background:var(--hi);z-index:3}
 .dflag.dragging{background:var(--hi);z-index:4}
@@ -1363,7 +1365,7 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .mtable .det{white-space:normal}
 .detcell{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0}
 .tiers{display:inline-flex;gap:3px}
-.tiers b{font-family:var(--data);font-size:8.5px;letter-spacing:.06em;font-weight:700;
+.tiers b{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.06em;font-weight:700;
   border-radius:var(--rad-1);padding:2px 5px;line-height:1.3}
 .t-leg{background:rgba(242,194,48,.15);color:#F2C230;box-shadow:inset 0 0 0 1px rgba(242,194,48,.35)}
 .t-myth{background:rgba(255,52,48,.15);color:#FF6B67;box-shadow:inset 0 0 0 1px rgba(255,52,48,.35)}
@@ -1379,9 +1381,9 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .t-legendary{background:rgba(242,194,48,.15);color:#F2C230;box-shadow:inset 0 0 0 1px rgba(242,194,48,.35)}
 .t-mythic{background:rgba(226,84,222,.15);color:#E254DE;box-shadow:inset 0 0 0 1px rgba(226,84,222,.35)}
 .t-epic{background:rgba(142,107,166,.18);color:#C0A3D4;box-shadow:inset 0 0 0 1px rgba(142,107,166,.4)}
-.mtable .det .dsub{font-size:12px;color:var(--ink3)}
+.mtable .det .dsub{font-size:var(--t-sm);color:var(--ink3)}
 .mtable .det .none{color:var(--ink3);font-style:italic}
-.thumb{font-family:var(--data);font-size:8.5px;letter-spacing:.05em;padding:1px 5px;border-radius:var(--rad-1);
+.thumb{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.05em;padding:1px 5px;border-radius:var(--rad-1);
   margin-left:auto;white-space:nowrap}
 .thumb.ok{color:var(--ok);background:rgba(61,220,151,.1)}
 .thumb.no{color:var(--ink3);background:rgba(255,255,255,.04)}
@@ -1413,8 +1415,8 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .xd{position:absolute;top:calc(var(--xtop,60px) - 26px);left:0;white-space:nowrap;
   background:var(--raised);border:1px solid var(--rule2);border-radius:var(--rad-2);padding:3px 9px;
   box-shadow:0 6px 18px -8px rgba(0,0,0,.9);display:flex;align-items:baseline;gap:8px}
-.xd b{font-family:var(--data);font-size:10.5px;color:var(--ink);font-weight:600;letter-spacing:.03em}
-.xd i{font-style:normal;font-size:10px;color:var(--ink3)}
+.xd b{font-family:var(--data);font-size:var(--t-xs);color:var(--ink);font-weight:600;letter-spacing:.03em}
+.xd i{font-style:normal;font-size:var(--t-xs);color:var(--ink3)}
 .xhair.on-item::before{background:linear-gradient(180deg,rgba(242,194,48,.6),rgba(242,194,48,.15))}
 .xhair.on-item .xd{border-color:var(--patch)}
 .tk-wrap{position:relative}
@@ -1430,24 +1432,24 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .uav{position:relative;width:38px;height:38px;border-radius:var(--rad-round);flex:none;display:grid;place-items:center;
   background:linear-gradient(140deg,var(--avatar-a),var(--sunk));
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.09)}
-.rolebadge{flex:none;font:700 8px/1 var(--data);letter-spacing:.1em;color:var(--patch);
+.rolebadge{flex:none;font:700 var(--t-micro)/1 var(--data);letter-spacing:.1em;color:var(--patch);
   border:1px solid rgba(242,194,48,.45);background:rgba(242,194,48,.1);border-radius:var(--rad-1);padding:2.5px 5px}
 .usec{padding:5px;border-top:1px solid var(--rule)}
 .usec.last{background:rgba(255,107,107,.03)}
 .umenu .mi{display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;
-  border-radius:var(--rad-2);color:var(--ink2);cursor:pointer;font:500 12.5px/1 var(--ui);padding:9px 9px;text-align:left}
+  border-radius:var(--rad-2);color:var(--ink2);cursor:pointer;font:500 var(--t-base)/1 var(--ui);padding:9px 9px;text-align:left}
 .umenu .mi svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:1.4;
   stroke-linecap:round;stroke-linejoin:round;opacity:.75}
 .umenu .mi:hover{background:var(--hi);color:var(--ink)}
 .umenu .mi:hover svg{opacity:1}
-.umenu .mi kbd{margin-left:auto;font-family:var(--data);font-size:9px;color:var(--ink3);
+.umenu .mi kbd{margin-left:auto;font-family:var(--data);font-size:var(--t-micro);color:var(--ink3);
   border:1px solid var(--rule);border-bottom-width:2px;border-radius:var(--rad-1);padding:2px 5px}
-.umenu .mi .mnote{margin-left:auto;font-family:var(--data);font-size:9.5px;color:var(--ink3)}
+.umenu .mi .mnote{margin-left:auto;font-family:var(--data);font-size:var(--t-micro);color:var(--ink3)}
 .umenu .mi.danger{color:var(--danger-ink)}
 .umenu .mi.danger:hover{background:rgba(255,107,107,.12)}
 .ustat{display:flex;align-items:center;justify-content:space-between;padding:6px 9px;
-  font-size:11.5px;color:var(--ink3)}
-.ustat b{font-family:var(--data);font-size:10.5px;color:var(--ink2);font-weight:600;
+  font-size:var(--t-sm);color:var(--ink3)}
+.ustat b{font-family:var(--data);font-size:var(--t-xs);color:var(--ink2);font-weight:600;
   font-variant-numeric:tabular-nums}
 
 /* ══════════════════ REFINEMENT PASS — classes never checked before ══════════════════ */
@@ -1483,29 +1485,29 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
    FILTER — naming a defect you cannot then list is not worth naming. */
 .rack{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:12px;padding:14px 16px}
 .rcard{display:flex;flex-direction:column;gap:10px;text-align:left;cursor:pointer;
-  background:var(--sunk);border:1px solid var(--rule);border-left:3px solid var(--c);
+  background:var(--sunk);border:1px solid var(--rule);border-left:2px solid var(--c);
   border-radius:var(--rad-2);padding:13px 14px;color:inherit;transition:border-color .14s,background .14s}
 .rcard:hover{background:var(--desk);border-color:var(--rule2);border-left-color:var(--c)}
 .rcard[aria-pressed=true]{background:color-mix(in srgb,var(--c) 12%,var(--sunk));border-color:var(--c)}
 .rcard.empty{opacity:.5}
 .rtop{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-.rname{font:600 13.5px/1.2 var(--ui);color:var(--ink)}
-.rn{font-family:var(--data);font-size:16px;font-weight:600;color:var(--c);font-variant-numeric:tabular-nums}
+.rname{font:600 var(--t-md)/1.2 var(--ui);color:var(--ink)}
+.rn{font-family:var(--data);font-size:var(--t-lg);font-weight:600;color:var(--c);font-variant-numeric:tabular-nums}
 /* What exists, said plainly. The abstract tick-per-build that lived here was never
    labelled, so no reader could decode it — and at this scale a distribution says less than
    the count already does. A weapon marked `bad` has at least one build with a defect. */
 .rlist{display:flex;flex-wrap:wrap;gap:5px;min-height:22px;align-content:flex-start}
-.rw{font-size:11px;color:var(--ink2);background:var(--raised);border:1px solid var(--rule);
+.rw{font-size:var(--t-sm);color:var(--ink2);background:var(--raised);border:1px solid var(--rule);
   border-radius:var(--rad-1);padding:2px 7px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .rw.bad{border-color:var(--danger-edge);color:var(--warn)}
-.rmore{font-family:var(--data);font-size:9.5px;color:var(--ink3);align-self:center;padding-left:2px}
-.rnone{font-size:11px;color:var(--ink3);font-style:italic}
-.rfoot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--data);font-size:9.5px;
+.rmore{font-family:var(--data);font-size:var(--t-micro);color:var(--ink3);align-self:center;padding-left:2px}
+.rnone{font-size:var(--t-sm);color:var(--ink3);font-style:italic}
+.rfoot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--data);font-size:var(--t-micro);
   color:var(--ink3);letter-spacing:.04em}
 .rfoot b{color:var(--ink2);font-weight:600;font-variant-numeric:tabular-nums}
 .rmeta{color:var(--patch)}
 .rbad{color:var(--warn)}
-.racknote{margin:0;padding:0 16px 14px;font-size:11.5px;color:var(--ink3)}
+.racknote{margin:0;padding:0 16px 14px;font-size:var(--t-sm);color:var(--ink3)}
 
 .cov{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:12px;padding:14px 16px}
 .ccard{display:flex;flex-direction:column;gap:9px;text-align:left;cursor:pointer;color:inherit;
@@ -1515,10 +1517,10 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .ccard[aria-pressed=true]{border-color:var(--warn);background:rgba(255,122,69,.07)}
 .ccard.clean{opacity:.72}
 .ctop{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-.cname{font:600 12.5px/1.3 var(--ui);color:var(--ink)}
-.cn{font-family:var(--data);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.cname{font:600 var(--t-base)/1.3 var(--ui);color:var(--ink)}
+.cn{font-family:var(--data);font-size:var(--t-lg);font-weight:600;font-variant-numeric:tabular-nums}
 .cn.bad{color:var(--warn)} .cn.ok{color:var(--ok)}
-.chint{font-size:11.5px;color:var(--ink3);line-height:1.45}
+.chint{font-size:var(--t-sm);color:var(--ink3);line-height:1.45}
 .cmeter{height:4px;border-radius:var(--rad-1);background:var(--rule);overflow:hidden}
 /* 🔴 GREEN WAS THE DEFAULT AND THE OVERRIDE NEVER MATCHED. `.cn.bad ~ * .cmeter i` asks for a
    `.cmeter` DESCENDANT of a later sibling; `.cmeter` IS the sibling, so the rule fired on nothing
@@ -1535,12 +1537,12 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 .expkept{margin-top:16px;padding-top:13px;border-top:1px solid var(--rule)}
 .expkept h5{margin:0 0 8px;font:600 var(--t-micro)/1 var(--ui);letter-spacing:var(--tr-micro);
   text-transform:uppercase;color:var(--ink3)}
-.expnone{margin:0;font-size:11.5px;color:var(--ink3);line-height:1.5}
+.expnone{margin:0;font-size:var(--t-sm);color:var(--ink3);line-height:1.5}
 .explist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
 .explist li{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
   padding:8px 10px;background:var(--sunk);border:1px solid var(--rule);border-radius:var(--rad-2)}
-.exp-s{font:600 11.5px/1 var(--data);color:var(--ink)}
-.exp-m{flex:1 1 auto;font:11px/1.3 var(--data);color:var(--ink3);font-variant-numeric:tabular-nums}
+.exp-s{font:600 var(--t-sm)/1 var(--data);color:var(--ink)}
+.exp-m{flex:1 1 auto;font:var(--t-sm)/1.3 var(--data);color:var(--ink3);font-variant-numeric:tabular-nums}
 
 /* Age on a build card. Deliberately the quietest mark in the package: 106 of 125 builds carry it,
    so anything louder is wallpaper — and the red count beside it has to stay readable as the rare
@@ -1548,59 +1550,57 @@ td.n .edit:focus{border-color:var(--patch);background:var(--sunk);outline:none}
 /* `--ink4` failed the contrast rule at 2.72:1 — it is a NON-TEXT token and this mark carries
    meaning, so it takes the quietest token that is still readable rather than the quietest token.
    The audit caught it on the same run that proved the badge split worked. */
-.bc-age{font:700 13px/1 var(--data);color:var(--ink3);padding:0 3px;cursor:default}
+.bc-age{font:700 var(--t-base)/1 var(--data);color:var(--ink3);padding:0 3px;cursor:default}
 /* A table row that IS the control needs a focus ring the eye can find across a full-width row. */
 tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px}
 .ccard[aria-pressed=true] .cmeter i{background:var(--warn)}
-.cfoot{font-family:var(--data);font-size:9.5px;color:var(--ink3);letter-spacing:.04em;
+.cfoot{font-family:var(--data);font-size:var(--t-micro);color:var(--ink3);letter-spacing:.04em;
   font-variant-numeric:tabular-nums}
 
 /* An active filter must name itself and offer the way out — a filtered list that looks like
    the whole list is how someone concludes their data is missing. */
 .afbar{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--rule);
   background:var(--sunk);flex-wrap:wrap}
-.aflab{font-family:var(--data);font-size:9.5px;letter-spacing:.1em;color:var(--ink3);text-transform:uppercase}
-.afchip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);
+.aflab{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.1em;color:var(--ink3);text-transform:uppercase}
+.afchip{display:inline-flex;align-items:center;gap:6px;font-size:var(--t-sm);color:var(--ink2);
   background:var(--raised);border:1px solid var(--rule2);border-radius:var(--rad-pill);padding:3px 10px}
 .afchip i{width:7px;height:7px;border-radius:var(--rad-1);background:var(--c,var(--ink3))}
 .afchip.warn{color:var(--warn);border-color:var(--danger-edge)}
 .afchip.warn i{background:var(--warn)}
-.afn{font-family:var(--data);font-size:10px;color:var(--ink3);margin-left:auto;font-variant-numeric:tabular-nums}
+.afn{font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);margin-left:auto;font-variant-numeric:tabular-nums}
 .afclear{background:transparent;border:1px solid var(--rule2);border-radius:var(--rad-2);color:var(--ink3);
-  cursor:pointer;font:600 10px/1 var(--data);letter-spacing:.08em;padding:5px 9px}
+  cursor:pointer;font:600 var(--t-xs)/1 var(--data);letter-spacing:.08em;padding:5px 9px}
 .afclear:hover{color:var(--ink);border-color:var(--ink4)}
 
 .wname{font-weight:500;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mtable .code{font-size:11px;color:var(--ink3);letter-spacing:.03em}
+.mtable .code{font-size:var(--t-sm);color:var(--ink3);letter-spacing:.03em}
 .mtable .none{color:var(--ink3);font-style:italic}
 .metatag{color:var(--patch);border:1px solid rgba(242,194,48,.4);border-radius:var(--rad-1);padding:1px 4px;
-  font-size:8px;letter-spacing:.08em}
-.health{font-family:var(--data);font-size:10px;letter-spacing:.04em;padding:3px 8px;border-radius:var(--rad-1);
+  font-size:var(--t-micro);letter-spacing:.08em}
+.health{font-family:var(--data);font-size:var(--t-xs);letter-spacing:.04em;padding:3px 8px;border-radius:var(--rad-1);
   white-space:nowrap}
 .health.ok{color:var(--ok);background:rgba(61,220,151,.1)}
 .health.bad{color:var(--warn);background:rgba(255,122,69,.12);cursor:help}
-.bdg{display:inline-block;font-family:var(--data);font-size:8.5px;font-weight:700;letter-spacing:.07em;
-  border-radius:var(--rad-1);padding:2px 5px;margin-left:4px}
-.bdg.rank{color:var(--patch);box-shadow:inset 0 0 0 1px rgba(242,194,48,.45)}
-.bdg.dmz{color:#5FA8D8;box-shadow:inset 0 0 0 1px rgba(95,168,216,.45)}
-.bdg.toxic{color:var(--del);box-shadow:inset 0 0 0 1px rgba(255,107,107,.45)}
+/* The inset-ring .bdg set that lived here was deleted 2026-09-06 09:15 EDT: the filled set below ("the real badge set") is declared later and won every shared property, so a rank chip rendered a gold ring UNDER a blue border — two topic colours on one badge, and the duplicate-selector trap this file names at .t-epic, one screen over. */
 .dwissues{margin-top:16px;border-top:1px solid var(--rule);padding-top:13px}
-.dwissues h6{margin:0 0 9px;font:700 9.5px/1 var(--data);letter-spacing:.12em;text-transform:uppercase;color:var(--warn)}
+.dwissues h6{margin:0 0 9px;font:700 var(--t-micro)/1 var(--data);letter-spacing:.12em;text-transform:uppercase;color:var(--warn)}
 .dwissue{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:var(--rad-2);
   background:rgba(255,122,69,.07);border-left:2px solid var(--warn);margin-bottom:6px}
-.dwissue b{font-size:12px;color:var(--ink);font-weight:600}
-.dwissue span{font-size:11.5px;color:var(--ink3)}
-.dwfield{display:flex;flex-direction:column;gap:5px;margin-bottom:11px}
-.dwfield label{font:600 9.5px/1 var(--data);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.dwissue b{font-size:var(--t-sm);color:var(--ink);font-weight:600}
+.dwissue span{font-size:var(--t-sm);color:var(--ink3)}
+.dwfield{display:flex;flex-direction:column;gap:var(--s2);margin-bottom:var(--s3)}
+/* a sentence-case label at --t-sm, not a 9.5px tracked eyebrow: a drawer with six fields is a FORM, and a form
+   is read, not scanned. The eyebrow voice stays for panel headings. */
+.dwfield label{font:600 var(--t-sm)/1.2 var(--ui);color:var(--ink3);letter-spacing:0;text-transform:none}
 .dwfield input{background:var(--sunk);border:1px solid var(--rule);border-radius:var(--rad-2);color:var(--ink);
-  font:500 13px/1 var(--ui);padding:9px 11px}
+  font:500 var(--t-base)/1 var(--ui);padding:9px 11px}
 .dwfield input:focus{outline:none;border-color:var(--patch)}
-.dwcheck{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:var(--ink2);cursor:pointer}
+.dwcheck{display:flex;align-items:flex-start;gap:9px;font-size:var(--t-base);color:var(--ink2);cursor:pointer}
 .bulkbar{display:flex;align-items:center;gap:9px;padding:10px 13px;border-top:1px solid var(--rule);
-  background:var(--sunk);font-size:12.5px;color:var(--ink2)}
+  background:var(--sunk);font-size:var(--t-base);color:var(--ink2)}
 .bulkbar b{color:var(--staged);font-family:var(--data)}
 .bulkbar button{background:transparent;border:1px solid var(--rule2);border-radius:var(--rad-2);color:var(--ink2);
-  cursor:pointer;font:500 11.5px/1 var(--ui);padding:6px 11px}
+  cursor:pointer;font:500 var(--t-sm)/1 var(--ui);padding:6px 11px}
 .bulkbar button:hover{color:var(--ink);border-color:var(--ink4)}
 .bulkbar .x{margin-left:auto;border:none;color:var(--ink3)}
 .srch{position:relative;display:flex;align-items:center}
@@ -1613,9 +1613,9 @@ tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px
    spatial editor instead of a text input. Dragging stages loadouts.setRank. */
 .tbcats{display:flex;gap:7px;flex-wrap:wrap;padding:13px 16px 0}
 .tbcat{display:inline-flex;align-items:center;gap:7px;background:var(--sunk);cursor:pointer;
-  border:1px solid var(--rule);border-radius:var(--rad-pill);color:var(--ink3);font:500 11.5px/1 var(--ui);padding:7px 12px}
+  border:1px solid var(--rule);border-radius:var(--rad-pill);color:var(--ink3);font:500 var(--t-sm)/1 var(--ui);padding:7px 12px}
 .tbcat i{width:8px;height:8px;border-radius:var(--rad-1);background:var(--c);flex:none}
-.tbcat b{font-family:var(--data);font-size:10px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.tbcat b{font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);font-variant-numeric:tabular-nums}
 .tbcat:hover{color:var(--ink);border-color:var(--rule2)}
 .tbcat.on{background:color-mix(in srgb,var(--c,var(--patch)) 15%,transparent);
   border-color:var(--c,var(--patch));color:var(--ink)}
@@ -1624,60 +1624,60 @@ tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px
 .trows{display:flex;flex-direction:column;gap:9px;padding:13px 16px}
 .trow{border:1px solid var(--rule);border-radius:var(--rad-2);background:var(--sunk);overflow:hidden}
 .trow-h{display:flex;align-items:center;gap:11px;padding:8px 12px;border-bottom:1px solid var(--rule3)}
-.trow-k{font:700 15px/1 var(--data);letter-spacing:.04em;width:26px;text-align:center;flex:none}
-.trow-n{font-family:var(--data);font-size:10px;color:var(--ink3);border:1px solid var(--rule);
+.trow-k{font:700 var(--t-lg)/1 var(--data);letter-spacing:.04em;width:26px;text-align:center;flex:none}
+.trow-n{font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);border:1px solid var(--rule);
   border-radius:var(--rad-3);padding:1px 7px;font-variant-numeric:tabular-nums}
-.trow-note{font-size:11px;color:var(--ink3)}
+.trow-note{font-size:var(--t-sm);color:var(--ink3)}
 /* S reads as the top of a podium, not merely the first row of a list. */
 .t-S{background:linear-gradient(90deg,rgba(242,194,48,.09),transparent 42%)}
 .t-S .trow-k{color:var(--patch)}
 .t-A .trow-k{color:#9BE8C0} .t-B .trow-k{color:var(--ink3)}
-.t-none{opacity:.86} .t-none .trow-k{color:var(--ink3);font-size:11px;width:auto;letter-spacing:.1em}
+.t-none{opacity:.86} .t-none .trow-k{color:var(--ink3);font-size:var(--t-sm);width:auto;letter-spacing:.1em}
 .trow-body{display:flex;flex-wrap:wrap;gap:8px;padding:11px 12px;min-height:58px;
   transition:background .14s,box-shadow .14s}
 .trow-body.over{background:rgba(95,212,232,.07);box-shadow:inset 0 0 0 1.5px var(--staged)}
-.trow-empty{margin:0;align-self:center;font-size:11.5px;color:var(--ink3);font-style:italic}
+.trow-empty{margin:0;align-self:center;font-size:var(--t-sm);color:var(--ink3);font-style:italic}
 
 .bchip{display:flex;flex-direction:column;gap:4px;min-width:158px;cursor:grab;
-  background:var(--raised);border:1px solid var(--rule2);border-left:3px solid var(--c);
+  background:var(--raised);border:1px solid var(--rule2);border-left:2px solid var(--c);
   border-radius:var(--rad-2);padding:8px 11px;transition:transform .13s,box-shadow .13s,border-color .13s}
 .bchip:hover{border-color:var(--c);transform:translateY(-2px);
   box-shadow:0 8px 18px -10px rgba(0,0,0,.9)}
 .bchip.dragging{opacity:.6;transform:rotate(-1.5deg) scale(.98);cursor:grabbing}
 .bc-top{display:flex;align-items:center;gap:7px}
-.bc-w{font:600 12.5px/1.2 var(--ui);color:var(--ink)}
-.bc-meta{font:700 7.5px/1 var(--data);letter-spacing:.09em;color:var(--patch);
+.bc-w{font:600 var(--t-base)/1.2 var(--ui);color:var(--ink)}
+.bc-meta{font:700 var(--t-micro)/1 var(--data);letter-spacing:.09em;color:var(--patch);
   border:1px solid rgba(242,194,48,.45);border-radius:var(--rad-1);padding:2px 4px}
-.bc-b{font-size:11px;color:var(--ink3)}
-.bc-foot{display:flex;align-items:center;gap:6px;font-family:var(--data);font-size:9px;
+.bc-b{font-size:var(--t-sm);color:var(--ink3)}
+.bc-foot{display:flex;align-items:center;gap:6px;font-family:var(--data);font-size:var(--t-micro);
   letter-spacing:.06em;color:var(--ink3)}
-.bc-dmz{color:#5FA8D8} .bc-tox{color:var(--del);font-size:11px}
+.bc-dmz{color:#5FA8D8} .bc-tox{color:var(--del);font-size:var(--t-sm)}
 .bc-bad{margin-left:auto;color:var(--warn);border:1px solid var(--danger-edge);border-radius:var(--rad-3);
   padding:1px 6px;font-variant-numeric:tabular-nums;cursor:help}
 
 /* ══════════ REPAIR QUEUE ══════════ */
 .cact{display:flex;gap:7px;margin-top:4px}
-.cok{font-family:var(--data);font-size:9.5px;color:var(--ok);letter-spacing:.05em}
+.cok{font-family:var(--data);font-size:var(--t-micro);color:var(--ok);letter-spacing:.05em}
 .chip.go{border-color:var(--staged);color:var(--staged)}
 .chip.go:hover{background:var(--staged);color:var(--on-accent)}
 .rep{display:flex;flex-direction:column;gap:6px;margin-top:13px}
 .repr{display:flex;align-items:center;gap:12px;background:var(--sunk);border:1px solid var(--rule);
-  border-left:3px solid var(--c);border-radius:var(--rad-2);padding:9px 12px}
-.repw{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink);min-width:0;flex:1}
+  border-left:2px solid var(--c);border-radius:var(--rad-2);padding:9px 12px}
+.repw{display:flex;align-items:center;gap:8px;font-size:var(--t-base);color:var(--ink);min-width:0;flex:1}
 .repw i{width:8px;height:8px;border-radius:var(--rad-1);background:var(--c);flex:none}
-.repw em{font-style:normal;font-size:11.5px;color:var(--ink3)}
-.repd{display:flex;align-items:center;gap:8px;font-family:var(--data);font-size:11px;flex:none}
+.repw em{font-style:normal;font-size:var(--t-sm);color:var(--ink3)}
+.repd{display:flex;align-items:center;gap:8px;font-family:var(--data);font-size:var(--t-sm);flex:none}
 .repd .was{color:var(--ink3);text-decoration:line-through;text-decoration-color:var(--rule2)}
 .repd .now{color:var(--ok)}
 .repd .arw{color:var(--ink3)}
-.repf{color:var(--ink3);font-size:9.5px;letter-spacing:.05em}
+.repf{color:var(--ink3);font-size:var(--t-micro);letter-spacing:.05em}
 .repin{background:var(--paper);border:1px solid var(--rule2);border-radius:var(--rad-2);color:var(--ink);
-  font:400 11.5px/1 var(--data);padding:6px 9px;min-width:210px}
+  font:400 var(--t-sm)/1 var(--data);padding:6px 9px;min-width:210px}
 .repin:focus{outline:none;border-color:var(--staged)}
 
 /* ══════════ COMPARE ══════════ */
 .cmpbar{display:flex;gap:7px;flex-wrap:wrap;padding:13px 16px 0}
-.cmpbar .chip b{font-family:var(--data);font-size:10px;color:var(--ink3);margin-left:7px}
+.cmpbar .chip b{font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);margin-left:7px}
 .cmpbar .chip.on{background:var(--hi);color:var(--ink);border-color:var(--ink4)}
 .cmp{padding:13px 16px}
 .cmpcards{display:flex;gap:12px;flex-wrap:wrap;align-items:stretch;margin-bottom:14px}
@@ -1689,14 +1689,14 @@ tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px
    because auto layout lets the longest cell decide. Two builds being compared must occupy
    IDENTICAL columns or the comparison misrepresents them. The field column is pinned and
    the remaining width splits exactly in two. Same fix .mtable already carries. */
-.cmptab{width:100%;table-layout:fixed;border-collapse:collapse;font-size:12.5px}
+.cmptab{width:100%;table-layout:fixed;border-collapse:collapse;font-size:var(--t-base)}
 .cmptab th:first-child,.cmptab td.cmpf{width:120px}
 /* Fixed layout will not wrap a long unbroken value, so it has to be told to. */
 .cmptab td{overflow-wrap:anywhere}
-.cmptab th{text-align:left;font:700 9.5px/1 var(--data);letter-spacing:.11em;text-transform:uppercase;
+.cmptab th{text-align:left;font:700 var(--t-micro)/1 var(--data);letter-spacing:.11em;text-transform:uppercase;
   color:var(--ink3);padding:8px 12px;border-bottom:1px solid var(--rule)}
 .cmptab td{padding:8px 12px;border-bottom:1px solid var(--rule3);font-variant-numeric:tabular-nums}
-.cmpf{font-family:var(--data);font-size:10px;color:var(--ink3);letter-spacing:.05em}
+.cmpf{font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);letter-spacing:.05em}
 /* Only the differing rows are lit — matching fields dim so the difference is what you see. */
 .cmptab tr.same td{color:var(--ink3);opacity:.55}
 .cmptab tr.diff td{color:var(--ink)}
@@ -1720,7 +1720,7 @@ tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px
 /* 23px → 22px, 2026-09-04 22:39 EDT: `.panel{margin:0 22px}` is the only thing establishing the content column, and
    the masthead sat one pixel off it — so the realm title, the largest type on the page, was the one element
    NOT on the column it appears to define. Measured across six realms: title left edge 99–100, panel edge 98. */
-.masthead{padding:34px 22px 22px;max-width:none}
+.masthead{padding:36px 22px 26px;max-width:none}
 .masthead .job{display:block;font-family:var(--data);font-size:var(--t-micro);
   letter-spacing:var(--tr-micro);color:var(--patch);text-transform:uppercase;margin-bottom:12px}
 /* A realm title is a LABEL, not a hero. It sits one step below the lead figure on purpose:
@@ -1772,7 +1772,7 @@ tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px
    "one class, two contracts" failure that put Broadcast's ruler 128px off its own lanes.
    The lock is the mark; the danger ink is inherited from the scope's own --c, so nothing here
    hardcodes a colour. */
-.mxcol.ownly .ownly-k{font-size:9px;line-height:1;margin-left:3px;opacity:.85;font-weight:400}
+.mxcol.ownly .ownly-k{font-size:var(--t-micro);line-height:1;margin-left:3px;opacity:.85;font-weight:400}
 .mxcol.ownly{color:var(--danger-ink)}
 /* A one-way row an admin may SEE but not run. Still fully legible — the point is that they can
    read what exists and what would unlock it, not that the row is greyed into unreadability. */
@@ -1815,7 +1815,7 @@ tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px
 /* Rule 3 — SLOW is its own state. Nothing is cancelled; the page stops pretending the wait is
    normal, because a reader who thinks it is broken reloads MID-WRITE. */
 .is-slow::before{content:attr(data-slow);position:absolute;left:50%;top:12px;transform:translateX(-50%);
-  z-index:7;font:500 11px/1 var(--ui);color:var(--ink2);background:var(--raised);
+  z-index:7;font:500 var(--t-sm)/1 var(--ui);color:var(--ink2);background:var(--raised);
   border:1px solid var(--rule2);border-radius:var(--rad-pill);padding:7px 12px;white-space:nowrap;
   box-shadow:0 6px 20px -10px rgba(0,0,0,.9)}
 
@@ -1824,12 +1824,12 @@ tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px
 .failbox{margin:14px 12px;border:1px solid var(--danger-edge);border-left:3px solid var(--danger-ink);
   border-radius:var(--rad-2);background:color-mix(in srgb,var(--danger-ink) 6%,transparent);padding:14px 16px}
 .fail-h{display:flex;align-items:center;gap:9px;margin-bottom:6px}
-.fail-k{font:700 9.5px/1 var(--data);letter-spacing:.16em;color:var(--danger-ink);
+.fail-k{font:700 var(--t-micro)/1 var(--data);letter-spacing:.16em;color:var(--danger-ink);
   border:1px solid var(--danger-edge);border-radius:var(--rad-1);padding:4px 6px}
-.fail-h b{font:600 14px/1.2 var(--ui);color:var(--ink)}
-.failbox p{margin:0;font-size:12.5px;line-height:1.5;color:var(--ink2);max-width:70ch}
+.fail-h b{font:600 var(--t-md)/1.2 var(--ui);color:var(--ink)}
+.failbox p{margin:0;font-size:var(--t-base);line-height:1.5;color:var(--ink2);max-width:70ch}
 .fail-d{margin:9px 0 0;padding:8px 10px;background:var(--sunk);border-radius:var(--rad-2);
-  font:11px/1.5 var(--mono);color:var(--ink3);overflow-x:auto;white-space:pre-wrap}
+  font:var(--t-sm)/1.5 var(--mono);color:var(--ink3);overflow-x:auto;white-space:pre-wrap}
 .fail-a{margin-top:11px}
 
 /* A commit is N ops in ONE transaction (§15.3) and op 23 of 40 can fail — so progress is per-op
@@ -1840,17 +1840,17 @@ tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px
 .prog-b i{display:block;height:100%;background:var(--patch);border-radius:var(--rad-pill);
   transition:width var(--dur-2) var(--ease)}
 .prog.bad .prog-b i{background:var(--danger-ink)}
-.prog-t{margin-top:8px;font:500 11.5px/1.4 var(--data);color:var(--ink2)}
+.prog-t{margin-top:8px;font:500 var(--t-sm)/1.4 var(--data);color:var(--ink2)}
 .prog.bad .prog-t b{color:var(--danger-ink)}
 
 /* Page-level facts take a page-level bar: the backend is gone, or this tab outlived its 12h
    session. Both name the one action AND say staged work is safe, because that is the reader's
    actual fear and an "offline" notice that does not answer it just adds to it. */
 .netbar{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:10px 22px;
-  border-bottom:1px solid var(--rule2);background:var(--raised);font-size:12.5px}
+  border-bottom:1px solid var(--rule2);background:var(--raised);font-size:var(--t-base)}
 .netbar.offline{background:color-mix(in srgb,var(--warn) 9%,var(--raised))}
 .netbar.expired{background:color-mix(in srgb,var(--patch) 9%,var(--raised))}
-.net-k{font:700 9.5px/1 var(--data);letter-spacing:.16em;color:var(--ink2);
+.net-k{font:700 var(--t-micro)/1 var(--data);letter-spacing:.16em;color:var(--ink2);
   border:1px solid var(--rule2);border-radius:var(--rad-1);padding:4px 6px}
 .netbar b{color:var(--ink)}
 .net-m{color:var(--ink2);flex:1 1 320px;min-width:0}
@@ -1911,7 +1911,9 @@ tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px
    A margin that belongs to a component does not belong to its neighbours. */
 #manifest,#sessions{margin-top:16px}
 
-.panel + .panel{border-color:var(--rule);background:transparent}
+/* margin-top added 2026-09-06 01:21 EDT (pin 14): the view layer and the Manifest sat flush, so the recessive
+   panel read as the hero's footer rather than as the mechanism beneath it. One step of air says which is which. */
+.panel + .panel{border-color:var(--rule);background:transparent;margin-top:var(--s5)}
 .panel + .panel > .ph,.panel + .panel > .mtools{background:transparent}
 
 /* ── 10.2 TYPE: panel and dialog headings step up ── */
@@ -1947,9 +1949,9 @@ tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px
 /* ── 10.6 EDGE STATES: name what is missing, why, and the one action that fixes it ── */
 .estate{display:flex;flex-direction:column;align-items:center;gap:11px;padding:38px 22px;text-align:center}
 .estate .eicon{width:34px;height:34px;border-radius:var(--rad-3);display:grid;place-items:center;
-  background:var(--sunk);border:1px dashed var(--rule2);color:var(--ink3);font-size:15px}
-.estate h4{margin:0;font:600 14px/1.3 var(--ui);color:var(--ink2)}
-.estate p{margin:0;font-size:12.5px;color:var(--ink3);max-width:44ch;line-height:1.5}
+  background:var(--sunk);border:1px dashed var(--rule2);color:var(--ink3);font-size:var(--t-lg)}
+.estate h4{margin:0;font:600 var(--t-md)/1.3 var(--ui);color:var(--ink2)}
+.estate p{margin:0;font-size:var(--t-base);color:var(--ink3);max-width:44ch;line-height:1.5}
 .estate .chip{margin-top:3px}
 .estate.good .eicon{border-style:solid;border-color:rgba(61,220,151,.4);color:var(--ok)}
 .estate.good h4{color:var(--ok)}
@@ -1995,7 +1997,7 @@ tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px
   color:var(--on-accent);background:var(--c,var(--pn));border-radius:var(--rad-1);padding:3px 6px}
 .nschan{font:500 var(--t-xs)/1 var(--data);color:var(--ink3);background:var(--sunk);
   border:1px solid var(--rule);border-radius:var(--rad-1);padding:4px 7px;white-space:nowrap}
-.nsgrip{color:var(--ink3);letter-spacing:1px;font-size:11px;line-height:1;user-select:none}
+.nsgrip{color:var(--ink3);letter-spacing:1px;font-size:var(--t-sm);line-height:1;user-select:none}
 .nsempty{border:1px dashed var(--rule2);border-radius:var(--rad-2);padding:26px;text-align:center;
   color:var(--ink3);font-size:var(--t-sm)}
 
@@ -2402,7 +2404,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 .rvopwrap{position:relative}
 .rvopwrap .rvop{width:100%}
 .rvdrop{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:var(--rad-2);
-  background:none;border:1px solid transparent;color:var(--ink3);font-size:11px;line-height:1;
+  background:none;border:1px solid transparent;color:var(--ink3);font-size:var(--t-sm);line-height:1;
   cursor:pointer;opacity:0;transition:opacity var(--dur-1) var(--ease),color var(--dur-1) var(--ease),
   border-color var(--dur-1) var(--ease),background var(--dur-1) var(--ease)}
 .rvopwrap:hover .rvdrop,.rvdrop:focus-visible{opacity:1}
@@ -2422,7 +2424,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
   border-radius:var(--rad-2);padding:14px 16px}
 .hbanner.warn{border-left-color:var(--warn)}
 .hbanner .hbi{width:22px;height:22px;border-radius:var(--rad-round);display:grid;place-items:center;
-  background:rgba(61,220,151,.14);color:var(--ok);font-size:12px;line-height:1;flex:none}
+  background:rgba(61,220,151,.14);color:var(--ok);font-size:var(--t-sm);line-height:1;flex:none}
 .hbanner.warn .hbi{background:rgba(255,122,69,.14);color:var(--warn)}
 .hbanner h4{font:600 var(--t-md)/1.3 var(--ui);color:var(--ink);margin:0 0 3px}
 .hbanner p{font:400 var(--t-sm)/1.55 var(--ui);color:var(--ink2);margin:0}
@@ -2502,7 +2504,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 .attrow .atti{font-family:var(--ui)}
 .attrow .atts{font-family:var(--data);font-size:var(--t-xs)}
 .attx{width:26px;height:26px;border-radius:var(--rad-2);border:1px solid transparent;color:var(--ink3);
-  font-size:11px;line-height:1;transition:all var(--dur-1) var(--ease)}
+  font-size:var(--t-sm);line-height:1;transition:all var(--dur-1) var(--ease)}
 .attx:hover{color:var(--danger-ink);border-color:var(--danger-edge);background:rgba(255,107,107,.08)}
 .attx:focus-visible{outline:2px solid var(--staged);outline-offset:2px}
 .attfoot{display:flex;align-items:flex-start;gap:12px;margin-top:11px}
@@ -2550,14 +2552,14 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
   border:1px solid var(--rule);border-radius:var(--rad-1);padding:2px 6px;white-space:nowrap;
   max-width:150px;overflow:hidden;text-overflow:ellipsis}
 .attpeek em.more{color:var(--ink3)}
-.bdg{font-family:var(--data);font-size:8.5px;letter-spacing:.06em;font-weight:700;border-radius:var(--rad-1);
+.bdg{display:inline-block;font-family:var(--data);font-size:var(--t-micro);letter-spacing:.06em;font-weight:700;border-radius:var(--rad-1);
   padding:2px 5px;line-height:1.3;background:rgba(242,194,48,.14);color:var(--patch);
   border:1px solid rgba(242,194,48,.4)}
 .bdg.rank{background:rgba(64,154,208,.14);color:var(--info);border-color:rgba(64,154,208,.4)}
 .bdg.dmz{background:rgba(51,123,166,.16);color:#6FB6DD;border-color:rgba(51,123,166,.45)}
 .bdg.toxic{background:rgba(255,107,107,.14);color:var(--danger-ink);border-color:var(--danger-edge)}
 .bdg.bad{background:rgba(255,122,69,.14);color:var(--warn);border-color:rgba(255,122,69,.4)}
-.bc-att{font-family:var(--data);font-size:8.5px;color:var(--ink3);letter-spacing:.04em}
+.bc-att{font-family:var(--data);font-size:var(--t-micro);color:var(--ink3);letter-spacing:.04em}
 
 /* Bulk & export view. */
 .bulkview{padding:16px}
@@ -2888,7 +2890,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
  * governs (--c, set per column/cell), never invented. The eighth accent an earlier build
  * would have needed does not exist anywhere else in the product. */
 .mxgrp th{padding:0 0 5px;border:0}
-.mxgrp th span{display:block;font:600 9px/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;
+.mxgrp th span{display:block;font:600 var(--t-micro)/1 var(--ui);letter-spacing:.1em;text-transform:uppercase;
   color:var(--ink3);text-align:center;padding-bottom:5px;border-bottom:1px solid var(--rule2)}
 .mx .ownerrow td{background:rgba(255,255,255,.018)}
 .mx .ownerrow .mxav{background:var(--sunk);color:var(--ink2)}
@@ -2917,21 +2919,21 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 .mxlegend.inh{background:transparent;border:2px solid var(--ink2)}
 .scopes{display:flex;flex-direction:column;gap:1px;padding:12px 16px;background:var(--rule3)}
 .scope{display:grid;grid-template-columns:190px 1fr auto auto;gap:12px;align-items:center;
-  padding:9px 12px;background:var(--paper);border-left:3px solid var(--c)}
-.scope .nm{display:flex;flex-direction:column;gap:2px;font:600 12.5px/1.2 var(--ui);color:var(--ink)}
+  padding:9px 12px;background:var(--paper);border-left:2px solid var(--c)}
+.scope .nm{display:flex;flex-direction:column;gap:2px;font:600 var(--t-base)/1.2 var(--ui);color:var(--ink)}
 .scope .nm i{display:none}
-.scope .nm em{font:500 10px/1 var(--mono);font-style:normal;color:var(--ink3);letter-spacing:.02em}
+.scope .nm em{font:500 var(--t-xs)/1 var(--mono);font-style:normal;color:var(--ink3);letter-spacing:.02em}
 .scope .hs{display:flex;flex-wrap:wrap;gap:5px}
-.scope .rl{font-size:11px;color:var(--ink3);white-space:nowrap}
+.scope .rl{font-size:var(--t-sm);color:var(--ink3);white-space:nowrap}
 /* The flag sits INLINE at the end of the row, not on a full-width line of its own — a short
  * string stretched across 1400px reads as an empty bar and takes more visual weight than the
  * finding deserves. It wraps under only when the row itself collapses at narrow widths. */
-.scope .flag{justify-self:end;font:600 10.5px/1 var(--ui);letter-spacing:.03em;color:var(--warn);
+.scope .flag{justify-self:end;font:600 var(--t-xs)/1 var(--ui);letter-spacing:.03em;color:var(--warn);
   border:1px solid rgba(242,153,74,.4);border-radius:var(--rad-pill);padding:4px 9px;white-space:nowrap}
 .scope .flag.quiet{color:var(--ink3);font-weight:500}
 .scope.spof{background:linear-gradient(90deg,rgba(242,153,74,.07),transparent 60%)}
 .holder{display:inline-block;padding:2px 7px;border-radius:var(--rad-pill);border:1px solid var(--rule2);
-  background:var(--sunk);font:500 10.5px/1.5 var(--mono);color:var(--ink2)}
+  background:var(--sunk);font:500 var(--t-xs)/1.5 var(--mono);color:var(--ink2)}
 .holder.owner{border-color:var(--rule);color:var(--ink3)}
 .tokgrid{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
 .tokgrid .chip.inh{opacity:.72;border-style:dashed}
@@ -2946,7 +2948,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
    on the one card whose whole job is to be noticed. It is not a disabled control, so no exemption applies. */
 .nscard.over{border-color:color-mix(in srgb,var(--staged) 62%,transparent)}
 .nspin.warn{background:rgba(242,153,74,.14);border-color:rgba(242,153,74,.4);color:var(--warn-ink)}
-.callout{margin:0;padding:12px 16px;font-size:12.5px;line-height:1.55;color:var(--ink2);
+.callout{margin:0;padding:12px 16px;font-size:var(--t-base);line-height:1.55;color:var(--ink2);
   border-left:3px solid var(--warn);background:rgba(242,153,74,.05)}
 .callout b{color:var(--ink)}
 
@@ -2979,8 +2981,8 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
  * zero STAYS ON SCREEN with its reason. A panel that only shows problems cannot tell you
  * what it is watching, so "clean" has to be a visible state rather than an absence. */
 .repwrap{padding:14px 16px}
-.rephead{font-size:12.5px;color:var(--ink2);line-height:1.55;padding-bottom:12px;border-bottom:1px solid var(--rule3)}
-.rephead b{color:var(--ink);font-size:15px}
+.rephead{font-size:var(--t-base);color:var(--ink2);line-height:1.55;padding-bottom:12px;border-bottom:1px solid var(--rule3)}
+.rephead b{color:var(--ink);font-size:var(--t-lg)}
 .reps{margin:16px 0 9px;font:600 var(--t-micro)/1 var(--ui);letter-spacing:var(--tr-micro);
   text-transform:uppercase;color:var(--ink3)}
 .repgrp{border:1px solid var(--rule2);border-radius:var(--rad-2);padding:11px 13px;margin-bottom:9px;background:var(--sunk)}
@@ -2988,10 +2990,10 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 .reph{display:flex;align-items:baseline;gap:9px}
 .reph .rt-n{font:700 17px/1 var(--mono);color:var(--warn);min-width:20px}
 .repgrp.clean .reph .rt-n{color:var(--ink3)}
-.reph .rt-l{font:600 13px/1.2 var(--ui);color:var(--ink)}
-.reph .rt-k{margin-left:auto;font:600 9.5px/1 var(--ui);letter-spacing:.09em;text-transform:uppercase;
+.reph .rt-l{font:600 var(--t-base)/1.2 var(--ui);color:var(--ink)}
+.reph .rt-k{margin-left:auto;font:600 var(--t-micro)/1 var(--ui);letter-spacing:.09em;text-transform:uppercase;
   color:var(--ink3);border:1px solid var(--rule2);border-radius:var(--rad-pill);padding:3px 7px}
-.repnote{margin:6px 0 0;font-size:11.5px;line-height:1.5;color:var(--ink3);max-width:88ch}
+.repnote{margin:6px 0 0;font-size:var(--t-sm);line-height:1.5;color:var(--ink3);max-width:88ch}
 /* 🔴 SCOPED TO `button`, NOT `li`. These five rules were ported as `.rephits li` while
    track.js's Repairs renders `<div class="rephits"><button>` — so every finding row lost its
    padding, its hover and the type contrast between the item name and the reason, and the
@@ -3003,7 +3005,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
    migration put all of it on the button and defined no row rule at all. The row then had no ground and
    the button had two paddings — 41px against the design's 29, on every finding — and it read as a
    spacing choice rather than as four rules pointing at the wrong element. The row rules are above. */
-.repclean{margin:8px 0 0;font-size:11.5px;color:var(--ink3)}
+.repclean{margin:8px 0 0;font-size:var(--t-sm);color:var(--ink3)}
 
 
 /* ═══════════════ ACCOUNT PANEL — the real Discord profile, not an approximation ═══════════════
@@ -3055,7 +3057,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
  * three overlapping playlists is three legible rows instead of three overlaid ones. */
 .lane[data-rows="1"] .tk .bar{height:22px}
 .lane:not([data-rows="1"]) .tk .bar{border-radius:var(--rad-1)}
-.lane:not([data-rows="1"]) .tk .bar .bl{font-size:10.5px}
+.lane:not([data-rows="1"]) .tk .bar .bl{font-size:var(--t-xs)}
 
 /* The point cluster. Reads as a count, not as a marker — a diamond would claim to be one item.
    ⚠️ `.pt.hid` is NOT redeclared here — it is defined once, in the `.mark` vocabulary block below,
@@ -3088,7 +3090,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
      reads "DMZ", so the colour on the glyphs was a redundant second copy of the identity —
      and it was the redundant copy that failed. Same move as the ring→rule correction in
      §16.19: a mark may point at content without colouring it. Now 14.3:1. */
-  font:600 9.5px/1 var(--data);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);white-space:nowrap}
+  font:600 var(--t-micro)/1 var(--data);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);white-space:nowrap}
 .dpin.l{left:4px}.dpin.r{right:4px}
 .dpin em{font-style:normal;color:var(--ink3);letter-spacing:0;text-transform:none}
 
@@ -3121,22 +3123,22 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 .nw-types{display:flex;flex-wrap:wrap;gap:7px}
 .nw-chip{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:var(--rad-pill);
   border:1px solid var(--rule);background:var(--sunk);color:var(--ink2);cursor:pointer;
-  font:500 12.5px/1 var(--ui);transition:border-color .14s,color .14s,background .14s}
-.nw-chip em{font:400 10.5px/1 var(--data);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-style:normal}
+  font:500 var(--t-base)/1 var(--ui);transition:border-color .14s,color .14s,background .14s}
+.nw-chip em{font:400 var(--t-xs)/1 var(--data);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-style:normal}
 .nw-chip .nw-dot{width:9px;height:9px;border-radius:var(--rad-1);background:var(--c);flex:none}
 .nw-chip:hover{border-color:var(--rule2);color:var(--ink)}
 .nw-chip.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent);color:var(--ink)}
 .nw-chip.on em{color:var(--ink2)}
-.nw-l{display:block;font:600 10.5px/1 var(--data);letter-spacing:.12em;text-transform:uppercase;
+.nw-l{display:block;font:600 var(--t-xs)/1 var(--data);letter-spacing:.12em;text-transform:uppercase;
   color:var(--ink3);margin:0 0 6px}
 .nw-i{width:100%;min-height:38px;padding:8px 11px;border-radius:var(--rad-2);border:1px solid var(--rule);
-  background:var(--sunk);color:var(--ink);font:400 13.5px/1.3 var(--ui)}
+  background:var(--sunk);color:var(--ink);font:400 var(--t-md)/1.3 var(--ui)}
 .nw-i:focus-visible{outline:2px solid var(--focus,#5FD4E8);outline-offset:1px;border-color:transparent}
 .nw-dates{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:13px}
 .nw-dates.one{grid-template-columns:1fr;max-width:260px}
-.nw-note,.nw-hint{margin:9px 0 0;font-size:12.5px;color:var(--ink3);line-height:1.45}
+.nw-note,.nw-hint{margin:9px 0 0;font-size:var(--t-base);color:var(--ink3);line-height:1.45}
 .nw-hint{margin:2px 0 0}
-.nw-why{font-size:12px;color:var(--ink3);margin-right:auto;align-self:center}
+.nw-why{font-size:var(--t-sm);color:var(--ink3);margin-right:auto;align-self:center}
 .nw-prev{min-height:76px}
 @media (max-width:560px){.nw-dates{grid-template-columns:1fr}}
 
@@ -3154,7 +3156,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 /* ── .pill — ONE interactive chip. Every filter, type selector and inline action. ── */
 .pill{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:var(--rad-pill);
   border:1px solid var(--rule);background:var(--sunk);color:var(--ink2);cursor:pointer;
-  font:500 12.5px/1 var(--ui);white-space:nowrap;
+  font:500 var(--t-base)/1 var(--ui);white-space:nowrap;
   transition:border-color .14s,color .14s,background .14s,transform .14s}
 .pill:hover{border-color:var(--rule2);color:var(--ink);transform:translateY(-1px)}
 .pill:active{transform:none}
@@ -3163,15 +3165,15 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 /* --ink3, not --ink4: this is 10px uppercase TEXT, and #5C6A75 scores 3.02:1 on --paper. It was declared
    TWICE — here and again in the orphaned stand-down block deleted above — so the failing value won on source
    order. Corrected 2026-09-04 21:54 EDT, applying the ledger's standing --ink4 rule rather than making a new call. */
-.pill .sub{font:400 10px/1 var(--data);letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
-.pill kbd{font:500 10.5px/1 var(--ui);letter-spacing:.04em;color:var(--ink3);
+.pill .sub{font:400 var(--t-xs)/1 var(--data);letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
+.pill kbd{font:500 var(--t-xs)/1 var(--ui);letter-spacing:.04em;color:var(--ink3);
   border:1px solid var(--rule2);border-radius:var(--rad-2);padding:3px 6px}
 .pill.on{border-color:var(--c,var(--patch));background:color-mix(in srgb,var(--c,var(--patch)) 13%,transparent);color:var(--ink)}
 .pill.on .sub{color:var(--ink3)}
 .pill.lead{border-color:var(--patch);background:color-mix(in srgb,var(--patch) 14%,transparent);color:var(--ink);
-  font-weight:600;font-size:13px;padding:10px 15px}
+  font-weight:600;font-size:var(--t-base);padding:10px 15px}
 .pill.lead:hover{background:color-mix(in srgb,var(--patch) 24%,transparent)}
-.pill.sm{padding:5px 10px;font-size:11.5px;gap:5px}
+.pill.sm{padding:5px 10px;font-size:var(--t-sm);gap:5px}
 .pill[disabled]{opacity:.45;cursor:default;transform:none}
 /* 🔴 `[hidden]` IS A UA RULE AT SPECIFICITY 0,0,1 AND ANY CLASS BEATS IT. `.pill` sets
    `display:inline-flex` at 0,1,0, so a `<button class="pill" hidden>` stays on screen — which
@@ -3208,7 +3210,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 .mark.stack::before{content:"";position:absolute;inset:0;border-radius:var(--rad-1);background:var(--c);
   opacity:.4;transform:translate(4px,-4px)}
 .mark.stack .n{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-45deg);
-  font:700 9px/1 var(--data);color:var(--on-accent,#08131A)}
+  font:700 var(--t-micro)/1 var(--data);color:var(--on-accent,#08131A)}
 .mark.tier-mythic{box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 55%,transparent),0 0 10px color-mix(in srgb,var(--c) 45%,transparent)}
 
 
@@ -3227,7 +3229,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
     color-mix(in srgb,var(--c,var(--rule)) 5%,var(--desk)));
   border-right:1px solid var(--rule);align-self:stretch;
   background:none;border:0;cursor:pointer;color:var(--ink3);text-align:left;
-  font:700 10px/1.15 var(--data);letter-spacing:.1em;text-transform:uppercase}
+  font:700 var(--t-xs)/1.15 var(--data);letter-spacing:.1em;text-transform:uppercase}
 .lnh:hover{color:var(--ink2)}
 .lnh:focus-visible{outline:2px solid var(--patch);outline-offset:-2px;border-radius:var(--rad-2)}
 /* The lane disclosure is a drawn .pm now - see DISCLOSURE, DRAWN NOT TYPED. */
@@ -3238,7 +3240,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
    never a reason to cut it, and a truncated lane name is the exact defect widening this gutter
    was meant to fix. */
 .lnh-t{flex:1 1 auto;min-width:0;white-space:normal;line-height:1.2;word-break:break-word}
-.lnh-n{flex:none;font:500 9.5px/1 var(--data);letter-spacing:.04em;color:var(--ink3);
+.lnh-n{flex:none;font:500 var(--t-micro)/1 var(--data);letter-spacing:.04em;color:var(--ink3);
   font-variant-numeric:tabular-nums}
 .lnh:hover .lnh-n{color:var(--ink3)}
 .lane.lnc .lnh{color:var(--ink3)}
@@ -3255,7 +3257,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 .lsum.load{display:flex;align-items:flex-end}
 .lsum.load i{position:absolute;bottom:5px;width:2px;background:var(--c);border-radius:var(--rad-1)}
 .lsum.load b{position:absolute;right:6px;top:50%;transform:translateY(-50%);
-  font:600 9.5px/1 var(--data);letter-spacing:.06em;color:var(--ink3)}
+  font:600 var(--t-micro)/1 var(--data);letter-spacing:.06em;color:var(--ink3)}
 
 /* ── marks carry the fact that matters for their lane ── */
 .pt.hid{display:none}                       /* a cluster REPLACES its members; it never sits on them */
@@ -3271,7 +3273,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 .ptc.mark.stack::before{content:"";position:absolute;inset:0;border-radius:var(--rad-1);background:var(--c);
   opacity:.42;transform:translate(4px,-4px);z-index:-1}
 .ptc.mark.stack .n{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-45deg);
-  font:700 9px/1 var(--data);color:var(--on-accent)}
+  font:700 var(--t-micro)/1 var(--data);color:var(--on-accent)}
 .ptc.mark.stack.same::after{content:"";position:absolute;inset:-3px;border-radius:var(--rad-2);
   box-shadow:0 0 0 1.5px color-mix(in srgb,var(--c) 45%,transparent)}
 .ptc.mark.stack:hover,.ptc.mark.stack:focus-visible{
@@ -3322,7 +3324,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 
 /* ── the ghost the composer draws on the REAL Track ── */
 .tghost.cmp{border-color:var(--patch);background:color-mix(in srgb,var(--patch) 12%,transparent);
-  color:var(--patch);font:600 11px/1 var(--ui);padding:0 8px;z-index:5;
+  color:var(--patch);font:600 var(--t-sm)/1 var(--ui);padding:0 8px;z-index:5;
   display:flex;align-items:center;overflow:hidden;white-space:nowrap}
 .tghost.cmp.pt{width:15px;height:15px;padding:0;border-radius:var(--rad-1);transform:translateY(-50%) rotate(45deg);
   margin-left:-7.5px;color:transparent}
@@ -3347,12 +3349,12 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
   background:var(--ink4);transform:rotate(45deg)}
 .cmdbar:focus-within .cb-mag,.cmdbar:focus-within .cb-mag::after{border-color:var(--patch);background:var(--patch)}
 .cmdbar:focus-within .cb-mag{background:none}
-.cb-in{flex:1 1 auto;min-width:0;background:none;border:0;color:var(--ink);font:400 12.5px/1 var(--ui)}
+.cb-in{flex:1 1 auto;min-width:0;background:none;border:0;color:var(--ink);font:400 var(--t-base)/1 var(--ui)}
 .cb-in::placeholder{color:var(--ink3)}
 .cb-in:focus{outline:none}
 /* ⌘ is not in JetBrains Mono, so `--data` rendered it as a tofu box that read as "MK". The
    glyph belongs to the system UI stack, which has it. */
-.cmdbar kbd{flex:none;font:500 11px/1 var(--ui);letter-spacing:.04em;color:var(--ink3);
+.cmdbar kbd{flex:none;font:500 var(--t-sm)/1 var(--ui);letter-spacing:.04em;color:var(--ink3);
   border:1px solid var(--rule2);border-radius:var(--rad-2);padding:4px 6px}
 .cmdbar:focus-within kbd{opacity:0}
 .cb-drop{position:absolute;left:0;right:0;top:calc(100% + 7px);background:var(--raised);
@@ -3361,15 +3363,15 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 .cb-drop[hidden]{display:none}
 .cb-drop .plist{max-height:min(56vh,440px)}
 .cb-drop .pitem{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;
-  border-radius:var(--rad-2);padding:9px 10px;color:var(--ink2);font:500 12.5px/1 var(--ui);cursor:pointer;text-align:left}
+  border-radius:var(--rad-2);padding:9px 10px;color:var(--ink2);font:500 var(--t-base)/1 var(--ui);cursor:pointer;text-align:left}
 .cb-drop .pitem i{width:7px;height:7px;border-radius:var(--rad-1);background:var(--c,var(--ink3));flex:none;transform:rotate(45deg)}
 .cb-drop .pitem:hover,.cb-drop .pitem.sel{background:var(--hi);color:var(--ink)}
-.cb-drop .pnone{margin:0;padding:14px 12px;font-size:12.5px;color:var(--ink3)}
+.cb-drop .pnone{margin:0;padding:14px 12px;font-size:var(--t-base);color:var(--ink3)}
 
 /* Sign out, in the bar. It still confirms; finding it is not the part that should be hard. */
 .hdr-out{flex:none;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 11px;
   border-radius:var(--rad-2);border:1px solid transparent;background:none;color:var(--ink3);cursor:pointer;
-  font:500 12px/1 var(--ui)}
+  font:500 var(--t-sm)/1 var(--ui)}
 .hdr-out svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5;
   stroke-linecap:round;stroke-linejoin:round}
 .hdr-out:hover{background:color-mix(in srgb,var(--del) 12%,transparent);border-color:color-mix(in srgb,var(--del) 40%,transparent);color:var(--del)}
@@ -3420,12 +3422,12 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 .att-row:only-child{border-radius:var(--rad-3)}
 .att-row + .att-row{border-top:0}
 .att-row:hover{background:var(--hi)}
-.att-i{font:600 12px/1 var(--data);letter-spacing:.06em;color:var(--ink3);text-align:right;
+.att-i{font:600 var(--t-sm)/1 var(--data);letter-spacing:.06em;color:var(--ink3);text-align:right;
   font-variant-numeric:tabular-nums}
 .att-b{align-self:stretch;border-radius:var(--rad-1);background:var(--sev,var(--ink4))}
 .att-x{min-width:0;display:flex;flex-direction:column;gap:3px}
-.att-x b{font:600 14.5px/1.35 var(--ui);color:var(--ink);font-weight:600}
-.att-x em{font:500 10px/1 var(--data);letter-spacing:.13em;text-transform:uppercase;
+.att-x b{font:600 var(--t-md)/1.35 var(--ui);color:var(--ink);font-weight:600}
+.att-x em{font:500 var(--t-xs)/1 var(--data);letter-spacing:.13em;text-transform:uppercase;
   color:var(--ink3);font-style:normal}
 /* The severity ladder is a COLOUR RAMP, not five identical alarms. */
 .att-row.s-conflict{--sev:var(--warn)}
@@ -3449,13 +3451,9 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 /* ══════════ ARMORY — a tier board that reads as tiered ══════════
    Best · T3 · T4 · T5 · unranked had identical visual weight, so the one thing the board exists
    to express — the ranking — was the one thing it did not show. */
-.trow.t-best{background:linear-gradient(90deg,color-mix(in srgb,var(--patch) 8%,transparent),transparent)}
-.trow.t-best .trow-k{font-size:20px;color:var(--patch)}
-.trow.t-top3 .trow-k{font-size:17px;color:var(--ink)}
-.trow.t-top4 .trow-k{font-size:15px;color:var(--ink2)}
-.trow.t-top5 .trow-k{font-size:14px;color:var(--ink3)}
-.trow.t-unranked{opacity:.72}
-.trow.t-unranked .trow-k{font-size:13px;color:var(--ink3)}   /* --ink4 is non-text: measured 3.46:1 */
+/* The `.trow.t-*` grading (20/17/15/14/13px marks, a dimmed lower tier) was deleted 2026-09-06 01:42 EDT: the rack is a
+   category accordion now (D5) and no tier row exists, so the tier rides on the weapon group — `.bgrp.t-*`, at the
+   foot of this file. RANK_KEY's values are still class names; they just land on a different element. */
 /* the card class is `.bchip`, not `.bcard` — checked against the markup rather than assumed */
 /* 🔴 AN OPACITY DIM OVER --ink3 TEXT COSTS AA, AND --ink3 HAS 0.31 OF HEADROOM — measured 2026-09-04 22:54 EDT.
    `--ink3` on `--raised` is 4.81:1, which DESIGN.md records as deliberate (solving for four AA-passing ink tones
@@ -3463,8 +3461,6 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
    Armory's resting Board at 4.42:1 and the .86 case at 3.69:1. Hover restored it, and hover is not an
    accessibility remedy. The dim moves to the chip's BORDER and BACKGROUND, which carry no text and are where a
    depth cue belongs; the label stays at full opacity. A 6% text fade was never legible as a cue anyway. */
-.trow.t-top4,.trow.t-top5{--bc-dim:.94}
-.trow.t-unranked{--bc-dim:.86}
 .trow .bchip{border-color:color-mix(in srgb,var(--rule2) calc(var(--bc-dim,1) * 100%),transparent);
   background-color:color-mix(in srgb,var(--raised) calc(var(--bc-dim,1) * 100%),transparent)}
 .trow:hover .bchip{opacity:1}
@@ -3479,7 +3475,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
    group's --sunk-with-no-edge, because the single was the better-looking of the two and it is
    the one a reader sees most often. */
 .bgrp{display:flex;flex-direction:column;gap:0;border:1px solid var(--rule2);
-  border-left:3px solid var(--c);border-radius:var(--rad-2);overflow:hidden;background:var(--raised);
+  border-left:2px solid var(--c);border-radius:var(--rad-2);overflow:hidden;background:var(--raised);
   transition:transform .13s,box-shadow .13s,border-color .13s}
 .bgrp:hover{border-color:var(--c);border-left-color:var(--c);transform:translateY(-2px);
   box-shadow:0 8px 18px -10px rgba(0,0,0,.9)}
@@ -3496,13 +3492,13 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
    same height and the row's cards align along their divider rather than by 3px each. Measured
    before: 48px and 51px headers side by side, which reads as sloppy long before it reads as
    "that name is longer". */
-.bgrp-w b{font:600 12.5px/1.25 var(--ui);color:var(--ink);min-width:0;
+.bgrp-w b{font:600 var(--t-base)/1.25 var(--ui);color:var(--ink);min-width:0;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
   overflow-wrap:anywhere;min-height:calc(2 * 1.25em)}
 .bgrp-w i{width:8px;height:8px;border-radius:var(--rad-1);background:var(--c);flex:none;
   transform:rotate(45deg);margin-top:4px}
 .bgrp-m{display:flex;align-items:center;gap:7px;padding-left:15px}
-.bgrp-m .bgrp-n{font:500 10px/1 var(--data);letter-spacing:.08em;color:var(--ink3);white-space:nowrap}
+.bgrp-m .bgrp-n{font:500 var(--t-xs)/1 var(--data);letter-spacing:.08em;color:var(--ink3);white-space:nowrap}
 .bgrp .bchip{border:0;border-radius:0;background:transparent;min-width:0;transform:none;box-shadow:none}
 .bgrp .bchip:hover{transform:none;box-shadow:none;background:color-mix(in srgb,var(--c) 9%,transparent)}
 .bgrp .bchip + .bchip{border-top:1px solid var(--rule3)}
@@ -3513,8 +3509,8 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
    one row, equal weight, because that is now exactly what they are: five ways in. */
 .hgrid.quiet{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
 .hgrid.quiet .hcard{padding:13px 14px;gap:7px}
-.hgrid.quiet .hq{font-size:11.5px;line-height:1.4}
-.hgrid.quiet .hf b{font-size:19px}
+.hgrid.quiet .hq{font-size:var(--t-sm);line-height:1.4}
+.hgrid.quiet .hf b{font-size:var(--t-xl)}
 @media (max-width:1180px){.hgrid.quiet{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:720px){.hgrid.quiet{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:460px){.hgrid.quiet{grid-template-columns:1fr}}
@@ -3555,13 +3551,13 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 .trow-h{align-self:start;display:grid;grid-template-columns:18px 1fr auto;
   grid-template-areas:"k t n" ". note note";align-items:center;column-gap:9px;row-gap:4px;
   padding:10px 12px;border-bottom:1px solid var(--rule3)}
-.trow-k{grid-area:k;font:700 14px/1 var(--data);text-align:center;width:auto;align-self:center;
+.trow-k{grid-area:k;font:700 var(--t-md)/1 var(--data);text-align:center;width:auto;align-self:center;
   color:var(--ink3)}
 .t-best .trow-k{color:var(--patch)}
-.trow-t{grid-area:t;margin-top:0;font:600 13px/1.2 var(--ui);color:var(--ink)}
-.trow-n{grid-area:n;justify-self:end;align-self:center;font-family:var(--data);font-size:10px;
+.trow-t{grid-area:t;margin-top:0;font:600 var(--t-base)/1.2 var(--ui);color:var(--ink)}
+.trow-n{grid-area:n;justify-self:end;align-self:center;font-family:var(--data);font-size:var(--t-xs);
   color:var(--ink3);border:1px solid var(--rule);border-radius:var(--rad-pill);padding:3px 8px;line-height:1}
-.trow-note{grid-area:note;margin-top:0;font-size:11.5px;line-height:1.45;color:var(--ink3)}
+.trow-note{grid-area:note;margin-top:0;font-size:var(--t-sm);line-height:1.45;color:var(--ink3)}
 /* 🔴 MASONRY, NOT A WRAPPING FLEX ROW. At the real 133-build scale the cards are wildly
    different heights — BAL-27 carries five builds and renders ~590px tall, MACHINE PISTOL
    carries one and renders ~120px — and a wrapping flex row aligns every card in a line to the
@@ -3633,7 +3629,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 /* the two column groups ran into each other; a group needs a gutter, not just a caption */
 .mx thead .grp + .grp,.mxgrp + .mxgrp{padding-left:14px}
 
-.klg.spofk{display:inline-flex;align-items:center;gap:7px;margin-left:16px;color:var(--ink3);font-size:12.5px}
+.klg.spofk{display:inline-flex;align-items:center;gap:7px;margin-left:16px;color:var(--ink3);font-size:var(--t-base)}
 .klg.spofk i{width:22px;height:7px;border-radius:var(--rad-pill);background:var(--ink4);
   box-shadow:0 0 0 2px var(--warn);flex:none}
 .klg.spofk b{color:var(--warn);font-weight:600}
@@ -3674,7 +3670,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
    which lived there. So ADD returns to the right-aligned placement every other realm uses, and to the
    one the mockup itself draws. A sibling selector for an arrangement that no longer exists does not
    error; it silently stops applying, which is why it is deleted rather than left to rot. */
-.mh-add-k{font:600 10px/1 var(--data);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);
+.mh-add-k{font:600 var(--t-xs)/1 var(--data);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);
   margin-right:3px}
 /* ══ THE CREATE FAMILY — the shape Harkirat kept ══════════════════════════════
    Harkirat, 2026-08-24, on the six Add pills: *"while yes these buttons are pretty and i
@@ -3704,12 +3700,12 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
    six and the diamond carries the whole per-type job, which is what the comment claimed all
    along. Colour arrives on HOVER, where it confirms the choice you are about to make instead of
    competing for attention with five others you are not. */
-.pill.mh-t{padding:10px 15px;font-weight:600;font-size:13px;color:var(--ink);
+.pill.mh-t{padding:10px 15px;font-weight:600;font-size:var(--t-base);color:var(--ink);
   border-color:var(--rule2);background:var(--sunk)}
 .pill.mh-t:hover{border-color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent)}
 .pill.mh-t:focus-visible{border-color:var(--c)}
 .pill.mh-t .dot{width:9px;height:9px;border-radius:var(--rad-1);background:var(--c);flex:none;transform:rotate(45deg)}
-.mh-k{font:500 10px/1 var(--ui);color:var(--ink3);border:1px solid var(--rule2);border-radius:var(--rad-2);
+.mh-k{font:500 var(--t-xs)/1 var(--ui);color:var(--ink3);border:1px solid var(--rule2);border-radius:var(--rad-2);
   padding:4px 6px;margin-left:2px;line-height:1;height:15px;display:inline-flex;align-items:center}
 /* 🔴 THE KEYBOARD HINT WAS GROWING ITS BUTTON. Measured on Armory: "New MP build" carried an
    .mh-k chip and rendered 170.1x40.5 while "New DMZ build" beside it rendered 148x35 - two
@@ -3793,20 +3789,20 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
   padding:11px 12px 11px 14px;border-radius:var(--rad-3);background:var(--raised);
   border:1px solid var(--rule2);box-shadow:0 20px 46px -18px #000,0 1px 0 0 #ffffff08 inset}
 /* The count reads as a figure, not a label — it is the one number the bar is about. */
-.selbar-n{font:600 19px/1 var(--data);color:var(--staged);letter-spacing:-.02em;
+.selbar-n{font:600 var(--t-xl)/1 var(--data);color:var(--staged);letter-spacing:-.02em;
   min-width:30px;text-align:center;flex:none}
 .selbar-t{min-width:0;display:flex;flex-direction:column;gap:2px}
-.selbar-t b{font:600 13px/1 var(--ui);color:var(--ink)}
-.selbar-t span{font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.selbar-t b{font:600 var(--t-base)/1 var(--ui);color:var(--ink)}
+.selbar-t span{font-size:var(--t-sm);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* The badge answers "can I take this back?" at the moment of deciding. */
-.selbar-rev{font:600 9.5px/1 var(--data);letter-spacing:.13em;text-transform:uppercase;
+.selbar-rev{font:600 var(--t-micro)/1 var(--data);letter-spacing:.13em;text-transform:uppercase;
   padding:6px 10px;border-radius:var(--rad-pill);border:1px solid var(--rule2);color:var(--ink3);white-space:nowrap;flex:none}
 .selbar-rev.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 38%,transparent);
   background:color-mix(in srgb,var(--ok) 8%,transparent)}
 .selbar-rev.gate{color:var(--danger-ink);border-color:var(--danger-edge);
   background:color-mix(in srgb,var(--del) 11%,transparent)}
 .selbar-a{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.selbar-x{background:none;border:none;color:var(--ink3);font:600 11.5px/1 var(--ui);
+.selbar-x{background:none;border:none;color:var(--ink3);font:600 var(--t-sm)/1 var(--ui);
   padding:8px 6px;cursor:pointer;min-height:var(--tap);flex:none}
 .selbar-x:hover{color:var(--ink)}
 .selbar-x:focus-visible{outline:2px solid var(--patch);outline-offset:2px;border-radius:var(--rad-2)}
@@ -3823,13 +3819,16 @@ body.has-selbar .tray{transform:translateY(-78px);transition:transform var(--dur
    else to be stated — and that made the colgroup's own rule ("widths are derived from each
    column's role") false for exactly one column. `.c-ra` now names it like the rest; these two
    cells keep the alignment and the padding, which are about the CELL and not the column. */
-.mtable td.ra,.mtable th.ra{width:40px;padding-right:8px;text-align:right}
-.mtable col.c-ra{width:40px}
+/* 52/12, not 40/8 (2026-09-06 01:21 EDT, pin 22): "tiny, at literally the edge of the manifest". The control is 32px; a 40px
+   column with 8px of padding put its ring 0px from the table edge. 12px in, and the column wide enough that the
+   ring never touches the rule. */
+.mtable td.ra,.mtable th.ra{width:52px;padding-right:12px;text-align:right}
+.mtable col.c-ra{width:52px}
 /* 32px, not 28 — 2026-09-04 22:43 EDT. `--tap:44px` is honoured by nine rules and bypassed here, on the one control in
    Access's ACTION column that destroys. `.mxcell` is also under the floor and has a written exception (a 44px
    cell in a twelve-column matrix fits on no laptop); this had none. 32 is what the row height allows without
    reflowing the table, and it is a floor rather than a target. */
-.rmv{width:32px;height:32px;border-radius:var(--rad-2);border:1px solid transparent;background:none;
+.rmv{width:32px;height:32px;border-radius:var(--rad-2);border:1px solid var(--rule);background:none;
   color:var(--ink3);display:inline-grid;place-items:center;cursor:pointer;
   transition:color var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease),background var(--dur-1) var(--ease)}
 .rmv svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;
@@ -3858,21 +3857,21 @@ body.has-selbar .tray{transform:translateY(-78px);transition:transform var(--dur
   .ow::before{transition:opacity var(--dur-2) var(--ease)}
 }
 .ow-h{padding:14px 16px 12px;border-bottom:1px solid var(--rule)}
-.ow-k{font:700 9.5px/1 var(--data);letter-spacing:.17em;color:var(--danger-ink);
+.ow-k{font:700 var(--t-micro)/1 var(--data);letter-spacing:.17em;color:var(--danger-ink);
   display:inline-block;padding:5px 8px;border-radius:var(--rad-2);
   background:color-mix(in srgb,var(--del) 15%,transparent);
   border:1px solid var(--danger-edge)}
-.ow-h h3{font:600 15px/1.2 var(--ui);margin:8px 0 5px;color:var(--ink)}
-.ow-h p{font-size:12px;line-height:1.5;color:var(--ink3);max-width:64ch;margin:0}
+.ow-h h3{font:600 var(--t-lg)/1.2 var(--ui);margin:8px 0 5px;color:var(--ink)}
+.ow-h p{font-size:var(--t-sm);line-height:1.5;color:var(--ink3);max-width:64ch;margin:0}
 .ow-l{list-style:none;margin:0;padding:0}
 .ow-i{display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid var(--rule3);flex-wrap:wrap}
 .ow-i:first-child{border-top:none}
 .ow-t{flex:1 1 220px;min-width:0}
-.ow-t b{font:600 13px/1.35 var(--ui);color:var(--ink);display:block}
-.ow-t span{font-size:11.5px;color:var(--ink3)}
-.ow-c{font:500 12px/1 var(--data);color:var(--ink2);white-space:nowrap;
+.ow-t b{font:600 var(--t-base)/1.35 var(--ui);color:var(--ink);display:block}
+.ow-t span{font-size:var(--t-sm);color:var(--ink3)}
+.ow-c{font:500 var(--t-sm)/1 var(--data);color:var(--ink2);white-space:nowrap;
   text-align:right;min-width:88px}
-.ow-c em{font-style:normal;color:var(--ink3);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+.ow-c em{font-style:normal;color:var(--ink3);font-size:var(--t-xs);letter-spacing:.08em;text-transform:uppercase}
 /* 🔴 SEVEN DESTRUCTIVE BUTTONS ENDED AT SEVEN DIFFERENT x POSITIONS — measured at 1282: 1094, 1094, 1122,
    1103, 1139, 1106, 1265. A 171px ragged edge down the one column on the page where every row is an
    irreversible operation. The mockup's rows all read "Export first →", so they aligned by accident of
@@ -3896,17 +3895,17 @@ body.has-selbar .tray{transform:translateY(-78px);transition:transform var(--dur
 .exs-i.done{border-color:color-mix(in srgb,var(--ok) 42%,transparent)}
 .exs-i.done .exs-t b::after{content:" ✓";color:var(--ok)}
 .exs-t{flex:1 1 200px;min-width:0}
-.exs-t b{font:600 13px/1.35 var(--ui);color:var(--ink);display:block}
-.exs-t span{font-size:11.5px;color:var(--ink3)}
-.exs-c{font:500 12px/1 var(--data);color:var(--ink2);white-space:nowrap}
-.exs-c em{font-style:normal;color:var(--ink3);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+.exs-t b{font:600 var(--t-base)/1.35 var(--ui);color:var(--ink);display:block}
+.exs-t span{font-size:var(--t-sm);color:var(--ink3)}
+.exs-c{font:500 var(--t-sm)/1 var(--data);color:var(--ink2);white-space:nowrap}
+.exs-c em{font-style:normal;color:var(--ink3);font-size:var(--t-xs);letter-spacing:.08em;text-transform:uppercase}
 
 /* ── THE TYPED CONFIRM ── tier 3 only. Asking for a typed word on a reversible change
    teaches people to type it without reading, which is worse than not asking. */
-.tc-l{display:block;margin:16px 0 6px;font-size:11.5px;color:var(--ink2)}
+.tc-l{display:block;margin:16px 0 6px;font-size:var(--t-sm);color:var(--ink2)}
 .tc-l b{font-family:var(--data);color:var(--danger-ink);letter-spacing:.06em}
 .tc-in{width:100%;background:var(--sunk);border:1px solid var(--rule2);border-radius:var(--rad-2);
-  color:var(--ink);font:500 14px/1 var(--data);letter-spacing:.1em;padding:11px 12px;min-height:var(--tap)}
+  color:var(--ink);font:500 var(--t-md)/1 var(--data);letter-spacing:.1em;padding:11px 12px;min-height:var(--tap)}
 .tc-in:focus{outline:2px solid var(--danger-ink);outline-offset:1px;border-color:var(--danger-edge)}
 .btn.dang[disabled]{opacity:.4;cursor:default;filter:none}
 
@@ -3956,7 +3955,7 @@ body.has-selbar .tray{transform:translateY(-78px);transition:transform var(--dur
 @media (max-width:820px){.mh-take{margin-left:var(--edge);margin-right:auto}}
 .mh-take .mh-i{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;
   stroke-linecap:round;stroke-linejoin:round}
-.mh-take-n{font:400 11px/1 var(--data);letter-spacing:.05em;color:var(--ink3)}
+.mh-take-n{font:400 var(--t-sm)/1 var(--data);letter-spacing:.05em;color:var(--ink3)}
 
 /* ══ ACCESS: click-to-toggle ══════════════════════════════════════════════════
    The matrix cell was a role="img" span for the life of the package — it displayed the
@@ -3998,7 +3997,7 @@ body.has-selbar .tray{transform:translateY(-78px);transition:transform var(--dur
 /* The batched confirm groups its two halves rather than running one list of mixed signs —
    reading "granting 3 / revoking 1" is the thing that makes a batch safer than four clicks. */
 .acg{margin-top:14px}
-.acg-k{display:inline-block;font:700 9.5px/1 var(--data);letter-spacing:.14em;text-transform:uppercase;
+.acg-k{display:inline-block;font:700 var(--t-micro)/1 var(--data);letter-spacing:.14em;text-transform:uppercase;
   padding:5px 8px;border-radius:var(--rad-2);margin-bottom:7px}
 .acg-k.on{color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent);
   border:1px solid color-mix(in srgb,var(--ok) 38%,transparent)}
@@ -4049,7 +4048,7 @@ body.has-selbar .tray{transform:translateY(-78px);transition:transform var(--dur
 /* NOW's live readout. It sits UNDER the marker rather than beside the NOW label above it, so
    the two facts (what this line is, what time it is) stack instead of colliding with the
    ruler's own dates. Tabular figures, or the minute changing shifts the whole string. */
-.nowt{position:absolute;top:-9px;left:6px;font:500 9px/1 var(--data);letter-spacing:.06em;
+.nowt{position:absolute;top:-9px;left:6px;font:500 var(--t-micro)/1 var(--data);letter-spacing:.06em;
   color:var(--patch);opacity:.85;white-space:nowrap;font-variant-numeric:tabular-nums;
   pointer-events:none}
 
@@ -4090,22 +4089,22 @@ tr.rowin > td{background:color-mix(in srgb,var(--staged) 9%,transparent)}
    The old form was five fields because it was Discord's modal shape reproduced in a browser —
    and Discord's five-field cap is the one constraint this portal exists to escape. */
 .bform{--gap:16px}
-.bf-legend{font-size:12px;color:var(--ink3);margin:0 0 16px;padding-bottom:12px;
+.bf-legend{font-size:var(--t-sm);color:var(--ink3);margin:0 0 16px;padding-bottom:12px;
   border-bottom:1px solid var(--rule)}
 /* 🔴 REQUIRED IS MARKED, AND THE MARK IS EXPLAINED IN THE SAME PANEL. An asterisk with no
    legend is a convention the reader has to already know; the legend costs one line. */
 .req{color:var(--patch);font-weight:700}
 .bf-sec{margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--rule3)}
 .bf-sec:last-child{border-bottom:none;padding-bottom:0;margin-bottom:0}
-.bf-h{font:600 12px/1 var(--ui);color:var(--ink);margin:0 0 4px;display:flex;align-items:center;gap:9px}
-.bf-n{font:500 10px/1 var(--data);letter-spacing:.08em;color:var(--ink3);
+.bf-h{font:600 var(--t-sm)/1 var(--ui);color:var(--ink);margin:0 0 4px;display:flex;align-items:center;gap:9px}
+.bf-n{font:500 var(--t-xs)/1 var(--data);letter-spacing:.08em;color:var(--ink3);
   border:1px solid var(--rule2);border-radius:var(--rad-pill);padding:4px 8px}
-.bf-p{font-size:12px;line-height:1.5;color:var(--ink3);margin:0 0 11px;max-width:70ch}
+.bf-p{font-size:var(--t-sm);line-height:1.5;color:var(--ink3);margin:0 0 11px;max-width:70ch}
 .bf-p code{font-family:var(--data);color:var(--ink2)}
 .bf-na{border-left:2px solid var(--rule2);padding-left:11px}
 /* The per-field hint sits UNDER its input, not in the placeholder — a placeholder disappears
    the moment you type, which is exactly when a format rule becomes useful. */
-.bf-hint{display:block;font-style:normal;font-size:11.5px;line-height:1.45;color:var(--ink3);margin-top:5px}
+.bf-hint{display:block;font-style:normal;font-size:var(--t-sm);line-height:1.45;color:var(--ink3);margin-top:5px}
 .bf-hint code{font-family:var(--data);color:var(--ink2);word-break:break-all}
 .bf-hint.bad{color:var(--danger-ink)}
 .bf-hint b{color:var(--ink2)}
@@ -4122,18 +4121,18 @@ tr.rowin > td{background:color-mix(in srgb,var(--staged) 9%,transparent)}
    five — the shape is the data's, not a guess. */
 .atlist{display:flex;flex-direction:column;gap:7px}
 .atr{display:flex;align-items:center;gap:9px}
-.atn{font:600 10.5px/1 var(--data);color:var(--ink3);width:16px;text-align:right;flex:none}
+.atn{font:600 var(--t-xs)/1 var(--data);color:var(--ink3);width:16px;text-align:right;flex:none}
 .ati{flex:1;min-width:0;background:var(--sunk);border:1px solid var(--rule);border-radius:var(--rad-2);
-  color:var(--ink);font:500 13px/1 var(--ui);padding:10px 11px;min-height:var(--tap)}
+  color:var(--ink);font:500 var(--t-base)/1 var(--ui);padding:10px 11px;min-height:var(--tap)}
 .ati:focus{outline:none;border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 18%,transparent)}
 .atx{flex:none;width:28px;height:28px;border-radius:var(--rad-2);border:1px solid transparent;background:none;
-  color:var(--ink3);cursor:pointer;font-size:11px}
+  color:var(--ink3);cursor:pointer;font-size:var(--t-sm)}
 .atr:hover .atx,.atx:focus-visible{color:var(--ink3);border-color:var(--rule2)}
 .atx:hover{color:var(--danger-ink);border-color:var(--danger-edge)}
 
 .bf-badges{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .bf-tog{display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border:1px solid var(--rule);
-  border-radius:var(--rad-3);background:var(--sunk);cursor:pointer;font:600 12.5px/1 var(--ui);color:var(--ink2);
+  border-radius:var(--rad-3);background:var(--sunk);cursor:pointer;font:600 var(--t-base)/1 var(--ui);color:var(--ink2);
   min-height:var(--tap)}
 .bf-tog:hover{border-color:var(--rule2);color:var(--ink)}
 .bf-tog:has(input:checked){border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--ink)}
@@ -4361,7 +4360,7 @@ a.att-row:hover .att-go .arw{transform:translateX(3px)}
  * homework; a count against its own population is a glance. */
 a.att-row .att-sev{font-family:var(--data);font-size:var(--t-sm);color:var(--ink2);
   font-variant-numeric:tabular-nums}
-a.att-row .att-x b{display:block;font-size:15px;color:var(--ink);font-weight:600}
+a.att-row .att-x b{display:block;font-size:var(--t-lg);color:var(--ink);font-weight:600}
 a.att-row .att-x em{display:block;font-style:normal;font-family:var(--data);font-size:var(--t-micro);
   letter-spacing:var(--tr-micro);text-transform:uppercase;color:var(--ink3);margin-top:4px}
 a.att-row .att-i{font-family:var(--data);font-size:var(--t-sm);color:var(--ink3);text-align:center}
@@ -4399,17 +4398,17 @@ a.att-row .att-i{font-family:var(--data);font-size:var(--t-sm);color:var(--ink3)
 .hlive .lp{background:var(--paper);border:1px solid var(--rule);border-radius:var(--rad-2);padding:16px 18px}
 .hlive h2{margin:0 0 3px;font-size:var(--t-sm);font-family:var(--data);letter-spacing:var(--tr-micro);
   text-transform:uppercase;color:var(--ink3);font-weight:600}
-.hlive .lsub{margin:0 0 13px;font-size:12px;color:var(--ink3)}
+.hlive .lsub{margin:0 0 13px;font-size:var(--t-sm);color:var(--ink3)}
 .lrow{display:grid;grid-template-columns:8px 1fr auto;align-items:baseline;gap:11px;
   padding:8px 0;border-top:1px solid var(--rule3)}
 .lrow:first-of-type{border-top:0}
 .lrow .ld{width:8px;height:8px;border-radius:var(--rad-1);background:var(--c,var(--ink4));
   transform:rotate(45deg);align-self:center}
-.lrow .lt{color:var(--ink);font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lrow .lt{color:var(--ink);font-size:var(--t-base);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lrow .lw{font-family:var(--data);font-size:var(--t-micro);letter-spacing:var(--tr-micro);
   color:var(--ink3);white-space:nowrap;text-transform:uppercase}
 .lrow .lw.hot{color:var(--warn)}
-.hlive .lmore{margin:11px 0 0;font-size:12px;color:var(--ink3)}
+.hlive .lmore{margin:11px 0 0;font-size:var(--t-sm);color:var(--ink3)}
 .hlive .lmore a{color:var(--ink2)}
 /* The season frame, stated as a fact rather than a table of three dates. */
 .hseason{display:flex;align-items:baseline;gap:10px;margin:0 0 12px;flex-wrap:wrap}
@@ -4461,24 +4460,24 @@ a.att-row .att-i{font-family:var(--data);font-size:var(--t-sm);color:var(--ink3)
 .uid .uav{width:46px;height:46px;border-radius:var(--rad-round);border:2px solid var(--paper);
   background:var(--avatar-a) var(--av-src) center/cover;flex:none}
 .uid .un{min-width:0}
-.uid .un b{display:block;font-size:15px;color:var(--ink);line-height:1.15}
+.uid .un b{display:block;font-size:var(--t-lg);color:var(--ink);line-height:1.15}
 .uid .un span{display:block;font-family:var(--data);font-size:var(--t-micro);color:var(--ink3);
   letter-spacing:var(--tr-micro)}
 .uid .rolebadge{margin-left:auto;align-self:center}
 /* rows that DO something */
 .umenu .mi{width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;
-  background:none;border:0;color:var(--ink2);font-size:13px;text-align:left}
+  background:none;border:0;color:var(--ink2);font-size:var(--t-base);text-align:left}
 .umenu .mi:hover{background:rgba(255,255,255,.04);color:var(--ink)}
 .umenu .mi .mnote{margin-left:auto;font-family:var(--data);font-size:var(--t-micro);
   color:var(--ink3);letter-spacing:var(--tr-micro)}
 /* 🔴 THE ID IS SHOWN WHOLE. `1139…2283` elided THE MIDDLE, which is the only part that
  * distinguishes it from any other snowflake — so the preview could not confirm it was the
  * right id, which is the entire reason a person looks at it before pasting it into a grant. */
-.umenu .mi .mid{margin-left:auto;font-family:var(--data);font-size:10px;color:var(--ink3);
+.umenu .mi .mid{margin-left:auto;font-family:var(--data);font-size:var(--t-xs);color:var(--ink3);
   letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .umenu .mi svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6;flex:none}
 .ustat{display:flex;align-items:baseline;justify-content:space-between;padding:8px 14px;
-  font-size:12.5px;color:var(--ink3)}
+  font-size:var(--t-base);color:var(--ink3)}
 .ustat b{font-family:var(--data);color:var(--ink2);font-weight:500}
 .ustat b.live{color:var(--ink)}
 .umenu .mi.danger{color:var(--danger-ink)}
@@ -4494,8 +4493,8 @@ a.att-row .att-i{font-family:var(--data);font-size:var(--t-sm);color:var(--ink3)
 .hdr-commit{display:inline-flex;align-items:stretch;gap:0;padding:0;overflow:hidden;
   text-decoration:none;
   border:1px solid color-mix(in srgb,var(--staged) 45%,var(--rule2));border-radius:var(--rad-pill);
-  background:color-mix(in srgb,var(--staged) 12%,transparent);color:var(--ink);font-size:12.5px}
-.hdr-commit b{display:flex;align-items:center;padding:6px 10px;font-family:var(--display);font-size:15px;
+  background:color-mix(in srgb,var(--staged) 12%,transparent);color:var(--ink);font-size:var(--t-base)}
+.hdr-commit b{display:flex;align-items:center;padding:6px 10px;font-family:var(--display);font-size:var(--t-lg);
   line-height:1;color:var(--staged);letter-spacing:var(--tr-fig);font-variant-numeric:tabular-nums;
   background:color-mix(in srgb,var(--staged) 14%,transparent);
   border-right:1px solid color-mix(in srgb,var(--staged) 30%,transparent)}
@@ -4535,7 +4534,7 @@ a.att-row .att-i{font-family:var(--data);font-size:var(--t-sm);color:var(--ink3)
 .ackrow.zero .at::after,.erow.never .et::after{content:"";position:absolute;left:0;right:0;
   bottom:0;height:3px;background:rgba(255,122,69,.35)}
 .ackrow .at,.erow .et{position:relative}
-.gread{font-size:12.5px;color:var(--ink3);margin:2px 0 14px}
+.gread{font-size:var(--t-base);color:var(--ink3);margin:2px 0 14px}
 .gread b{color:var(--ok);font-weight:600}
 .gread em{font-style:normal;color:var(--warn);font-weight:600}
 
@@ -4546,7 +4545,7 @@ a.att-row .att-i{font-family:var(--data);font-size:var(--t-sm);color:var(--ink3)
 /* PASTE ANYTHING — a field in the composer, not a drawer behind a button. */
 .nw-paste{margin:0 0 12px}
 .pz-in{width:100%;background:var(--sunk);border:1px solid var(--rule);border-radius:var(--rad-2);
-  color:var(--ink);font:400 12.5px/1.55 var(--data);padding:10px 12px;resize:vertical}
+  color:var(--ink);font:400 var(--t-base)/1.55 var(--data);padding:10px 12px;resize:vertical}
 .pz-in::placeholder{color:var(--ink3);opacity:.65}
 .pz-in:focus{border-color:var(--rule2);outline:none}
 .pz-out{margin-top:10px}
@@ -4557,16 +4556,16 @@ a.att-row .att-i{font-family:var(--data);font-size:var(--t-sm);color:var(--ink3)
 .pz-r .pz-d{width:8px;height:8px;border-radius:var(--rad-1);background:var(--c);transform:rotate(45deg)}
 .pz-r .pz-k{font-family:var(--data);font-size:var(--t-micro);letter-spacing:var(--tr-micro);
   text-transform:uppercase;color:var(--ink3)}
-.pz-r .pz-n{color:var(--ink);font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pz-r .pz-n{color:var(--ink);font-size:var(--t-base);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pz-r .pz-n em{color:var(--ink3);font-style:italic}
-.pz-r .pz-w{font-family:var(--data);font-size:11px;color:var(--ok);white-space:nowrap}
+.pz-r .pz-w{font-family:var(--data);font-size:var(--t-sm);color:var(--ok);white-space:nowrap}
 /* A line the parser could not date is SHOWN, never dropped. A parser that silently discards
  * what it did not understand is the worst possible version of this feature: you cannot tell
  * the difference between "it read six lines" and "it read four and threw two away". */
 .pz-r.bad{background:rgba(255,122,69,.06)}
 .pz-r.bad .pz-w{color:var(--warn)}
 .pz-act{display:flex;align-items:center;gap:12px;margin-top:9px}
-.pz-sum{font-size:12px;color:var(--ink3)}
+.pz-sum{font-size:var(--t-sm);color:var(--ink3)}
 .pz-act .chip{margin-left:auto}
 
 /* A DATE FIELD THAT UNDERSTANDS — the echo is the trust. Nothing is stored until you can
@@ -4581,7 +4580,7 @@ a.att-row .att-i{font-family:var(--data);font-size:var(--t-sm);color:var(--ink3)
 /* ⌘K THAT ACTS — the action row is visibly not a navigation row. */
 .pitem.act{color:var(--ink);font-weight:500}
 .pitem.act i{background:var(--staged)}
-.pitem.act::after{content:"stage";margin-left:auto;font-family:var(--data);font-size:9px;
+.pitem.act::after{content:"stage";margin-left:auto;font-family:var(--data);font-size:var(--t-micro);
   letter-spacing:var(--tr-micro);text-transform:uppercase;color:var(--staged)}
 
 /* FIX ALL MECHANICAL — every fix shows its own before → after, and can be unticked.
@@ -4592,12 +4591,12 @@ a.att-row .att-i{font-family:var(--data);font-size:var(--t-sm);color:var(--ink3)
   align-items:center;padding:10px 13px;border-top:1px solid var(--rule3);background:var(--sunk);cursor:pointer}
 .fxr:first-child{border-top:0}
 .fxr:hover{background:var(--paper)}
-.fxr .fxb{color:var(--ink);font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fxr .fxb{color:var(--ink);font-size:var(--t-base);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fxr .fxb em{color:var(--ink3);font-style:normal}
 .fxr .fxf{font-family:var(--data);font-size:var(--t-micro);letter-spacing:var(--tr-micro);
   text-transform:uppercase;color:var(--ink3)}
 .fxd{display:grid;grid-template-columns:minmax(0,1fr) 16px minmax(0,1fr);gap:8px;align-items:center;min-width:0}
-.fxwas,.fxnow{font-family:var(--data);font-size:11px;min-width:0;overflow:hidden;
+.fxwas,.fxnow{font-family:var(--data);font-size:var(--t-sm);min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap;padding:3px 7px;border-radius:var(--rad-1)}
 .fxwas{color:var(--ink3);background:rgba(255,107,107,.10);text-decoration:line-through}
 .fxnow{color:var(--ok);background:rgba(61,220,151,.10)}
@@ -4664,15 +4663,15 @@ tbody tr{transition:transform var(--dur-1) var(--ease),box-shadow var(--dur-1) v
  * meaning; the words are the bonus. `.wide` is set from the region's own measured share of the
  * plot, never from a breakpoint. */
 .oos.wide::after{content:"OUT OF SEASON";position:absolute;top:5px;left:9px;
-  font:600 9px/1 var(--data);letter-spacing:var(--tr-micro);color:var(--warn-ink);opacity:.85}
+  font:600 var(--t-micro)/1 var(--data);letter-spacing:var(--tr-micro);color:var(--warn-ink);opacity:.85}
 /* 🔴 THE LABEL IS THE REDUNDANT HALF, NOT THE TICK. Masking the whole span left the ruler
  * running Aug 18 → [gap] → Sep 1 under the NOW pill, which reads as a rendering fault; a
  * ruler's regularity is its legibility, and NOW's own chip already states that date. */
 .ruler span b{font-weight:inherit}
 /* The findings strip: one line per finding, not a wall of cards under the plot. */
 .flags.tight{gap:6px;padding:9px 12px}
-.flags.tight .flag{padding:5px 9px;font-size:12px;border-radius:var(--rad-1)}
-.flags.tight .flag button{padding:3px 8px;min-height:26px;font-size:11px}
+.flags.tight .flag{padding:5px 9px;font-size:var(--t-sm);border-radius:var(--rad-1)}
+.flags.tight .flag button{padding:3px 8px;min-height:26px;font-size:var(--t-sm)}
 /* …and the finding marks the bar it is about, so the notice and its subject are one object. */
 .bar.flagged,.pt.flagged{outline:1.5px solid color-mix(in srgb,var(--warn) 70%,transparent);
   outline-offset:1px}
@@ -4693,7 +4692,7 @@ tbody tr{transition:transform var(--dur-1) var(--ease),box-shadow var(--dur-1) v
  * you have said what you are adding, so a 118px field for the other path is a third of the
  * composer spent on a road not taken. Open cold, it stays expanded: that is the case where
  * pasting IS the point. */
-.pz-open{display:none;background:none;border:0;padding:0;color:var(--ink3);font-size:12px;
+.pz-open{display:none;background:none;border:0;padding:0;color:var(--ink3);font-size:var(--t-sm);
   text-align:left;border-bottom:1px dashed var(--rule2)}
 .pz-open:hover{color:var(--ink2)}
 .pz.shut .pz-open{display:inline-block}
@@ -4950,7 +4949,7 @@ tbody tr{transition:transform var(--dur-1) var(--ease),box-shadow var(--dur-1) v
    The portal's strip is untouched and returns when the flag comes off. */
 .nodraft{margin-top:12px;padding:16px 14px;background:var(--sunk);border:1px dashed var(--rule2);
   border-radius:var(--rad-2);text-align:center;display:block;align-items:normal;gap:normal;flex-wrap:nowrap;font-size:revert}
-.nodraft p{margin:0 0 10px;font-size:12.5px;color:var(--ink3)}
+.nodraft p{margin:0 0 10px;font-size:var(--t-base);color:var(--ink3)}
 .nd-late{color:var(--warn-ink);font-weight:500}
 
 @media (max-width:820px){
@@ -5105,12 +5104,13 @@ button .ic,a .ic{pointer-events:none}
    2px ring that painted on top of the `.ptc.mark.stack.same::after` ring already defined up there —
    two rings on one mark, neither aware of the other. The surviving rule lives beside its family. */
 
-.rec{margin:16px 22px 0;border:1px solid var(--rule);border-radius:var(--rad-2);background:var(--paper);padding:14px 16px 16px}
-.rec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:10px}
-.rec-t{font:600 10.5px/1 var(--data);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
-.rec-n{font-size:11.5px;color:var(--ink3)}
+.rec{margin:var(--s5) 22px 0;border:1px solid var(--rule);border-radius:var(--rad-2);background:var(--paper);padding:var(--s4) 18px 18px}
+/* center, not baseline (pin 8): the CTA is a 30px box beside a 10.5px eyebrow, and a baseline row hung it 8px low. */
+.rec-h{display:flex;align-items:center;gap:12px;margin-bottom:var(--s3)}
+.rec-t{font:600 var(--t-xs)/1 var(--data);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+.rec-n{font-size:var(--t-sm);color:var(--ink3)}
 .rec-cta{margin-left:auto;background:none;border:1px dashed var(--rule2);color:var(--ink3);border-radius:var(--rad-2);
-  padding:6px 11px;font:500 12px/1 var(--ui);cursor:pointer}
+  padding:0 12px;min-height:30px;display:inline-flex;align-items:center;gap:6px;font:500 var(--t-sm)/1 var(--ui);cursor:pointer}
 .rec-cta:hover{border-color:var(--patch);color:var(--patch)}
 .rec-list{list-style:none;margin:0;padding:0;position:relative;--rec-x:10px}
 /* 🔴 THE SPINE AND THE MARKERS DID NOT SHARE AN X in the mockup's own first pass: the rail was drawn
@@ -5124,17 +5124,19 @@ button .ic,a .ic{pointer-events:none}
   padding:9px 4px;border-bottom:1px solid var(--rule);cursor:pointer}
 .rec-row:last-child{border-bottom:0}
 .rec-row:hover,.rec-row:focus-visible{background:var(--hi)}
-.rec-mk{width:11px;height:11px;border-radius:var(--rad-1);transform:rotate(45deg) scale(.82);
+/* justify-self:center (pin 9): the column is calc(--rec-x*2) and the spine runs at --rec-x, so an 11px marker
+   left-aligned in it sat 4.5px off the line it was supposed to thread. Centring is the whole fix. */
+.rec-mk{width:11px;height:11px;border-radius:var(--rad-1);transform:rotate(45deg) scale(.82);justify-self:center;
   background:var(--sunk);box-shadow:inset 0 0 0 1.5px var(--patch);position:relative;z-index:1}
 .rec-row.cur .rec-mk{background:var(--patch);box-shadow:0 0 0 4px color-mix(in srgb,var(--patch) 22%,transparent)}
-.rec-ttl{font:600 13.5px/1.3 var(--ui);color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rec-ttl{font:600 var(--t-md)/1.3 var(--ui);color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rec-row.cur .rec-ttl{color:var(--ink)}
 .rec-row[aria-expanded=true] .rec-ttl{color:var(--ink)}
-.rec-d,.rec-meta{font:500 11px/1 var(--data);letter-spacing:.07em;color:var(--ink3);white-space:nowrap}
-.rec-tag{font:600 9.5px/1 var(--data);letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:var(--rad-2);
+.rec-d,.rec-meta{font:500 var(--t-sm)/1 var(--data);letter-spacing:.07em;color:var(--ink3);white-space:nowrap}
+.rec-tag{font:600 var(--t-micro)/1 var(--data);letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:var(--rad-2);
   background:var(--sunk);color:var(--ink3);white-space:nowrap}
 .rec-row.cur .rec-tag{background:color-mix(in srgb,var(--patch) 18%,transparent);color:var(--patch)}
-.rec-empty{list-style:none;font-size:13px;color:var(--ink3);padding:8px 0}
+.rec-empty{list-style:none;font-size:var(--t-base);color:var(--ink3);padding:8px 0}
 @media (max-width:820px){.rec-row{grid-template-columns:20px 1fr auto}.rec-meta,.rec-d{display:none}}
 
 /* ═══ PORTAL-AUTHORED — CLASSES THE ADOPTED SHEET NAMES BUT NEVER STYLED ═══
@@ -5156,7 +5158,7 @@ button .ic,a .ic{pointer-events:none}
 .hc-face{margin-inline:auto}
 /* The mode is a classification beside a build's name, not a heading — MP and DMZ are the two
  * halves of the Armory and the word has to read as a label rather than as part of the title. */
-.bc-mode{font:600 9.5px/1 var(--data);letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);
+.bc-mode{font:600 var(--t-micro)/1 var(--data);letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);
   border:1px solid var(--rule2);border-radius:var(--rad-2);padding:3px 6px;white-space:nowrap}
 /* The editor's two grid children. The adopted sheet declares `.bed` (1fr 340px) and `.bed-sec`
  * inside it but never the columns themselves, so a long attachment string pushed the 1fr track
@@ -5184,8 +5186,8 @@ button .ic,a .ic{pointer-events:none}
 .daylist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
 .daylist li{display:flex;align-items:baseline;gap:10px;padding:7px 0;border-top:1px solid var(--rule)}
 .daylist li:first-child{border-top:0}
-.daylist li b{font:600 13px/1.3 var(--ui);color:var(--ink);min-width:0;flex:1}
-.daylist .dd{font:500 11px/1 var(--data);letter-spacing:.05em;color:var(--ink3);white-space:nowrap}
+.daylist li b{font:600 var(--t-base)/1.3 var(--ui);color:var(--ink);min-width:0;flex:1}
+.daylist .dd{font:500 var(--t-sm)/1 var(--data);letter-spacing:.05em;color:var(--ink3);white-space:nowrap}
 /* The record is the last block on the page; `.rec` sets no bottom margin, so it butted against the
  * viewport edge with no room to read the final row. */
 .rec-b{margin-bottom:var(--gap)}
@@ -5198,13 +5200,13 @@ button .ic,a .ic{pointer-events:none}
 .cb:focus-visible{outline:2px solid var(--patch);outline-offset:2px}
 /* The door's one line of state, above the heading. It is deliberately quiet — a stranger is being
  * told a fact about the session, not warned about anything. */
-.doorstate{margin:0 0 4px;font:500 11px/1 var(--data);letter-spacing:.08em;color:var(--ink3);text-transform:uppercase}
+.doorstate{margin:0 0 4px;font:500 var(--t-sm)/1 var(--data);letter-spacing:.08em;color:var(--ink3);text-transform:uppercase}
 /* The card's own chips and code block. The mockup wrote both as inline `style=` attributes because it
  * was a sketch; they are the Discord surface's colours, not the portal's, which is why they are
  * literals here rather than tokens — this block is a picture OF another product. */
 .dcard .badges span{background:#1E1F22;border-radius:var(--rad-1);padding:2px 7px;font-size:10px;color:#B5BAC1}
 .dcode{margin-top:9px;background:#1E1F22;border-radius:var(--rad-1);padding:6px 8px;
-  font-family:var(--data);font-size:10.5px;color:#A8B0B8;letter-spacing:.04em}
+  font-family:var(--data);font-size:var(--t-xs);color:#A8B0B8;letter-spacing:.04em}
 
 
 /* ════ REGISTERED CONFORMANCE DIVERGENCE · the fourth ink tone cannot carry text ════
@@ -5338,3 +5340,286 @@ button .ic,a .ic{pointer-events:none}
    flag the design's double ring comes back so the overlay compares like with like. Found only once the
    audit started sampling box-shadow, which it had never done. */
 .ptc.same{box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 40%,transparent)}
+
+
+/* ═══ BUILD-OUT 2026-09-06 01:21 EDT — unit A: the realm's own light, the page arriving, the drawer form ═══ */
+/* ── THE SIGNATURE (`bolder`): a realm-hue radial wash behind every masthead. `.app` carries data-realm
+ * (shell.js) and each realm maps its own accent into --realm-c; Review and Home set none, so
+ * var(--realm-c,transparent) collapses to nothing there — colourless on purpose, see tokens.css. The wash is
+ * 10% at the top-left corner fading by 70%: a light the page is lit BY, never a coloured box. */
+.app[data-realm=season]{--realm-c:var(--r-season)}
+.app[data-realm=armory]{--realm-c:var(--r-armory)}
+.app[data-realm=broadcast]{--realm-c:var(--r-broadcast)}
+.app[data-realm=access]{--realm-c:var(--r-access)}
+.app[data-realm=analytics]{--realm-c:var(--r-analytics)}
+.masthead{background-image:radial-gradient(ellipse 64% 130% at 0% 0%,
+  color-mix(in srgb,var(--realm-c,transparent) 10%,transparent) 0%,transparent 70%)}
+/* ── THE PAGE ARRIVES (`animate`): ONE orchestration, keyed on --dur-3. The masthead's figures rise in
+ * order (60ms apart — long enough to read as a sequence, short enough that the last lands before you
+ * look for it), the rail items stagger once on mount. Drawers already scale in. The reduced-motion kill
+ * at the top of this file zeroes all of it. */
+@media (prefers-reduced-motion:no-preference){
+  .mh-stats .stat{animation:rise var(--dur-3) var(--ease) backwards}
+  .mh-stats .stat:nth-child(2){animation-delay:60ms}
+  .mh-stats .stat:nth-child(3){animation-delay:120ms}
+  .mh-stats .stat:nth-child(4){animation-delay:180ms}
+  .mh-stats .stat:nth-child(n+5){animation-delay:240ms}
+  .rail .realm{animation:laneIn var(--dur-3) var(--ease) backwards}
+  .rail .realm:nth-child(2){animation-delay:40ms} .rail .realm:nth-child(3){animation-delay:80ms}
+  .rail .realm:nth-child(4){animation-delay:120ms} .rail .realm:nth-child(5){animation-delay:160ms}
+  .rail .realm:nth-child(6){animation-delay:200ms} .rail .realm:nth-child(7){animation-delay:240ms}
+}
+/* ── THE DRAWER FORM VOCABULARY: every creation drawer on every realm (decision D1) shares these, so a
+ * draw, a build and a grant are the same kind of thing to fill in. .dwfield is the field; textarea and
+ * select take the input's skin; .why is the one line beside the primary that says what is still missing
+ * (`harden`), in the warn ink because it is a reason, not an error. .dw-grid2 puts two short fields on one row. */
+.dwfield textarea,.dwfield select{background:var(--sunk);border:1px solid var(--rule);border-radius:var(--rad-2);
+  color:var(--ink);padding:8px 10px;font:500 var(--t-base)/var(--lh-ui) var(--ui);min-height:36px}
+.dwfield textarea{min-height:88px;resize:vertical;font-family:var(--data);font-size:var(--t-sm);line-height:var(--lh-body)}
+.dwfield textarea:focus,.dwfield select:focus{outline:none;border-color:var(--patch)}
+.dwfield .hint{padding:0;font-size:var(--t-xs);color:var(--ink3);line-height:var(--lh-ui)}
+.dw-grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 var(--s3)}
+/* ink3 at rest, warn only when it BLOCKS: most of the time the line reports how many fields changed, which is not a problem. */
+.dw-f .why{margin-right:auto;font-size:var(--t-sm);color:var(--ink3);line-height:var(--lh-ui);align-self:center;max-width:52%}
+.dw-f .why.blocked{color:var(--warn)}
+.dw-f .btn[disabled]{opacity:.45;cursor:not-allowed}
+
+
+/* ═══ BUILD-OUT 2026-09-06 01:34 EDT — unit B (Season): the staged strip, the composer drawer, items + thumbnail, Today ═══ */
+/* ── THE STAGED STRIP (Pin 6) ──────────────────────────────────────────────────────────────────
+   Replaces the .callout.stg panel, which Harkirat said "feels squeezed in": a 438px box inset 22px from an
+   otherwise full-bleed page. One line, full width, directly under the view bar, on every view. It is not a
+   .callout — a callout is a thing you read once; this is chrome that stays. */
+.stg-strip{display:flex;align-items:center;gap:8px;padding:8px 22px;
+  border-bottom:1px solid var(--rule);background:var(--sunk);
+  font-size:var(--t-base);color:var(--ink2);min-height:38px}
+/* The count is the one number here, so it carries the data face the rest of the portal gives figures. */
+.stg-strip .ss-n{font-family:var(--data);font-size:var(--t-xs);letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink3);white-space:nowrap}
+.stg-strip .ss-n b{color:var(--ink);font-weight:700;font-size:var(--t-base)}
+.stg-strip .ss-sep{color:var(--ink4);flex:none}
+/* The summary is the part that can be long, so it is the only part allowed to shrink and ellipsize —
+   truncating the count or the actions would remove the two things this strip exists for. */
+.stg-strip .ss-d{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
+/* A blocked change cannot commit, so its reason is coloured as a warning rather than folded into the count. */
+.stg-strip .ss-w{color:var(--warn);white-space:nowrap;flex:none}
+.stg-strip .ss-sp{flex:1 1 auto}
+.stg-strip .chip{flex:none}
+
+/* ── THE COMPOSER, NOW INSIDE A DRAWER ─────────────────────────────────────────────────────────
+   .nw already stacks (app.css:3124). These are the rules the old inline host used to supply and the
+   drawer does not. */
+/* app.css:3321 hides an empty preview as `.nwhost .nw-prev:empty`, and the composer is no longer inside a
+   .nwhost — without this the 76px min-height (app.css:3140) reserves a blank block in every drawer that has
+   not been named yet, which is exactly the state ComposePreview refuses to render for. */
+.nw .nw-prev:empty{display:none}
+/* polish lens: labels at 11.5px in --ink3, fields on a 4/8/12 rhythm. The base .nw-l is 10.5px, which was
+   sized for a dense inline bar; inside a drawer body at 15px it reads as a caption for the field above it. */
+.drawer .nw .nw-l{font-size:var(--t-sm);color:var(--ink3);margin-bottom:8px}
+.drawer .nw .nw-f{margin:0}
+.drawer .nw .nw-f + .nw-f,.drawer .nw .nw-items + .nw-f{margin-top:12px}
+.drawer .nw .nw-note{margin-top:8px}
+.drawer .nw .nw-dates{margin-top:4px}
+/* A textarea has to opt into the input treatment: .nw-i sets min-height:38px, which would crush one. */
+.nw-ta{min-height:0;resize:vertical;font:inherit;line-height:1.5}
+.nw-ta:focus-visible{outline:2px solid var(--focus,#5FD4E8);outline-offset:1px;border-color:transparent}
+
+/* ── ITEMS, AND THE TIERS THEY READ AS ─────────────────────────────────────────────────────────
+   Beside the box, never under it: the question is "did the first word read as a tier", which is about the
+   line you are looking at, and under the box the answer is off the fold by the fifth item. */
+.nw-items{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+@media (max-width:720px){.nw-items{grid-template-columns:1fr}}
+/* The parsed rows reuse .pz-r (app.css:4554), the paste box's own row — the same thing, a preview of what a
+   parser understood — so only the tier column's width differs from a pasted line's. */
+.nw-items .pz-rows{max-height:216px;overflow:auto}
+.nw-items .pz-r{grid-template-columns:8px 88px 1fr}
+
+/* ── THE THUMBNAIL, WHICH IS THE BROKEN-LINK DETECTOR ──────────────────────────────────────────
+   Every thumbnail is re-hosted on Cloudinary at commit, so a link that is already dead produces a draw with
+   no image and no complaint. The img IS the check; it only has to be big enough to see. */
+.thumbprev{display:flex;align-items:center;gap:10px;margin-top:8px}
+.thumbprev img{width:64px;height:64px;object-fit:cover;flex:none;
+  border:1px solid var(--rule2);border-radius:var(--rad-2);background:var(--sunk)}
+/* A broken img renders as the browser's own placeholder, which is easy to read as "loading". The border
+   says it failed even before the sentence beside it is read. */
+.thumbprev.bad img{border-color:var(--warn);border-style:dashed}
+.tp-ok{font-family:var(--data);font-size:var(--t-micro);color:var(--ok)}
+.tp-bad{font-family:var(--data);font-size:var(--t-micro);color:var(--warn)}
+
+/* ── TODAY, IN THE TRACK'S TOOLBAR (Pin 7) ─────────────────────────────────────────────────────
+   .zoomer button.wide (app.css:991) already gives an auto width and the FIT button's padding; this only
+   has to sit the icon beside the word. */
+.zoomer button.today{display:inline-flex;align-items:center;gap:6px}
+.zoomer button.today .ic{width:12px;height:12px}
+/* ── THE TRAY YIELDS TO A DRAWER AND TO THE STRIP ──
+ * Measured on B-draw-drawer.png: the floating staged tray (z above the scrim) sat ON TOP of the drawer's
+ * footer and covered the Stage button — the one control the drawer exists for. Below the scrim (44) it is
+ * held back with the rest of the page. And on Season the strip under the view bar says everything the tray
+ * says (count · first change · Review → · Discard all), so the tray is redundant there and hides; every
+ * other realm keeps it. Keyed on the data-realm attribute shell.js emits. */
+.tray{z-index:40}
+.app[data-realm=season] .tray{display:none}
+/* Home too: its banner already carries the count, the first change and the same Review & commit button, so the tray was a second identical CTA 600px below the first. */
+.app[data-realm=home] .tray{display:none}
+
+
+/* ═══ BUILD-OUT 2026-09-06 01:42 EDT — unit C (Armory): the category accordion, the tier on the weapon group, the weapon search, the drawers ═══ */
+/* ── THE RACK, NOW A CATEGORY ACCORDION ──────────────────────────────────────────────────────
+ * `.trow` is a 190px sidebar grid built for a tier row whose header sits beside its body. A category row is an
+ * accordion: header across the top, body under it, because the header is the thing you read when it is closed and a
+ * 190px column is not where a closed row's teaser can live. This is the same shape app.css's own max-width:900px
+ * media query already switches `.trow` into — it is being asked for by class rather than by viewport.
+ * 🔴 `display:flex` IS RESTATED HERE AND IT IS NOT REDUNDANT. app.css:1626 declares `.trow-h{display:flex}` and a
+ * later rule takes it back off, so `flex-direction:row` alone computed as row over a container that was no longer
+ * flexing: measured 2026-09-06 01:35 EDT with the header 69px tall and the teaser and the fold chevron sitting on a
+ * second line, while getComputedStyle cheerfully reported flexDirection:row and flexWrap:nowrap. Restating it takes
+ * the header to 40px and one line. Those two properties compute whatever `display` is, so they are not evidence. */
+.trow.tcat{grid-template-columns:1fr}
+.trow.tcat > .trow-h{display:flex;flex-wrap:nowrap;flex-direction:row;align-items:center;border-right:0;border-bottom:1px solid var(--rule3);
+  width:100%;min-height:44px;text-align:left;gap:11px;padding:10px 13px}   /* 44, the tap floor the rest of the console honours; it measured 40 */
+/* A closed row has no body element rendered at all, so nothing here needs to hide one — but the border under the
+ * header is a divider between two things, and with the body gone it is a line under nothing. */
+.trow.tcat.tclosed > .trow-h{border-bottom:0}
+.trow.tcat > .trow-h:focus-visible{outline:2px solid var(--staged);outline-offset:-2px}
+.trow.tcat > .trow-h:hover{background:var(--hi)}
+
+/* The category's own accent, which is real data from the API (getMpCategoryAccent), not a token. The mark replaces the
+ * tier board's graded star/dash: a category has no rank, so what it has to say for itself is which category it is. */
+.catdot{display:block;width:9px;height:9px;border-radius:var(--rad-1);background:var(--c);margin:0 auto}
+
+/* 🔴 NOT `.trow-note`, WHICH IS THE ONE THING IT CANNOT BE. app.css carries `.trow.tclosed .trow-note{display:none}`,
+ * so a teaser in that class would be hidden in exactly the state it exists for — the closed header is the whole
+ * reason there is a teaser at all. Same size and colour, opposite visibility rule. */
+/* ⚠️ IT GROWS, IT DOES NOT PUSH. `.trow-n` carries its own `margin-left:auto`, so a teaser placed after it with a
+ * margin of its own is handed the width that is left, which is none — measured 2026-09-06 01:33 EDT as a header
+ * wrapping to a second line reading "B". It sits BEFORE the count now and takes the free space with flex. */
+.tcat-top{flex:1 1 auto;min-width:0;font-size:var(--t-sm);color:var(--ink3);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.tcat-top b{color:var(--ink2);font-weight:600}
+@media (max-width:760px){ .tcat-top{display:none} }
+
+/* Expand all / Collapse all, and the empty-rack and empty-compare buttons, which share this strip. */
+.racktools{display:flex;align-items:center;gap:8px;padding:12px 16px 0}
+.rkt-n{margin-left:auto;font-family:var(--data);font-size:var(--t-sm);color:var(--ink3)}
+.racktools .chip[disabled]{opacity:.42;cursor:default}
+
+/* ── THE TIER, WHICH NOW RIDES ON THE WEAPON GROUP ───────────────────────────────────────────
+ * app.css grades `.trow.t-best/.t-top3/.t-top4/.t-top5/.t-unranked` — 20/17/15/14/13px marks and a `--bc-dim` that
+ * fades the lower tiers. Those selectors are scoped to `.trow`, and there is no tier row any more, so the grading has
+ * to be re-stated for the element that now carries the tier. Same idea, one level down: a Best weapon reads loudest.
+ * ⚠️ THE `.trow.t-*` RULES IN app.css ARE UNREFERENCED AS OF THIS CHANGE — see the report; they are not deleted here
+ * because deleting them is an app.css edit this unit may not make. */
+.bgrp.t-best{border-color:var(--rule2);box-shadow:inset 0 0 0 1px rgba(242,194,48,.16)}
+.bgrp.t-best .bgrp-w b{font-size:var(--t-md)}
+.bgrp.t-top4,.bgrp.t-top5{--bc-dim:.86}
+.bgrp.t-unranked{--bc-dim:.74}
+.bgrp-m .bdg.rank{flex:none}
+
+/* ── THE WEAPON SEARCH (Compare) ─────────────────────────────────────────────────────────────
+ * A combobox, so the list is positioned against the field rather than pushed into the flow: a list that moves the
+ * page down on every keystroke is a list you cannot aim at. */
+.wsrch{position:relative;flex:0 0 280px;max-width:280px}
+.wsrch .dwfield{margin-bottom:0}
+.wsrch input{width:100%}
+.wsrch-list{position:absolute;z-index:5;left:0;right:0;top:100%;margin:4px 0 0;padding:4px;list-style:none;
+  background:var(--raised);border:1px solid var(--rule2);border-radius:var(--rad-2);
+  /* The sheet's own popover shadow, spelled the way it is spelled everywhere else here — a fresh rgba() would be a
+     second black in a palette that already has one. */
+  box-shadow:0 12px 32px -12px #000;max-height:264px;overflow:auto}
+.wsrch-opt{display:flex;align-items:baseline;gap:8px;padding:7px 9px;border-radius:var(--rad-1);cursor:pointer}
+.wsrch-opt b{font:600 var(--t-base)/1.2 var(--ui);color:var(--ink)}
+.wsrch-opt span{font-size:var(--t-sm);color:var(--ink3)}
+.wsrch-opt.on{background:var(--hi)}
+.wsrch-opt.on b{color:var(--patch)}
+.wsrch-none{margin:6px 0 0;font-size:var(--t-sm);color:var(--ink3)}
+/* The picked-weapon chips sit beside the field, so the bar has to align them to its bottom edge rather than centre
+ * them against a two-line labelled input. */
+.cmpbar{align-items:flex-end;gap:9px}
+.cmpbar .chip.on{display:inline-flex;align-items:center;gap:6px}
+
+/* One build of a weapon, and the six-column truncation, both say so in the same voice. */
+.cmpone{margin:0 0 10px;font-size:var(--t-sm);color:var(--ink2);display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.cmpone b{color:var(--ink)}
+.cmptab th em{display:block;font-style:normal;font-weight:400;color:var(--ink3);letter-spacing:0;text-transform:none}
+
+
+/* The Add drawer's right column carries the record's own card rather than a Discord render — there is no id to ask
+ * the bot about yet — and a 340px column holding one card wants the card to fill it. */
+.drawer.wide .bed{gap:18px}
+.drawer.wide .bed-side .dcard.lc{width:100%}
+
+/* ── UNDERSIZED UI TEXT — the detector's largest single excess on this realm (+140 vs the mockup) ────────────────
+ * `--t-sm` (11.5px) is the floor for anything a reader has to READ; `--t-micro` (9px) is for tracked uppercase
+ * eyebrows only, where the letterspacing and the caps do the legibility work. Each rule below re-states an existing
+ * app.css declaration at the token rather than at a hardcoded px, so the change is a token swap and nothing else.
+ * ⚠️ These are the Armory's OWN classes only. `.bdg`, `.thumb` and `.dwfield label` are shared with other realms, so
+ * they are listed in the report as a cross-realm decision rather than changed unilaterally here. */
+.bc-meta{font-size:var(--t-micro)}      /* 7.5px → 9px. Uppercase and tracked, so micro is the honest floor, not sm. */
+.bc-att{font-size:var(--t-sm)}          /* 8.5px → 11.5px. "5×" is a number a reader reads, not an eyebrow. */
+.bc-foot{font-size:var(--t-sm)}         /* 9px → 11.5px. The chip's whole meta row inherits from here. */
+.bc-mode{font-size:var(--t-sm)}         /* 9.5px → 11.5px. MP/DMZ is the single most-read word on a build chip. */
+.bc-b{font-size:var(--t-sm)}            /* 11px → 11.5px. The build name — the thing that tells two siblings apart. */
+.bc-tox{font-size:var(--t-sm)}          /* 11px → 11.5px. */
+.trow-n{font-size:var(--t-sm)}          /* 10px → 11.5px. A count in a closed header is the header's only number. */
+.bf-n{font-size:var(--t-sm)}            /* 10px → 11.5px. "3 of 5" beside the attachments heading. */
+.bgrp-m .bgrp-n{font-size:var(--t-sm)}  /* 10px → 11.5px. */
+.cmpf{font-size:var(--t-sm)}            /* 10px → 11.5px. The field-name column of the comparison table. */
+.cmptab th{font-size:var(--t-sm)}       /* 9.5px → 11.5px. Column headers name the builds; they are read, not scanned. */
+.diff-r .dk{font-size:var(--t-sm)}      /* 10px → 11.5px. */
+.aflab{font-size:var(--t-micro)}        /* 9.5px → 9px, DOWN: "Showing" is a tracked uppercase eyebrow and was sitting
+                                           between the two tokens, which is what makes a scale stop being a scale. */
+.afn{font-size:var(--t-sm)}             /* 10px → 11.5px. The "12 of 133" the filter bar exists to state. */
+.afclear{font-size:var(--t-sm)}         /* 10px → 11.5px. A button label. */
+.atn{font-size:var(--t-sm)}             /* 10.5px → 11.5px. Attachment slot numbers, 1–5. */
+.attx,.atx{font-size:var(--t-sm)}       /* 11px → 11.5px. */
+.fxwas,.fxnow{font-size:var(--t-sm)}    /* 11px → 11.5px. The before/after values of a bulk overwrite. */
+.trow-note{font-size:var(--t-sm)}       /* 11px → 11.5px. ⚠️ app.css declares .trow-note TWICE (11px, then
+                                           var(--t-xs) = 10px at line 2824); this must land AFTER both or it loses. */
+
+
+/* ═══ BUILD-OUT 2026-09-06 01:46 EDT — unit D (Access + identity): the lookup preview card, the granted-row flash, the initial-letter avatar ═══ */
+/* pin32 — the Discord lookup preview card inside the Grant drawer (portal/ui/access.js's GrantForm): avatar,
+   display name, @username and the id, so an admin can see who they are about to grant before Grant enables.
+   .grantpreview/.gp-av/.gp-n are new classes; .dwbody/.dwfield/.tokgrid/.dw-p already exist and are reused
+   as-is. --avatar-a and --sunk are existing tokens (see .who .av's gradient fallback in app.css). */
+.grantpreview{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--rule2);
+  border-radius:var(--rad-1);background:var(--sunk);margin:8px 0}
+.grantpreview .gp-av{width:32px;height:32px;border-radius:var(--rad-round);flex:none;
+  background:var(--av-src,none) center/cover no-repeat,var(--avatar-a)}
+.grantpreview .gp-n{display:flex;flex-direction:column;gap:1px;min-width:0}
+.grantpreview .gp-n b{font-size:var(--t-sm);color:var(--ink)}
+.grantpreview .gp-n span{font-size:var(--t-micro);color:var(--ink3)}
+
+/* harden lens — names which single precondition is still missing before the Grant button in the drawer will
+   enable (access.logic.js's grantReady drives the text; this is only the line's own styling). New class. */
+/* scoped to the drawer body — a bare .why would restyle .card .why, .ccard .why and every footer reason line; and --t-sm, because a line that says what is still missing is read. */
+.dwbody .why{font-size:var(--t-sm);color:var(--ink3);margin-top:6px;line-height:var(--lh-ui)}
+
+/* delight lens (pin5/D1) — the admin row in the By-admin grid gets a one-time fade after a grant lands, so the
+   change is visibly acknowledged in the table itself and not only via the toast. Cleared client-side by
+   access.js's own highlightId timeout (2.4s), so the animation duration and that timeout should be kept in
+   step if either changes. --ok is an existing token (#3DDC97, the same green .thumb.ok/.health.ok already use). */
+.mx tbody tr.just-granted{animation:d-just-granted 2.2s ease-out}
+@keyframes d-just-granted{
+  0%{background:color-mix(in srgb, var(--ok) 22%, transparent)}
+  100%{background:transparent}
+}
+
+/* D3 identity chip — .who .av (header) and .umenu .uav (account menu) already exist in app.css and already
+   support a real avatar via [data-src]/--av-src (see the "a grey disc says nobody's" comment already sitting
+   on .who .av — this is that comment's own TODO, finally wired up). What was missing is centring for the
+   INITIAL-LETTER FALLBACK rendered when a session has no avatarHash yet (a session predating this field). Adds
+   properties only; does not redeclare anything the base rule already sets, so this is additive, not a
+   duplicate-selector override. */
+.who .av{display:flex;align-items:center;justify-content:center;font:600 var(--t-xs) var(--ui);color:var(--ink2);
+  text-transform:uppercase}
+.umenu .uav b.uinit{font:600 17px var(--ui);color:var(--ink2)}
+/* .umenu .uav is already display:grid;place-items:center in app.css, so the initial letter is already
+   centred there with no new rule needed. */
+
+/* ── the matrix cell's HIT AREA is 24px while its DRAWN box stays 16 (2026-09-06 09:15 EDT) ──
+ * WCAG 2.2 AA target size is 24×24; a 16px cell in a twelve-column grid cannot grow without the grid leaving the laptop
+ * (its written exception), but the thing a finger meets need not be the thing the eye sees. An invisible ::before
+ * extends the target 4px each way; ::after stays the checkmark. */
+.mxcell{position:relative}
+.mxcell::before{content:"";position:absolute;inset:-4px}

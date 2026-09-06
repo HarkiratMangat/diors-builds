@@ -1,7 +1,7 @@
 {
   "realm": "home",
-  "recordedAt": "2026-09-05T02:54:40.864Z",
-  "commit": "bba9d30e",
+  "recordedAt": "2026-09-06T13:24:39.731Z",
+  "commit": "ec4a9958",
   "viewport": {
     "w": 1282,
     "h": 888
@@ -9,9 +9,9 @@
   "views": {
     "(single view)": {
       "grid": {
-        "examined": 198,
-        "nearMisses": 3,
-        "sizeIssues": 36,
+        "examined": 194,
+        "nearMisses": 0,
+        "sizeIssues": 35,
         "sizeGroups": [
           "[object>[object.SVGAnimatedString]|h",
           "[object>[object.SVGAnimatedString]|w",
@@ -47,7 +47,6 @@
           "sc-u>i|TOP-OFFSET",
           "sc-u>i|w",
           "stat>k|TOP-OFFSET",
-          "stat>k|w",
           "stat>v|TOP-OFFSET"
         ]
       },

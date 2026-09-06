@@ -101,8 +101,21 @@
    * Three consumers now read them: the rail's hover wash, the masthead's LEAD figure,
    * and Home's attention rows. Season is the bot's own Season End orange; Review's
    * "topic" is the staged cyan, because the realm IS the staging area. */
-  --r-season:#F2994A; --r-armory:var(--draw); --r-broadcast:var(--patch);
-  --r-access:var(--info); --r-analytics:var(--ev); --r-review:var(--staged);
+  /* 🔴 DISTINCT HUE PER REALM — Harkirat, 2026-09-06 00:50 EDT (decision D4 of the build-out). Until
+   * 2026-09-06 01:21 EDT four of six realm accents ALIASED state colours (--draw, --patch, --info, --ev, --staged),
+   * so a realm's identity and a row's state could read as the same thing — the exact inversion of
+   * "shape carries state, colour carries topic". Each realm now owns a hue nothing else uses:
+   *   season   30° orange  — the bot's own Season End orange, unchanged
+   *   armory  275° violet  — was --draw; kept, because it is a TOPIC here and the draw lane is a topic too
+   *   broadcast 335° pink  — was --patch (also the portal's global accent)
+   *   access  228° indigo  — was --info (24° away, and darker, so a tip and a grant never match)
+   *   analytics 85° lime   — was --ev
+   *   review   ink         — colourless ON PURPOSE: it is the one realm with no topic, because it is every topic
+   *   home     ink2        — the arrival surface, not a territory; explicit so the rail never falls back to --patch
+   * Consumers: the rail's hover wash and active edge, the masthead's LEAD figure, the masthead wash
+   * (.app[data-realm] in app.css), Access's accentOf(), Home's attention rows. */
+  --r-season:#F2994A; --r-armory:#AE72E0; --r-broadcast:#E56FA6;
+  --r-access:#6B8AF7; --r-analytics:#9CC85A; --r-review:var(--ink); --r-home:var(--ink2);
 
 
   /* layout — the one place to override */
@@ -174,6 +187,12 @@
   --ease-soft:cubic-bezier(.22,1,.36,1);  /* long travel, no overshoot spike */
 
   --rail-w:76px; --hdr-h:52px; --gap:14px;
+  /* ── SPACING SCALE — added 2026-09-06 01:21 EDT, decision D6 (`layout`). It did not exist: app.css carried
+   * 10px×63 · 9px×61 · 8px×52 · 7px×51 · 12px×47 · 6px×42 · 3px×34, each individually reasonable,
+   * and pin 14 read the sum as "no breathing room in this entire design". Six steps. Structural
+   * gaps (main, masthead, panels, the record) use s4–s6; inside a control s1–s3. A literal is
+   * still legal where it is optical (a 1px hairline, an 11px diamond); a NEW structural gap is not. */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px;
 
   /* SHAPE SCALE — the same defect as the type scale above, one level out and never checked.
      Measured 2026-08-25: **308 `border-radius` declarations across 29 DISTINCT values** — 1px,
@@ -220,8 +239,18 @@
    * on the mastheads. `--t-body` and `--t-label` were a THIRD set of names for 13.5px and 11px,
    * which `--t-md` and `--t-sm` already covered; they are gone rather than aliased, because an
    * alias is a second name for one value and that is how this collided in the first place. */
-  --t-micro:9px; --t-xs:10px; --t-sm:11.5px; --t-base:12.5px;
-  --t-md:13.5px; --t-lg:15px; --t-xl:19px; --t-hero:24px;
+  /* 🔴 RAISED HALF A STEP, 2026-09-06 01:21 EDT — decision D6 of the build-out (`typeset`). The detector's top rule
+   * across all seven realms was undersized-ui-text (1009 hits on the design's own Armory), and pin 14
+   * said the console had no air. Every UI step moved up 0.5–1.5px and every LITERAL px in app.css was
+   * mapped onto a step in the same change (8/8.5/9/9.5→micro · 10/10.5→xs · 11/11.5/12→sm ·
+   * 12.5/13→base · 13.5/14/14.5→md · 15/16→lg · 19→xl · 24→hero; 17 and 20 stay literal — two display
+   * one-offs on the Armory rank column). ⚠️ The mockup package keeps the OLD values on purpose: it is
+   * the design as approved, and the build-out moved past it (ledger, "Superseded 2026-09-06"). */
+  --t-micro:9.5px; --t-xs:10.5px; --t-sm:12px; --t-base:13px;
+  --t-md:14.5px; --t-lg:16.5px; --t-xl:19px; --t-hero:26px;
+  /* line-height as three jobs, not per-rule taste: a figure sits tight, a control sits on its
+   * own line, a paragraph breathes. */
+  --lh-tight:1.15; --lh-ui:1.35; --lh-body:1.5;
 
   --ui:"Space Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
   --data:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -264,7 +293,7 @@
 body {
     background: var(--desk);
     color: var(--ink);
-    font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-family: var(--ui);   /* the token, not a second stack that had already drifted from it */
     margin: 0;
 }
 

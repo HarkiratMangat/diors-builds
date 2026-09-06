@@ -18,6 +18,12 @@ function ownerOnly(handler) {
     };
 }
 
+// pin32 — the default embed avatar Discord assigns an account with no custom avatar image, computed the same way discord.js does for the new username system: (snowflake >> 22) % 6. Used only when the lookup below finds a real account with a null avatar hash, so the preview card never shows a broken image.
+function defaultAvatarUrl(discordId) {
+    const idx = Number((BigInt(discordId) >> 22n) % 6n);
+    return `https://cdn.discordapp.com/embed/avatars/${idx}.png`;
+}
+
 // "By scope" \u2014 flags a scope held by exactly one non-owner (a single point of failure).
 function singlePointsOfFailure(admins) {
     // ⚠️ A SET, NOT A LIST. `parsePermissionsInput` accepts "manage, manage.draws", and with the two effects below now both applying (they were mutually exclusive until 2026-08-24), that admin was pushed TWICE for manage.draws — so ids.length === 2 and the one scope they hold most explicitly was the one scope never reported as a single point. Deduping by id makes "how many people hold this" mean what it says.
@@ -170,6 +176,29 @@ function register(route) {
         const body = await readJsonBody(req);
         await PortalSession.updateOne({ sessionHash: body.sessionHash }, { revokedAt: new Date() });
         sendJson(res, 200, { ok: true });
+    })));
+
+    // pin32 — resolves a typed Discord id against the bot's own Discord access BEFORE the Grant drawer will let an admin submit it, so a typo or a nonexistent account is caught before it becomes an unreachable AdminUser row. Owner-only, same as every other Access route: the grant form is only ever reachable from this page. ⚠️ NEVER THROWS TO THE CLIENT — a network failure or a Discord rate limit is exactly as recoverable as a "no such user" from the drawer's point of view, so all three come back as `{ ok:false, reason }` on a 200 rather than as a 5xx the drawer has no branch for.
+    route('GET', /^\/api\/discord\/user$/, requireAdmin(ownerOnly(async (req, res, url) => {
+        const id = String(url.searchParams.get('id') || '').trim();
+        if (!/^\d{17,20}$/.test(id)) return sendJson(res, 200, { ok: false, reason: 'That is not a Discord id — 17 to 20 digits.' });
+        let discordRes;
+        try {
+            discordRes = await fetch(`https://discord.com/api/v10/users/${id}`, {
+                headers: { authorization: `Bot ${process.env.BOT_TOKEN}` },
+            });
+        } catch (e) {
+            return sendJson(res, 200, { ok: false, reason: 'Could not reach Discord — try again in a moment.' });
+        }
+        if (discordRes.status === 404) return sendJson(res, 200, { ok: false, reason: 'No Discord user has that id.' });
+        if (discordRes.status === 429) return sendJson(res, 200, { ok: false, reason: 'Discord is rate-limiting lookups right now — wait a moment and try again.' });
+        if (!discordRes.ok) return sendJson(res, 200, { ok: false, reason: `Discord returned ${discordRes.status} — try again.` });
+        let user;
+        try { user = await discordRes.json(); } catch (e) { return sendJson(res, 200, { ok: false, reason: 'Discord sent back something unreadable.' }); }
+        const avatarUrl = user.avatar
+            ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`
+            : defaultAvatarUrl(user.id);
+        sendJson(res, 200, { id: user.id, username: user.username, globalName: user.global_name || null, avatarUrl });
     })));
 }
 

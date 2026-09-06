@@ -11,7 +11,7 @@ import { fetchJson } from './httpClient.js';
 import { useAsync, RealmShell } from './async.js';
 import { stageOps } from './composeClient.js';
 import { renderV2 } from './v2Render.js';
-import { useOverlay } from './overlay.js';
+import { useOverlay, Drawer } from './overlay.js';
 import { reportFailure } from './async.js';
 import { downloadText } from './download.js';
 
@@ -20,10 +20,9 @@ const CATEGORIES = ['AR', 'SMG', 'SNIPER', 'LMG', 'SHOTGUN', 'MARKSMAN', 'SECOND
 
 // 🔴 THE MANIFEST NAMED EVERY BUILD AND SHOWED WHAT WAS IN NONE OF THEM. Weapon, build, category, mode and a comma-joined list of defect keys — so the one question you open a build list to answer, *what does this build actually run*, needed a click per row. The attachments peek and the badge chips are what the adopted table was styled for.
 //
-// ⚠️ THE PEEK SHOWS TWO AND COUNTS THE REST. Five attachment names is a paragraph in a table cell; two plus "+3" is the shape of the thing, and the editor is one click away for the rest. The mockup's filter chips use short labels and its own display order (armory.html's `renderCatChips`) — distinct from CATEGORY_LABEL above, which is precise on purpose for the edit form's dropdown. Only categories with at least one build in the current mode get a chip, matching the mockup's own comment: offering an empty category would advertise a result nothing can fill.
-const CATEGORY_CHIP_LABEL = { AR: 'Assault', SMG: 'SMG', LMG: 'LMG', MARKSMAN: 'Marksman', SNIPER: 'Sniper', SHOTGUN: 'Shotgun', SECONDARIES: 'Secondaries' };
-const CATEGORY_CHIP_ORDER = ['AR', 'SMG', 'LMG', 'MARKSMAN', 'SNIPER', 'SHOTGUN', 'SECONDARIES'];
-
+// ⚠️ THE PEEK SHOWS TWO AND COUNTS THE REST. Five attachment names is a paragraph in a table cell; two plus "+3" is the shape of the thing, and the editor is one click away for the rest.
+//
+// ⚠️ CATEGORY_CHIP_LABEL / CATEGORY_CHIP_ORDER LIVE IN armory.logic.js NOW, as bare globals the same way DMZ_RANGE_TOKENS always has — they are read by rackCategories(), which is arithmetic over the build list and therefore belongs somewhere a test can reach without a browser. They are still distinct from CATEGORY_LABEL below, which is verbose on purpose for the edit form's dropdown.
 const ARMORY_COLUMNS = [
     { key: 'weaponName', label: 'Weapon', editable: true,
       meta: (r) => `${r.mode} · ${(r.attachments || []).length} attachment${(r.attachments || []).length === 1 ? '' : 's'}` },
@@ -67,25 +66,16 @@ const COVERAGE_LABEL = {
     'stale-90d': 'Not updated in 90 days', 'near-duplicate': 'Near-duplicate code',
 };
 
-// Rack -- what exists, by category, in the bot's REAL per-category accent (spec §8.2). It shipped as one row of uniform grey chips: a count per category and nothing else. 04-armory-and-commit.html specs a card per WEAPON under a per-category section divider, each card carrying its build count, a dupe warning where one applies, and a dashed placeholder where the image is missing -- so the panel answers "what is in the armory" at a glance instead of "how many categories are there".
+// Rack — what exists, in the bot's REAL per-category accent (spec §8.2).
 //
-// `accent` is real DATA (portal/api/armory.js stamps it from getMpCategoryAccent), not a CSS token. That is the correct mechanism and deliberately unlike Season's --topic-accent tokens: the bot owns these hues, so reading them from the payload means the two can never drift apart. 🔴 THE RACK IS ORGANISED BY RANK TIER, NOT BY CATEGORY — rebuilt 2026-08-26 onto the adopted design. The previous version grouped by category, which answers "what is in the armory"; the rack in the approved mockup answers "what is ranked where", which is the question the badges exist for and the only one a rack can answer that the Manifest below cannot. Category has not been lost — it is the accent every card carries, so the two facts occupy colour and position rather than competing for the same structure.
-const RANK_ORDER = ['best', 'top3', 'top4', 'top5', null];
-const RANK_LABEL = { best: 'Best in category', top3: 'Top 3', top4: 'Top 4', top5: 'Top 5', null: 'Unranked' };
-// 🔴 THESE STRINGS ARE CSS CLASS NAMES, AND FOUR OF THE FIVE USED TO NAME NOTHING. app.css's Armory block (`.trow.t-best/.t-top3/.t-top4/.t-top5/.t-unranked`) is the one thing that makes the board read as tiered — graded 20/17/15/14/13px marks and a `--bc-dim` that fades the lower tiers' cards. This map emitted `t-t3`, `t-t4`, `t-t5` and `t-none`, so only the Best row ever matched: every other tier rendered at the fallback 19px with `--bc-dim` unset, and `t-none` additionally collided with an unrelated `.t-none` rule 1,800 lines away. Same defect class as the missing `id="mhAdd"`: live CSS, dead selector, nothing reports it.
-const RANK_KEY = { best: 'best', top3: 'top3', top4: 'top4', top5: 'top5', null: 'unranked' };
-const TCLOSED_KEY = 'dioreo-armory-tclosed';
+// `accent` is real DATA (portal/api/armory.js stamps it from getMpCategoryAccent), not a CSS token. That is the correct mechanism and deliberately unlike Season's --topic-accent tokens: the bot owns these hues, so reading them from the payload means the two can never drift apart.
+//
+// 🔴 IT IS GROUPED BY CATEGORY AND IT OPENS CLOSED — Harkirat, Pin 21: "WHY do I have to scroll all the way". This reverses the 2026-08-26 rebuild onto rank tiers, and the reasoning that rebuild gave is still true and is no longer the whole story: a tier board answers "what is ranked where", which is the question the badges exist for, but it answers it by putting the entire catalogue on screen at once in five rows nothing could close. Category is the axis a reader arrives with, and rank has moved one level down rather than away — the weapon groups inside an open category are ordered best-first and each carries its tier as a `.bdg.rank` chip, the same mark the Manifest uses for the same fact. ⚠️ RANK_ORDER / RANK_LABEL / RANK_KEY / rankOf() MOVED TO armory.logic.js in the same change that made the rack category-first: they are what orders the weapon groups inside a category and what labels the teaser on a closed header, so they are read by rackCategories() and are tested there. RANK_KEY's values are still CSS class names — they ride on the weapon group now (.bgrp.t-best) rather than on a tier row, because there is no tier row left.
 
-// A DMZ build ranks on dmzRangeRank, which also encodes a combat range (`best-close`, `best-midlong`) — the tier is the part before the hyphen. An MP build ranks on categoryRank. Reading the wrong field is how DMZ builds all pile into Unranked while looking correct.
-function rankOf(b) {
-    const raw = b.mode === 'DMZ' ? b.dmzRangeRank : b.categoryRank;
-    if (!raw) return null;
-    return String(raw).split('-')[0];
-}
-
-// The Unranked tier carries almost half the catalogue, so it starts collapsed — matching the mockup's default.
-function loadTClosed() { try { return new Set(JSON.parse(sessionStorage.getItem(TCLOSED_KEY)) || ['null']); } catch { return new Set(['null']); } }
-function saveTClosed(set) { try { sessionStorage.setItem(TCLOSED_KEY, JSON.stringify([...set])); } catch (e) {} }
+// 🔴 THE OPEN SET IS STORED, NOT THE CLOSED ONE, AND THAT IS WHAT MAKES "CLOSED BY DEFAULT" SURVIVE A NEW CATEGORY. The tier board stored the CLOSED keys, which works only while the set of rows is fixed: to open closed you have to seed the store with every category that exists, and the first SHOTGUN build to land is then absent from that seed and arrives OPEN — the one state the default exists to forbid. An empty store is all-closed with nothing to enumerate, so a category that appears later inherits the default for free.
+const COPEN_KEY = 'dioreo-armory-catopen';
+function loadCOpen() { try { return new Set(JSON.parse(sessionStorage.getItem(COPEN_KEY)) || []); } catch { return new Set(); } }
+function saveCOpen(set) { try { sessionStorage.setItem(COPEN_KEY, JSON.stringify([...set])); } catch (e) {} }
 
 // 🔴 AGE IS NOT A DEFECT. Counting staleness among the faults put a red mark on nearly every card — the mockup measured 33 of 36 siblings — so the badge stopped meaning anything. Faults get the red count; age gets a quiet dot, because it is a different fact and reads as one.
 export function splitCoverage(b) {
@@ -128,75 +118,91 @@ function BuildChip({ b, onPick }) {
         </article>`;
 }
 
-// 🔴 ONE CARD SHAPE, ALWAYS — a weapon with one build is a group of one. Returning a bare chip for singles and a group for multiples put two visual languages side by side for the same kind of object, which Harkirat read as a rendering bug rather than a distinction. And siblings genuinely ARE a group: six pairs of adjacent cards differed only by a stored buildName that is an index ("Build 1", "Build 2"), so the rack was asking a reader to spot a one-character difference between two identical rectangles.
-function WeaponGroup({ weapon, group, onPick }) {
+// 🔴 ONE CARD SHAPE, ALWAYS — a weapon with one build is a group of one. Returning a bare chip for singles and a group for multiples put two visual languages side by side for the same kind of object, which Harkirat read as a rendering bug rather than as a distinction. And siblings genuinely ARE a group: six pairs of adjacent cards differed only by a stored buildName that is an index ("Build 1", "Build 2"), so the rack was asking a reader to spot a one-character difference between two identical rectangles.
+//
+// ⚠️ THE TIER RIDES HERE NOW. With categories as the top axis, a weapon's rank has to be visible on the weapon or it is nowhere — so the group carries `t-<tierKey>` (the class names app.css grades) and prints the tier in the Manifest's own short spelling, TOP3 rather than "Top 3", because one field wearing two spellings on one screen is the defect the Category column already had to have fixed once.
+function WeaponGroup({ group, onPick }) {
+    const short = group.tier === 'best' ? 'BEST' : String(group.tier).toUpperCase();
     return html`
-        <div class="bgrp" style=${`--c:${group[0].accent || 'var(--ink3)'}`}>
+        <div class=${`bgrp t-${group.tierKey}`} style=${`--c:${group.builds[0].accent || 'var(--ink3)'}`}>
             <div class="bgrp-h">
-                <span class="bgrp-w"><i aria-hidden="true"></i><b>${weapon}</b></span>
+                <span class="bgrp-w"><i aria-hidden="true"></i><b>${group.weapon}</b></span>
                 <span class="bgrp-m">
-                    ${group.some((b) => b.isMeta) ? html`<span class="bc-meta">META</span>` : null}
-                    <span class="bgrp-n">${group.length} build${group.length > 1 ? 's' : ''}</span>
+                    ${group.builds.some((b) => b.isMeta) ? html`<span class="bc-meta">META</span>` : null}
+                    ${group.tier ? html`<b class="bdg rank">${short}</b>` : null}
+                    <span class="bgrp-n">${group.builds.length} build${group.builds.length > 1 ? 's' : ''}</span>
                 </span>
             </div>
-            ${group.map((b) => html`<${BuildChip} key=${b._id || b.id} b=${b} onPick=${onPick} />`)}
+            ${group.builds.map((b) => html`<${BuildChip} key=${b._id || b.id} b=${b} onPick=${onPick} />`)}
         </div>`;
 }
 
 // 🔴 THE VIEW PANELS USED TO CARRY THEIR OWN `.ph`, so the page drew TWO view headers where every design draws one: the Shell's bar (mode · views · legend) and then a second strip repeating the view's name and its count. The design puts that count in the Shell bar's own right-aligned `.sp` meta line (armory.html's `#viewMeta`), and the Shell has had a `meta` prop for it since Broadcast needed one — Armory simply never passed it. RackNote/RepairNote survive as the derivations behind that line, which is the point of them: the panel and the masthead cannot disagree.
-function Rack({ builds, onPick }) {
-    const [tclosed, setTClosed] = useState(loadTClosed);
-    const toggle = (k) => setTClosed((prev) => {
+//
+// ⚠️ THE BODY IS NOT RENDERED WHILE A CATEGORY IS CLOSED, which is a second mechanism on top of `.trow.tclosed .trow-body{display:none}` and is deliberate rather than redundant: closed is the resting state of every category now, so always-rendering would leave the whole catalogue in the DOM — a hundred and thirty cards, every one of them a tab stop's worth of markup — to draw a page that shows seven headers.
+function Rack({ builds, onPick, onAdd }) {
+    const [copen, setCOpen] = useState(loadCOpen);
+    const cats = rackCategories(builds);
+    const toggle = (k) => setCOpen((prev) => {
         const next = new Set(prev);
         next.has(k) ? next.delete(k) : next.add(k);
-        saveTClosed(next);
+        saveCOpen(next);
         return next;
     });
+    const setAll = (open) => {
+        const next = new Set(open ? cats.map((c) => c.category) : []);
+        saveCOpen(next);
+        setCOpen(next);
+    };
+    const openCount = cats.filter((c) => copen.has(c.category)).length;
+
+    // An empty armory is not an error and it is not a table with no rows: it is a page whose only useful content is the way out of it, so it carries the button rather than describing one.
+    if (!builds.length) {
+        return html`
+            <div id="rack">
+                <p class="empty"><b>Nothing in this armory yet.</b>
+                    A build is a weapon, a category and the attachments on it — a gunsmith code, an image and the
+                    badges can all arrive later.</p>
+                <div class="racktools"><button class="pill lead" onClick=${onAdd}>Add the first build</button></div>
+            </div>`;
+    }
 
     return html`
-        <!-- 🔴 NO .panel HERE. Shell already draws section.panel around the view slot, so a view that opened its own
-             was a panel inside a panel: measured .rack at 1114px starting at x=122, against the design's 1160 at x=99,
-             because the outer panel's 23px of padding applied twice. The design has ONE panel per view, holding the
-             header bar and the board together. -->
+        <!-- NO .panel HERE. Shell already draws section.panel around the view slot, so a view that opened its own
+             was a panel inside a panel: measured .rack at 1114px starting at x=122, against the design's 1160 at
+             x=99, because the outer panel's 23px of padding applied twice. -->
         <div id="rack">
-            ${builds.length === 0 ? html`<p class="empty">No builds in this catalogue yet.</p>` : null}
+            <div class="racktools">
+                <button class="chip" disabled=${openCount === cats.length} onClick=${() => setAll(true)}>Expand all</button>
+                <button class="chip" disabled=${openCount === 0} onClick=${() => setAll(false)}>Collapse all</button>
+                <span class="rkt-n">${cats.length} categories · ${builds.length} builds · ${openCount === 0 ? 'all closed — open the one you came for' : openCount + ' open'}</span>
+            </div>
             <div class="rack">
-                ${RANK_ORDER.map((r) => {
-                    const key = String(r);
-                    const list = builds.filter((b) => rankOf(b) === r);
-                    const closed = tclosed.has(key);
-                    const byWeapon = new Map();
-                    for (const b of list) { if (!byWeapon.has(b.weaponName)) byWeapon.set(b.weaponName, []); byWeapon.get(b.weaponName).push(b); }
+                ${cats.map((c) => {
+                    const open = copen.has(c.category);
                     return html`
-                        <div key=${key} class=${`trow t-${RANK_KEY[key]}${closed ? ' tclosed' : ''}`} data-tier=${key}>
-                            <div class="trow-h" role="button" tabindex="0" aria-expanded=${!closed}
-                                 onClick=${() => toggle(key)}
-                                 onKeyDown=${(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(key); } }}
-                                 aria-label=${`${RANK_LABEL[key]}, ${byWeapon.size} weapon group${byWeapon.size === 1 ? '' : 's'} — click to collapse`}>
-                                <!-- 🔴 "T3" AND "Top 3" ARE THE SAME FACT. The header used to render a token, a
-                                     count and a label as three lines, so every tier restated itself, and the
-                                     shapes differed row to row — five headers reading as three designs. One
-                                     shape: mark, label, count, and a note ONLY where there is something to add.
-                                     The mark is a star for best and an em dash for unranked, the two rows whose
-                                     meaning is not already in their label. -->
-                                <span class="trow-k" aria-hidden="true">${r === null ? '—' : r === 'best' ? html`<${Icon} name="star" cls="sm" />` : ''}</span>
-                                <!-- The separating spaces are LOAD-BEARING, not formatting: without them the row's accessible
-                                     name fuses to "Best in category18one weapon per category", which is what a screen reader
-                                     reads out and what --triggers reports. The design's markup has whitespace between these
-                                     spans because it is HTML; a JSX-ish template drops it unless it is asked for. -->
-                                <span class="trow-t">${RANK_LABEL[key]}</span> <span class="trow-n">${list.length}</span> ${r === 'best' ? html`<span class="trow-note">one <b>weapon</b> per category</span>`
-                                    : r === null ? html`<span class="trow-note">no rank set; these render with no tier badge</span>` : null}
-                                <${Fold} open=${!closed} cls="sm trow-i" />
-                            </div>
+                        <div key=${c.category} class=${'trow tcat' + (open ? '' : ' tclosed')} data-cat=${c.category}
+                             style=${`--c:${c.accent || 'var(--ink3)'}`}>
+                            <!-- A REAL BUTTON, not a div wearing role="button". The div version carried its own
+                                 Enter/Space handler, which is the whole of what a button gives you for free and none
+                                 of what it gives a screen reader's forms mode or a browser's own focus ring. -->
+                            <button type="button" class="trow-h" aria-expanded=${open ? 'true' : 'false'}
+                                    onClick=${() => toggle(c.category)}
+                                    aria-label=${`${c.label}: ${c.count} build${c.count === 1 ? '' : 's'} across ${c.weapons} weapon${c.weapons === 1 ? '' : 's'}. Best ranked: ${c.teaser || 'nothing ranked'}.`}>
+                                <span class="trow-k" aria-hidden="true"><i class="catdot"></i></span>
+                                <!-- The separating spaces are LOAD-BEARING, not formatting: without them the row's
+                                     accessible name fuses to "Assault35", which is what --triggers reports and what a
+                                     screen reader reads out. -->
+                                <span class="trow-t">${c.label}</span> <span class="tcat-top" aria-hidden="true">${c.teaserRank}${c.teaser ? html` · <b>${c.teaser}</b>` : ''}</span> <span class="trow-n">${c.count}</span>
+                                <${Fold} open=${open} cls="sm trow-i" />
+                            </button>
                             <div class="trow-body">
-                                ${list.length
-                                    ? [...byWeapon.entries()].map(([w, g]) => html`<${WeaponGroup} key=${w} weapon=${w} group=${g} onPick=${onPick} />`)
-                                    : html`<div class="trow-empty">Nothing at ${RANK_LABEL[key]}.</div>`}
+                                ${open ? c.groups.map((g) => html`<${WeaponGroup} key=${g.weapon} group=${g} onPick=${onPick} />`) : null}
                             </div>
                         </div>`;
                 })}
             </div>
-            <p class="racknote">A badge describes the <b>weapon</b>, not one build of it — the bot propagates it across every build sharing a <code>weaponKey</code> value and mode, so a weapon with five builds contributes five cards to its tier. Rank is <b>per category</b>: “Best” means best AR, best SMG, and so on, rendered as <code>BEST ASSAULT</code> on the card. The words are the bot's own — <code>best</code> then <code>top3</code> then <code>top4</code> then <code>top5</code> — and anything else is refused when you save. <b>DMZ builds never use it</b> — they carry <code>dmzRangeRank</code> instead, which also encodes a combat range such as <code>best-close</code> or <code>best-midlong</code> as well.</p>
+            <p class="racknote">A badge describes the <b>weapon</b>, not one build of it — the bot propagates it across every build sharing a <code>weaponKey</code> value and mode, so a weapon with five builds contributes five cards to its category. Rank is <b>per category</b>: “Best” means best AR, best SMG, and so on, rendered as <code>BEST ASSAULT</code> on the card. The words are the bot's own — <code>best</code> then <code>top3</code> then <code>top4</code> then <code>top5</code> — and anything else is refused when you save. <b>DMZ builds never use it</b> — they carry <code>dmzRangeRank</code> instead, which also encodes a combat range such as <code>best-close</code> or <code>best-midlong</code> as well.</p>
         </div>
     `;
 }
@@ -306,7 +312,8 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
     const set = (patch) => setF((prev) => ({ ...prev, ...patch }));
     const dmz = f.mode === 'DMZ';
     const filled = atts.map((a) => a.trim()).filter(Boolean);
-    const ready = f.weaponName.trim() && f.category.trim();
+    // harden — the reasons, not a boolean. A form whose only required fields are at the very top is exactly the one where a disabled Stage button eight hundred pixels below them explains nothing; the footer says which.
+    const blockers = addFormBlockers(f);
     const code = f.shareCode.trim();
     const img = f.imageKey.trim();
 
@@ -318,11 +325,25 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
         }));
     }
 
+    // ⚠️ THE PREVIEW IS LOCAL, BECAUSE THERE IS NOTHING TO ASK THE SERVER ABOUT YET. The editor's side column renders what Discord actually sends, by calling /api/armory/preview with a real id; a build being typed has no id, so this draws the same record through Compare's own card component — the fields you are filling in, in the order the card puts them. It is a preview of the RECORD and it says so, rather than claiming to be the Discord render.
+    const previewBuild = {
+        ...f, attachments: filled, buildName: f.buildName || 'Standard Build', _id: 'draft',
+        categoryRank: dmz ? null : (f.rank || null), dmzRangeRank: dmz ? (f.rank || null) : null,
+    };
+
     return html`
-        <div class="panel bform" style="margin-bottom:14px">
-            <div class="ph"><span class="t">New build</span><span class="rt">staged, never written — Review is the only screen that commits</span></div>
-            <div style="padding:14px 16px 16px">
-                <p class="bf-legend"><span class="req">*</span> required — everything else can be filled in now or later.</p>
+        <${Drawer} eyebrow=${`loadout.add · ${f.mode} · tier 1`} title=${`New ${f.mode} build`} wide onClose=${onCancel}
+                   actions=${html`
+                       <span role="status" class=${'why' + (blockers.length ? ' blocked' : '')}>${blockers.length
+                           ? `Still needs ${blockers[0]}.`
+                           : 'Stages one operation. Nothing reaches a player until you commit it on Review.'}</span>
+                       <button class="btn" onClick=${onCancel}>Cancel</button>
+                       <button class="btn go" disabled=${blockers.length > 0} onClick=${submit}>Stage this ${f.mode} build</button>`}>
+            <div class="bed">
+                <div class="bed-main">
+                    <p class="dw-p">Fill in what you know. A weapon name and a category are all it takes to stage a
+                        build — the gunsmith code, the image and the badges can follow later, and none of it reaches
+                        a player until somebody commits it on Review.</p>
 
                 <section class="bf-sec">
                     <h4 class="bf-h">Identity</h4>
@@ -332,21 +353,21 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
                                     onClick=${() => set({ mode: m, rank: '' })}>${m}</button>`)}
                     </div>
                     <div class="bed-g2" style="margin-top:11px">
-                        <label class="dwfield"><span>Weapon name <span class="req">*</span></span>
-                            <input value=${f.weaponName} placeholder="AK117" autocomplete="off"
+                        <div class="dwfield"><label for="ab-weapon"><span>Weapon name <span class="req">*</span></span></label>
+                            <input id="ab-weapon" aria-describedby="ab-weapon-hint" value=${f.weaponName} placeholder="AK117" autocomplete="off"
                                    onInput=${(e) => set({ weaponName: e.target.value })} />
-                            <i class="bf-hint">As it should read on the card. <code>weaponKey</code> is derived from it —${' '}
-                                lowercased, spaces stripped${f.weaponName.trim() ? html` → <code>${f.weaponName.toLowerCase().replace(/\s+/g, '')}</code>` : ''}.</i></label>
-                        <label class="dwfield"><span>Build name</span>
-                            <input value=${f.buildName} placeholder="Aggressive Flex" autocomplete="off"
+                            <i class="bf-hint" id="ab-weapon-hint">As it should read on the card. <code>weaponKey</code> is derived from it —${' '}
+                                lowercased, spaces stripped${f.weaponName.trim() ? html` → <code>${f.weaponName.toLowerCase().replace(/\s+/g, '')}</code>` : ''}.</i></div>
+                        <div class="dwfield"><label for="ab-build"><span>Build name</span></label>
+                            <input id="ab-build" aria-describedby="ab-build-hint" value=${f.buildName} placeholder="Aggressive Flex" autocomplete="off"
                                    onInput=${(e) => set({ buildName: e.target.value })} />
-                            <i class="bf-hint">A human variant label, not a code. Defaults to <b>Standard Build</b>.</i></label>
+                            <i class="bf-hint" id="ab-build-hint">A human variant label, not a code. Defaults to <b>Standard Build</b>.</i></div>
                     </div>
-                    <label class="dwfield"><span>Category <span class="req">*</span></span>
-                        <select value=${f.category} onChange=${(e) => set({ category: e.target.value })}>
+                    <div class="dwfield"><label for="ab-category"><span>Category <span class="req">*</span></span></label>
+                        <select id="ab-category" value=${f.category} onChange=${(e) => set({ category: e.target.value })}>
                             ${CATEGORIES.map((c) => html`<option value=${c} key=${c}>${c} — ${CATEGORY_LABEL[c] || c}</option>`)}
                         </select>
-                        <i class="bf-hint">Mode is <b>${f.mode}</b> and is chosen above, exactly as it is decided by which page you opened in the bot.</i></label>
+                        <i class="bf-hint">Mode is <b>${f.mode}</b> and is chosen above, exactly as it is decided by which page you opened in the bot.</i></div>
                 </section>
 
                 <section class="bf-sec">
@@ -360,8 +381,9 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
                                 <label class="sr" for=${`ab-att-${i}`}>Attachment ${i + 1}</label>
                                 <input class="ati" id=${`ab-att-${i}`} value=${a} placeholder=${ATT_HINTS[i] || 'Attachment'}
                                        onInput=${(e) => setAtts(atts.map((v, n) => (n === i ? e.target.value : v)))} />
-                                <button class="atx" aria-label=${`Clear attachment ${i + 1}`} tabIndex=${-1}
-                                        onClick=${() => setAtts(atts.map((v, n) => (n === i ? '' : v)))}>✕</button>
+                                ${''/* 🔴 A HINT INSIDE A LABEL BECOMES PART OF THE NAME (2026-09-06 09:22 EDT): the accessibility review read "Weapon name * As it should read on the card. weaponKey is derived from it…" as the field's whole accessible name, on five fields. label[for] + input#id + aria-describedby now, so the hint is a description. 🔴 A SELECT NEVER SITS INSIDE ITS LABEL — four did, and the states walk's PASS 6 read each label's name as every option run together ("Category rankUnrankedBest in categoryTop 3…"): label[for] + select#id now. 🔴 REACHABLE BY TAB, 2026-09-06 01:45 EDT. The clear button carried tabIndex -1 — an arrow-key pattern nothing here implements — so the states walk's PASS 4 found five visible buttons no Tab could reach inside a dialog that had just declared the rest of the page inert. And the glyph is drawn, not typed: a text ✕ inherits metrics nothing here controls (reference_never_text_glyphs_for_icons). */}
+                                <button class="atx" aria-label=${`Clear attachment ${i + 1}`}
+                                        onClick=${() => setAtts(atts.map((v, n) => (n === i ? '' : v)))}><${Icon} name="x" cls="sm" /></button>
                             </div>`)}
                     </div>
                 </section>
@@ -372,24 +394,24 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
                         <p class="bf-p bf-na"><b>DMZ builds have no share code.</b> That screen does not generate one, so
                             the field is absent rather than shown and ignored.</p>`
                     : html`
-                        <label class="dwfield"><span>Share code</span>
-                            <input value=${f.shareCode} placeholder="1C2B4A8B9A" autocomplete="off" spellcheck="false" maxLength="12"
+                        <div class="dwfield"><label for="ab-share"><span>Share code</span></label>
+                            <input id="ab-share" aria-describedby="ab-share-hint" value=${f.shareCode} placeholder="1C2B4A8B9A" autocomplete="off" spellcheck="false" maxLength="12"
                                    onInput=${(e) => set({ shareCode: e.target.value })} />
-                            <i class="bf-hint">Ten characters, a digit and a letter alternating. Look-alike characters are
+                            <i class="bf-hint" id="ab-share-hint">Ten characters, a digit and a letter alternating. Look-alike characters are
                                 corrected on save rather than refused${code && code.length !== 10 ? html`, but ${code.length} characters is not ten` : ''}.
-                                Leave it blank if you do not have one — a blank field sends no value at all.</i></label>`}
+                                Leave it blank if you do not have one — a blank field sends no value at all.</i></div>`}
                 </section>
 
                 <section class="bf-sec">
                     <h4 class="bf-h">Image</h4>
-                    <label class="dwfield"><span>Cloudinary key, or a full URL</span>
-                        <input value=${f.imageKey} placeholder="AK117-1" autocomplete="off" spellcheck="false"
+                    <div class="dwfield"><label for="ab-image"><span>Cloudinary key, or a full URL</span></label>
+                        <input id="ab-image" aria-describedby="ab-image-hint" value=${f.imageKey} placeholder="AK117-1" autocomplete="off" spellcheck="false"
                                onInput=${(e) => set({ imageKey: e.target.value })} />
-                        <i class="bf-hint">${!img
+                        <i class="bf-hint" id="ab-image-hint">${!img
                             ? html`Convention is <code>WEAPON-N</code> — all caps, spaces to hyphens, N being this build's position among its siblings.`
                             : (/^https?:\/\//i.test(img)
                                 ? html`Read as a <b>full URL</b>, stored as-is — and it will not survive a bulk-export round trip, because only a real key is emitted there.`
-                                : html`Read as a <b>Cloudinary key</b>, delivered with <code>f_auto,q_auto</code> baked in.`)}</i></label>
+                                : html`Read as a <b>Cloudinary key</b>, delivered with <code>f_auto,q_auto</code> baked in.`)}</i></div>
                 </section>
 
                 <section class="bf-sec">
@@ -401,31 +423,37 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
                     <div class="bf-badges">
                         <label class="bf-tog"><input type="checkbox" checked=${f.isMeta} onChange=${(e) => set({ isMeta: e.target.checked })} /><span>Meta</span></label>
                         <label class="bf-tog"><input type="checkbox" checked=${f.isToxic} onChange=${(e) => set({ isToxic: e.target.checked })} /><span>Toxic</span></label>
-                        <label class="dwfield bf-rank"><span>${dmz ? 'DMZ range rank' : 'Category rank'}</span>
-                            <select value=${f.rank} onChange=${(e) => set({ rank: e.target.value })}>
+                        <div class="dwfield bf-rank"><label for="ab-rank"><span>${dmz ? 'DMZ range rank' : 'Category rank'}</span></label>
+                            <select id="ab-rank" value=${f.rank} onChange=${(e) => set({ rank: e.target.value })}>
                                 <option value="">${dmz ? 'None' : 'Unranked'}</option>
                                 ${(dmz ? DMZ_RANGE_TOKENS : MP_RANK_TOKENS).map((t) => html`
                                     <option value=${t} key=${t}>${dmz ? t.replace('-', ' · ') : (RANK_LABEL[t] || t)}</option>`)}
-                            </select></label>
+                            </select></div>
                     </div>
                 </section>
 
                 <section class="bf-sec">
                     <h4 class="bf-h">Description</h4>
-                    <label class="dwfield"><span>Usage blurb</span>
-                        <textarea rows="2" value=${f.description} placeholder="When to reach for this build."
+                    <div class="dwfield"><label for="ab-usage"><span>Usage blurb</span></label>
+                        <textarea id="ab-usage" aria-describedby="ab-usage-hint" rows="2" value=${f.description} placeholder="When to reach for this build."
                                   onInput=${(e) => set({ description: e.target.value })}></textarea>
-                        <i class="bf-hint">Rendered as a blockquote above the attachments. <b>2 of 133</b> builds carry one.</i></label>
+                        <i class="bf-hint" id="ab-usage-hint">Rendered as a blockquote above the attachments. <b>2 of 133</b> builds carry one.</i></div>
                 </section>
 
-                <div class="attfoot">
-                    <!-- A disabled control that does not say why is the same defect as a check that cannot fail: the reader learns nothing from it. -->
-                    <button class="pill lead" disabled=${!ready} onClick=${submit}>
-                        ${ready ? `Stage this ${f.mode} build` : 'A weapon name is required'}</button>
-                    <button class="pill" onClick=${onCancel}>Cancel</button>
                 </div>
+
+                <aside class="bed-side">
+                    <div class="bed-sec">
+                        <h5>The record you are writing</h5>
+                        ${f.weaponName.trim()
+                            ? html`<${LoadoutCard} build=${previewBuild} siblings=${[previewBuild]} />`
+                            : html`<p class="empty">Type a weapon name and the card builds itself here.</p>`}
+                        <p class="imgnote">Not the Discord render — that needs a saved build to ask the bot about.
+                            This is the record as it stands, in the order the card puts it.</p>
+                    </div>
+                </aside>
             </div>
-        </div>
+        <//>
     `;
 }
 
@@ -514,12 +542,18 @@ function BuildEditor({ build, csrfToken, onStage, onClose }) {
     }
 
     const dmz = draft.mode === 'DMZ';
+    // harden — two things make a Stage pointless, and both are stated on the footer line rather than left for the Review screen to discover. A no-op edit is the interesting one: it is not harmless, it puts a row on the only screen that commits for somebody to read, understand and decide about, and it changes nothing when they do.
+    const changed = editedFields(build, draft);
+    const blockers = editorBlockers(build, draft);
     return html`
-        <div class="panel" id="build-editor">
-            <div class="ph">
-                <span class="t">Editing ${build.weaponName}<span class="bc-mode">${build.mode}</span></span>
-                <span class="rt">one operation, staged — nothing here writes</span>
-            </div>
+        <${Drawer} eyebrow=${`loadout.edit · ${build.mode} · tier 1`}
+                   title=${`${build.weaponName} — ${build.buildName || 'Standard Build'}`} wide onClose=${onClose}
+                   actions=${html`
+                       <span role="status" class=${'why' + (blockers.length ? ' blocked' : '')}>${blockers.length
+                           ? `Still needs ${blockers[0]}.`
+                           : `${changed.length} field${changed.length === 1 ? '' : 's'} changed, staged as one operation.`}</span>
+                       <button class="btn" onClick=${onClose}>Cancel</button>
+                       <button class="btn go" disabled=${blockers.length > 0} onClick=${stage}>Stage this edit</button>`}>
             <div class="bed">
                 <!-- ⚠️ THE TWO COLUMNS ARE NAMED NOW, and this comment used to say naming them would emit classes that do nothing. That was true of the ADOPTED sheet, which declares neither; it stopped being true when the portal authored rules for both. A zero min-width is what stops a long attachment string from blowing the 1fr column past its track, and the aside sticks so the card stays on screen while a long field list scrolls under it. -->
                 <div class="bed-main">
@@ -532,18 +566,18 @@ function BuildEditor({ build, csrfToken, onStage, onClose }) {
                                 <input value=${draft.buildName || ''} onInput=${(e) => set({ buildName: e.target.value })} /></label>
                         </div>
                         <div class="bed-g3">
-                            <label class="dwfield"><span>Category</span>
-                <select value=${draft.category} onChange=${(e) => set({ category: e.target.value })}>
+                            <div class="dwfield"><label for="be-category"><span>Category</span></label>
+                <select id="be-category" value=${draft.category} onChange=${(e) => set({ category: e.target.value })}>
                                     <!-- The PRECISE label, matching the Add form. These two dropdowns edit the same field
                                          and disagreed: the Add form read "AR — Assault Rifle" and this one read "AR". The
                                          column beside them now reads "Assault". Three spellings for one field, which is
                                          the defect the column fix closed in ONE of its three places. -->
                                     ${CATEGORIES.map((c) => html`<option value=${c} key=${c}>${c} — ${CATEGORY_LABEL[c] || c}</option>`)}
-                                </select></label>
-                            <label class="dwfield"><span>Mode</span>
-                                <select value=${draft.mode} onChange=${(e) => set({ mode: e.target.value })}>
+                                </select></div>
+                            <div class="dwfield"><label for="be-mode"><span>Mode</span></label>
+                                <select id="be-mode" value=${draft.mode} onChange=${(e) => set({ mode: e.target.value })}>
                                     ${MODES.map((m) => html`<option value=${m} key=${m}>${m}</option>`)}
-                                </select></label>
+                                </select></div>
                             <label class="dwfield"><span>weaponKey <i>derived</i></span>
                                 <input value=${String(draft.weaponName || '').toLowerCase().replace(/\s+/g, '')} readOnly /></label>
                         </div>
@@ -624,11 +658,7 @@ function BuildEditor({ build, csrfToken, onStage, onClose }) {
                     </div>
                 </aside>
             </div>
-            <div class="attfoot" style="padding:0 16px 16px">
-                <button class="pill lead" onClick=${stage}>Stage this edit</button>
-                <button class="pill" onClick=${onClose}>Close</button>
-            </div>
-        </div>
+        <//>
     `;
 }
 
@@ -649,8 +679,6 @@ const COMPARE_FIELDS = [
     ['Share code', (b) => b.shareCode || '—'],
     ['Image', (b) => b.imageKey || '—'],
 ];
-
-const MAX_COMPARE = 3;
 
 // 🔴 `.cmpcards` EXPECTED `.dcard` CHILDREN AND GOT BARE DIVS, so the column layout, the dividers and every rule under `.dcard.lc` styled nothing — twelve classes with rules and no markup. The card is the RECORD, laid out so two of them line up field for field: the attachment list is the thing you actually compare, and reading it out of two Discord renders means reading two pictures.
 //
@@ -694,33 +722,108 @@ function LoadoutCard({ build, siblings }) {
     `;
 }
 
-function Compare({ builds, picked, onPick }) {
-    const chosen = builds.filter((b) => picked.includes(String(b._id)));
+
+// 🔴 PICK-TWO WAS THE WRONG QUESTION — Harkirat, Pin 18: "why can't I just type the weapon name / compare multiple builds of that weapon". The bar offered the first forty builds in the catalogue as chips and asked you to find two of them by eye, so the comparison anyone actually wants — this weapon, all of its builds — could only be reached by scrolling to two chips that happen to share a name, and a weapon with three builds could not be expressed at all. The entry point is a typed weapon now, and the comparison is its whole sibling set: exactly the set the near-duplicate flag is about.
+//
+// ⚠️ TWO WEAPONS, SIX COLUMNS. One weapon answers "which of these do I keep"; a second answers "does the AK117 carry what the Fennec does", which is a real question and costs one more chip. Past that the table stops being readable at 1282px, so the cap is on the COLUMNS rather than on the weapons — a weapon with seven builds is truncated and says so, instead of being refused for having too many.
+const MAX_COMPARE_WEAPONS = 2;
+const MAX_COMPARE_COLUMNS = 6;
+
+// ⚠️ A COMBOBOX, NOT AN INPUT WITH A LIST UNDER IT. `aria-expanded`/`aria-controls`/`aria-activedescendant` are what make the arrow keys mean anything to a screen reader: without them the highlighted row is a class name and the reader is told nothing has changed. The list is filtered on every keystroke rather than on a debounce, because the corpus is the weapons in one armory — tens, not thousands — and a debounce would only add lag to a local filter.
+function WeaponSearch({ options, picked, onPick }) {
+    const [q, setQ] = useState('');
+    const [hi, setHi] = useState(0);
+    const full = picked.length >= MAX_COMPARE_WEAPONS;
+    const matches = full ? [] : matchWeapons(options, q, picked);
+    const at = Math.min(hi, Math.max(0, matches.length - 1));
+    const take = (w) => { onPick(w); setQ(''); setHi(0); };
+    function onKey(e) {
+        if (e.key === 'Escape') { setQ(''); setHi(0); return; }
+        if (!matches.length) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); setHi((h) => (Math.min(h, matches.length - 1) + 1) % matches.length); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); setHi((h) => (Math.min(h, matches.length - 1) - 1 + matches.length) % matches.length); }
+        else if (e.key === 'Enter') { e.preventDefault(); take(matches[at].weapon); }
+    }
+    return html`
+        <div class="wsrch">
+            <label class="dwfield">
+                <span>Weapon</span>
+                <input id="cmp-weapon" type="search" autocomplete="off" spellcheck="false" role="combobox"
+                       aria-expanded=${matches.length ? 'true' : 'false'} aria-controls="cmp-weapon-list"
+                       aria-activedescendant=${matches.length ? 'cmp-w-' + at : ''}
+                       placeholder=${full ? 'Two weapons is as many as this table lines up' : 'Type a weapon name — AK117, Fennec, KRM'}
+                       disabled=${full} value=${q}
+                       onInput=${(e) => { setQ(e.target.value); setHi(0); }} onKeyDown=${onKey} />
+            </label>
+            ${matches.length ? html`
+                <ul class="wsrch-list" id="cmp-weapon-list" role="listbox" aria-label="Matching weapons">
+                    ${matches.map((o, i) => html`
+                        <li key=${o.weapon} id=${'cmp-w-' + i} role="option" aria-selected=${i === at ? 'true' : 'false'}
+                            class=${'wsrch-opt' + (i === at ? ' on' : '')}
+                            onMouseEnter=${() => setHi(i)} onClick=${() => take(o.weapon)}>
+                            <b>${o.weapon}</b> <span>${o.builds.length} build${o.builds.length === 1 ? '' : 's'} · ${CATEGORY_CHIP_LABEL[o.category] || o.category}</span>
+                        </li>`)}
+                </ul>` : null}
+            ${!full && q.trim() && !matches.length
+                ? html`<p class="wsrch-none">No weapon in this armory matches “${q.trim()}”.</p>` : null}
+        </div>`;
+}
+
+// ⚠️ THE SAME ROWS ARE DRAWN WHETHER THEY MATCH OR NOT. Showing only the differences would be shorter and would answer a different question: "these two are identical apart from the image" is a conclusion you can only reach by seeing the fields that agree. `.cmptab tr.same` is the adopted sheet's own class for exactly that.
+function Compare({ builds, weapons, onSetWeapons, onOpenRack, onAdd }) {
+    const options = weaponOptions(builds);
+    const picked = (weapons || []).filter((w) => options.some((o) => o.weapon === w));
+    const optionOf = (w) => options.find((o) => o.weapon === w) || { weapon: w, builds: [] };
+    const all = picked.flatMap((w) => optionOf(w).builds);
+    const chosen = all.slice(0, MAX_COMPARE_COLUMNS);
     const siblingsOf = (b) => builds.filter((x) => x.weaponKey === b.weaponKey && x.mode === b.mode);
+    // The suggestion is the point of the empty state: "type a weapon name" is an instruction, and a button carrying a weapon that actually has siblings is the thing the instruction was for.
+    const suggest = options.find((o) => o.builds.length > 1) || null;
+    const singles = picked.map(optionOf).filter((o) => o.builds.length === 1);
+
+    if (!options.length) {
+        return html`
+            <div id="compare">
+                <p class="empty"><b>Nothing to compare yet.</b>
+                    Compare lines up every build of one weapon, field by field — so it needs a weapon first.</p>
+                <div class="racktools"><button class="pill lead" onClick=${onAdd}>Add a build</button></div>
+            </div>`;
+    }
 
     return html`
         <div id="compare">
             <div class="cmpbar">
-                ${builds.slice(0, 40).map((b) => {
-                    const id = String(b._id);
-                    const on = picked.includes(id);
-                    return html`
-                        <button class=${'chip' + (on ? ' on' : '')} key=${id} aria-pressed=${on ? 'true' : 'false'}
-                                disabled=${!on && picked.length >= MAX_COMPARE}
-                                onClick=${() => onPick(id)}>
-                            ${b.weaponName}<b>${b.buildName || '—'}</b>
-                        </button>`;
-                })}
+                <${WeaponSearch} options=${options} picked=${picked}
+                                 onPick=${(w) => onSetWeapons([...picked, w].slice(-MAX_COMPARE_WEAPONS))} />
+                ${picked.map((w) => html`
+                    <button class="chip on" key=${w} onClick=${() => onSetWeapons(picked.filter((x) => x !== w))}
+                            aria-label=${`Remove ${w} from the comparison`}>
+                        ${w}<b>${optionOf(w).builds.length}</b><${Icon} name="x" cls="sm" />
+                    </button>`)}
             </div>
-            ${chosen.length < 2 ? html`
-                <p class="empty">Pick two or three builds above. Rows that differ are marked; rows that agree are shown
-                    too, because "identical apart from the image" is a conclusion you can only reach by seeing them.</p>`
+            ${!picked.length ? html`
+                <p class="empty"><b>Type a weapon above.</b>
+                    Every build of it lines up here, field by field, with the rows that differ marked — which is the
+                    only way to decide which of two near-duplicates to keep.</p>
+                ${suggest ? html`
+                    <div class="racktools">
+                        <button class="pill lead" onClick=${() => onSetWeapons([suggest.weapon])}>Try ${suggest.weapon} — ${suggest.builds.length} builds</button>
+                    </div>` : null}`
             : html`
                 <div class="cmp">
+                    ${singles.map((o) => html`
+                        <p class="cmpone" key=${o.weapon}><b>${o.weapon}</b> has one build in this armory, so there is
+                            nothing to line it up against. Its card is below.${' '}
+                            <button class="chip" onClick=${() => onOpenRack(o.weapon)}>Show it in the tier board</button></p>`)}
+                    ${all.length > chosen.length ? html`
+                        <p class="cmpone">Showing the first ${MAX_COMPARE_COLUMNS} of ${all.length} builds — past that the
+                            table stops fitting the screen it is read on.</p>` : null}
                     <div class="cmpcards">
                         ${chosen.map((b) => html`<${LoadoutCard} key=${String(b._id)} build=${b} siblings=${siblingsOf(b)} />`)}
                     </div>
-                    <!-- ⚠️ THE TABLE ANSWERS "WHAT IS DIFFERENT" ONE FIELD AT A TIME AND NEVER TOTALS IT. Two builds that differ in one field and two that differ in nine look identical until you have read every row. -->
+                    <!-- ⚠️ THE TABLE ANSWERS "WHAT IS DIFFERENT" ONE FIELD AT A TIME AND NEVER TOTALS IT. Two builds
+                         that differ in one field and two that differ in nine look identical until you have read
+                         every row. -->
                     ${(() => {
                         const differing = COMPARE_FIELDS.filter(([, read]) => {
                             const vs = chosen.map(read).map((v) => (v == null ? '—' : String(v)));
@@ -728,26 +831,28 @@ function Compare({ builds, picked, onPick }) {
                         }).length;
                         return html`
                             <div class="diff">
+                                <div class="diff-r"><span class="dk">Builds lined up</span><span>${chosen.length}</span></div>
                                 <div class="diff-r"><span class="dk">Fields compared</span><span>${COMPARE_FIELDS.length}</span></div>
-                                <div class="diff-r"><span class="dk">Differ</span><span>${differing || 'none — these are the same build twice'}</span></div>
+                                <div class="diff-r"><span class="dk">Differ</span><span>${chosen.length < 2 ? 'nothing to differ from' : (differing || 'none — these are the same build twice')}</span></div>
                             </div>`;
                     })()}
-                    <table class="cmptab">
-                        <thead><tr><th>Field</th>${chosen.map((b) => html`<th key=${String(b._id)}>${b.weaponName}</th>`)}</tr></thead>
-                        <tbody>
-                            ${COMPARE_FIELDS.map(([label, read]) => {
-                                const values = chosen.map(read).map((v) => (v == null ? '—' : String(v)));
-                                const same = values.every((v) => v === values[0]);
-                                // ⚠️ A DIFFERING CELL IS MARKED, AN AGREEING ONE IS NOT. The row already carries `diff`, which colours the whole line — but with three builds picked, two can agree and one differ, and a row-level mark cannot say which. `.dnow` is the cell-level version of the same signal.
-                                return html`
-                                    <tr class=${same ? 'same' : 'diff'} key=${label}>
-                                        <td class="cmpf">${label}</td>
-                                        ${values.map((v, i) => html`
-                                            <td key=${i} class=${!same && v !== values[0] ? 'dnow' : ''}>${v}</td>`)}
-                                    </tr>`;
-                            })}
-                        </tbody>
-                    </table>
+                    ${chosen.length > 1 ? html`
+                        <table class="cmptab">
+                            <thead><tr><th>Field</th>${chosen.map((b) => html`<th key=${String(b._id)}>${b.weaponName} <em>${b.buildName || 'Standard Build'}</em></th>`)}</tr></thead>
+                            <tbody>
+                                ${COMPARE_FIELDS.map(([label, read]) => {
+                                    const values = chosen.map(read).map((v) => (v == null ? '—' : String(v)));
+                                    const same = values.every((v) => v === values[0]);
+                                    // ⚠️ A DIFFERING CELL IS MARKED, AN AGREEING ONE IS NOT. The row already carries `diff`, which colours the whole line — but with three builds picked, two can agree and one differ, and a row-level mark cannot say which. `.dnow` is the cell-level version of the same signal.
+                                    return html`
+                                        <tr class=${same ? 'same' : 'diff'} key=${label}>
+                                            <td class="cmpf">${label}</td>
+                                            ${values.map((v, i) => html`
+                                                <td key=${i} class=${!same && v !== values[0] ? 'dnow' : ''}>${v}</td>`)}
+                                        </tr>`;
+                                })}
+                            </tbody>
+                        </table>` : null}
                 </div>`}
         </div>
     `;
@@ -982,15 +1087,12 @@ export function ArmoryRealm({ session }) {
     const [notice, setNotice] = useState('');
     // ⚠️ THE VIEW NAMES ARE THE MOCKUP'S, chosen at Harkirat's call on 2026-08-27 after seeing both bars rendered side by side. `Repairs` is the one that earns it outright: `Coverage` named a measurement, `Repairs` names what you came to do, and Season already calls the same idea by the same word -- so the two realms finally agree.
     const [view, setView] = useState(VIEWS.rack);
-    const [compared, setCompared] = useState([]);
+    // Compare is keyed on WEAPONS now, not on build ids: the question is "this weapon, all of its builds", so the selection is the weapon and the build set falls out of it. A stale id could survive a refresh that deleted its build; a stale weapon name simply stops matching and is filtered out.
+    const [comparedWeapons, setComparedWeapons] = useState([]);
     // What the Manifest's own filter chips are set to. Owned here only because the EXPORT strip scopes by them; the Manifest still owns the filtering itself.
     const [manifestFilters, setManifestFilters] = useState({});
     const [editingId, setEditingId] = useState(null);
-    // The side column exists only while something is being edited, so the grid that reserves room for it does too.
-    const editing = Boolean(showAdd || editingId);
-    // The grid is applied around the body rather than by swapping the tag, because htm has no dynamic-tag-with-spread form and the attempt to write one parses as an unterminated expression — node --check caught it, loudly. ⚠️ AND IT SITS BELOW editingId ON PURPOSE. The first placement was four lines ABOVE that useState, which is a temporal dead zone: the file parses, node --check is silent, and the realm renders NOTHING. Caught because portal:probe reported .rack as MISSING ON THE PORTAL — the same class eslint.config.mjs was installed for.
-    const wrapBed = (body) => (editing ? html`<div class="bed" id="armory"><div>${body}</div></div>` : body);
-    // 🔴 THE MODE IS A PROPERTY OF THE REALM, NOT OF ONE PANEL. It began as BulkView's private state, so the Rack, Repairs and Compare all showed MP and DMZ mixed together while a fourth view quietly filtered to one of them. MP and DMZ are two armories with different rules -- DMZ has no share code and ranks by combat range -- and every figure on this page is a count of one population or the other, so a masthead that totals both answers a question nobody asked.
+    // 🔴 BOTH FORMS ARE MODAL DRAWERS NOW, so the view slot no longer has to make room for one. `wrapBed` used to wrap the whole view in the editor's `.bed` grid whenever something was being edited — which meant the rack, the repairs cards and the bulk panel all inherited a layout that exists for a form none of them contain. The drawer carries its own `.bed` internally and the page behind it is `inert`, so the view is only ever the view. 🔴 THE MODE IS A PROPERTY OF THE REALM, NOT OF ONE PANEL. It began as BulkView's private state, so the Rack, Repairs and Compare all showed MP and DMZ mixed together while a fourth view quietly filtered to one of them. MP and DMZ are two armories with different rules -- DMZ has no share code and ranks by combat range -- and every figure on this page is a count of one population or the other, so a masthead that totals both answers a question nobody asked.
     const [armMode, setArmMode] = useState('MP');
     const overlay = useOverlay();
 
@@ -1045,17 +1147,20 @@ export function ArmoryRealm({ session }) {
         .filter((b) => !weaponFilter || b.weaponName === weaponFilter)
         .map((b) => ({ ...b, id: b._id, topicVar: null, accentHex: b.accent }));
 
+    // 🔴 A DRAWER OVER A ROW THAT NO LONGER EXISTS. The editor used to be handed `builds.find(...)` inline, so a staged bulk deletion followed by a refresh could hand it `undefined` and the first field read would throw inside a modal with the page behind it inert — a dead screen with no way out but Escape. Resolved once here, and the drawer is simply not rendered when the build it was opened for has gone.
+    const editingBuild = editingId ? builds.find((b) => String(b._id) === editingId) || null : null;
+
     // 🔴 STAGING WITH NO ACKNOWLEDGEMENT READS AS A DROPPED CLICK. The form closed, the table did not change (a staged build is not a live one), and nothing anywhere said the work had landed — so the only way to find out was to open Review and look. The toast carries the way there, because "it is staged" and "here is where staged things go" are the same sentence.
     async function handleAdd(op) {
         await stageOps('armory', [op], session.csrfToken);
         setShowAdd(false);
-        overlay.say('Build staged. Nothing is live until you commit it.', 'Review', () => { location.hash = '#/review'; });
+        overlay.say('Staged · nothing is live until you commit it.', 'Review →', () => { location.hash = '#/review'; });
         refresh();
     }
 
     async function handleBulkDelete(ids) {
         await stageOps('armory', [{ type: 'loadout.bulkDelete', target: null, payload: { ids } }], session.csrfToken);
-        overlay.say(`${ids.length} deletion${ids.length === 1 ? '' : 's'} staged.`, 'Review', () => { location.hash = '#/review'; });
+        overlay.say(`Staged · ${ids.length} deletion${ids.length === 1 ? '' : 's'}, nothing removed yet.`, 'Review →', () => { location.hash = '#/review'; });
         refresh();
     }
 
@@ -1085,7 +1190,7 @@ export function ArmoryRealm({ session }) {
         });
         if (ops.length) await stageOps('armory', ops, session.csrfToken);
         setBulkBadgesIds(null);
-        overlay.say(`Badges staged for ${ops.length} build${ops.length === 1 ? '' : 's'}.`, 'Review', () => { location.hash = '#/review'; });
+        overlay.say(`Staged · badges on ${ops.length} build${ops.length === 1 ? '' : 's'}.`, 'Review →', () => { location.hash = '#/review'; });
         refresh();
     }
 
@@ -1111,7 +1216,9 @@ export function ArmoryRealm({ session }) {
     const rankedNow = inMode.filter((b) => b.categoryRank || b.dmzRangeRank).length;
     const viewMeta = view === VIEWS.rack ? `${rankedNow} of ${inMode.length} ranked`
         : view === VIEWS.coverage ? `${Object.keys(COVERAGE_LABEL).filter((f) => inMode.some((b) => (b.coverage || []).includes(f))).length} of ${Object.keys(COVERAGE_LABEL).length} checks failing`
-        : view === VIEWS.compare ? `${compared.length} of ${MAX_COMPARE} picked`
+        : view === VIEWS.compare ? (comparedWeapons.length
+            ? `${comparedWeapons.join(' · ')} — ${inMode.filter((b) => comparedWeapons.includes(b.weaponName)).length} builds`
+            : 'type a weapon name')
         : `${inMode.length} ${armMode} builds · pipe format, lossless round trip`;
 
     const tag = armMode.toLowerCase();
@@ -1153,12 +1260,24 @@ export function ArmoryRealm({ session }) {
                   realmKey=${html`<${ArmoryKey} split=${split} />`}
                   badges=${{ review: load.data.stagedUnknown ? 0 : (load.data.stagedOps || []).length }}
                   stagedOps=${load.data.stagedUnknown ? null : load.data.stagedOps}
-                  overlaySlot=${overlay.render()} exports=${exportScopes} exportLabel="Export" overlayFor=${overlay}
+                  overlaySlot=${html`
+                      ${overlay.render()}
+                      ${showAdd ? html`<${AddBuildForm} mode=${addMode} onSubmit=${handleAdd} onCancel=${() => setShowAdd(false)} />` : null}
+                      ${editingBuild ? html`
+                          <${BuildEditor} build=${editingBuild} csrfToken=${session.csrfToken}
+                                          onStage=${async (op) => {
+                                              await stageOps('armory', [op], session.csrfToken);
+                                              setEditingId(null);
+                                              overlay.say('Staged · nothing is live until you commit it.', 'Review →', () => { location.hash = '#/review'; });
+                                              refresh();
+                                          }}
+                                          onClose=${() => setEditingId(null)} />` : null}`}
+                  exports=${exportScopes} exportLabel="Export" overlayFor=${overlay}
                   commands=${[
                       { label: 'Add a build', group: 'armory', local: true, accent: 'var(--r-armory)',
                         keywords: ['new', 'create', 'loadout', 'weapon'], run: () => { setAddMode(armMode); setShowAdd(true); } },
-                      { label: 'Compare the selected builds', group: 'armory', local: true, accent: 'var(--r-armory)',
-                        keywords: ['diff', 'side by side', 'duplicate'], run: () => setView(VIEWS.compare) },
+                      { label: 'Compare every build of a weapon', group: 'armory', local: true, accent: 'var(--r-armory)',
+                        keywords: ['diff', 'side by side', 'duplicate', 'search', 'weapon'], run: () => setView(VIEWS.compare) },
                       { label: 'Paste a list of builds', group: 'armory', local: true, accent: 'var(--r-armory)',
                         keywords: ['bulk', 'import', 'many', 'export', 'backup'], run: () => { setEditingId(null); setView(VIEWS.bulk); } },
                       { label: 'Clear the rack and coverage filters', group: 'armory', local: true, accent: 'var(--ink3)',
@@ -1176,57 +1295,23 @@ export function ArmoryRealm({ session }) {
                                                    <${ArmoryAddChips} onAdd=${(m) => { setAddMode(m); setShowAdd(true); }} />`} />`}
                   viewSlot=${html`
                       ${notice ? html`<p style="color:var(--warn);padding:0 var(--gut)">${notice}</p>` : null}
-                      <!-- The .bed class is the adopted sheet's own main-plus-side split (1fr 340px), which is
-                           exactly this layout. The armcols/armmain/armside names were portal-authored, with no rules
-                           left behind them, so the preview column had been stacking under the rack rather than beside
-                           it. (No backticks in this comment: an EVEN number of them inside an html template closes and
-                           reopens it, which parses fine and turns the prose into expressions — this exact comment did
-                           that, and the page rendered blank with "Cannot read properties of null (reading 'bed')".) -->
-                      <!-- 🔴 THE BED WRAPPER IS FOR EDITING, AND IT WAS WRAPPED ROUND THE RESTING PAGE TOO. The id
-                           armory does not exist on the mockup at all: the design puts the view panel straight into the
-                           view slot, and .bed is the main-plus-side split the EDITOR needs. Wrapping the rack in it cost
-                           23px of inset on each side — measured .rack at 1114px against the design's 1160, starting at
-                           x=122 against x=99 — so the tier board ran narrow and the board's right-hand gutter read as
-                           dead space. It renders only when there is a side column to hold.
-                           (No backticks in this comment. The first draft had five and broke the parse; portal:template-comments,
-                            written earlier in this same session for exactly this, named the file and the line.) -->
-                      ${wrapBed(html`
-                              ${showAdd ? html`<${AddBuildForm} mode=${addMode} onSubmit=${handleAdd} onCancel=${() => setShowAdd(false)} />` : null}
-                              ${editingId ? html`
-                                  <${BuildEditor} build=${builds.find((b) => String(b._id) === editingId)}
-                                                  csrfToken=${session.csrfToken}
-                                                  onStage=${async (op) => {
-                                                      await stageOps('armory', [op], session.csrfToken);
-                                                      setEditingId(null);
-                                                      overlay.say('Edit staged. Nothing is live until you commit it.', 'Review', () => { location.hash = '#/review'; });
+                      ${view === VIEWS.rack
+                          ? html`<${Rack} builds=${inMode}
+                                          onPick=${(w) => setWeaponFilter(weaponFilter === w ? null : w)}
+                                          onAdd=${() => { setAddMode(armMode); setShowAdd(true); }} />`
+                          : view === VIEWS.compare
+                              ? html`<${Compare} builds=${rows} weapons=${comparedWeapons} onSetWeapons=${setComparedWeapons}
+                                                 onOpenRack=${(w) => { setWeaponFilter(w); setView(VIEWS.rack); }}
+                                                 onAdd=${() => { setAddMode(armMode); setShowAdd(true); }} />`
+                          : view === VIEWS.bulk
+                              ? html`<${BulkView} builds=${builds} mode=${armMode}
+                                                  csrfToken=${session.csrfToken} overlay=${overlay}
+                                                  onStaged=${(s) => {
+                                                      overlay.say(`Staged · ${s.understood} build${s.understood === 1 ? '' : 's'} — ${s.updates} update, ${s.creates} new. Nothing is live until you commit.`,
+                                                          'Review →', () => { location.hash = '#/review'; });
                                                       refresh();
-                                                  }}
-                                                  onClose=${() => setEditingId(null)} />`
-                              : view === VIEWS.rack
-                                  ? html`<${Rack} builds=${inMode} onPick=${(w) => setWeaponFilter(weaponFilter === w ? null : w)} />`
-                                  : view === VIEWS.compare
-                                      ? html`<${Compare} builds=${rows} picked=${compared}
-                                                         onPick=${(id) => setCompared(compared.includes(id) ? compared.filter((x) => x !== id) : [...compared, id])} />`
-                                  : view === VIEWS.bulk
-                                      ? html`<${BulkView} builds=${builds} mode=${armMode}
-                                                          csrfToken=${session.csrfToken} overlay=${overlay}
-                                                          onStaged=${(s) => {
-                                                              overlay.say(`${s.understood} build${s.understood === 1 ? '' : 's'} staged — ${s.updates} update, ${s.creates} new. Nothing is live until you commit.`,
-                                                                  'Review', () => { location.hash = '#/review'; });
-                                                              refresh();
-                                                          }} />`
-                                      : html`<${Coverage} builds=${inMode} active=${coverageFilter} onFilter=${setCoverageFilter} />`}
-                          <!-- 🔴 THE STANDALONE LIVE PREVIEW PANEL IS GONE. It showed the card for whichever row was
-                               last clicked, beside a table you were not editing — a preview with nothing to preview
-                               against. The build editor carries it in .bed-side, where the card and the fields that
-                               produce it are one screen. Clicking a row opens the editor.
-                               🔴 AND THE COLUMN IT LEFT BEHIND WAS STILL BEING RESERVED. The bed grid held a 340px second
-                               cell whose only content was the hint below, measured 7,725px tall on the rack — so the
-                               board ran at 798px of an 1,158px panel to make room for one sentence. The hint is a
-                               caption for the MANIFEST, which is where the clickable rows actually are, so it belongs
-                               in the flow under the board rather than in a column of its own. A :has-only-child rule
-                               on .bed drops the empty cell, and the board gets the width the mockup gives it. -->
-                      `)}
+                                                  }} />`
+                              : html`<${Coverage} builds=${inMode} active=${coverageFilter} onFilter=${setCoverageFilter} />`}
                   `}
                   manifestSlot=${html`
                       <!-- 🔴 THE HINT USED TO RENDER HERE, AND IT COST THE WHOLE TABLE ITS DEPTH. Both stylesheets carry
@@ -1250,7 +1335,7 @@ export function ArmoryRealm({ session }) {
                                    buildEditOp=${buildArmoryEditOp}
                                    onEditError=${(msg) => setNotice(msg)}
                                    onFiltersChange=${setManifestFilters}
-                                   caption=${editingId || showAdd ? null : 'Click a row to open it.'}
+                                   caption="Click a row to open it."
                                    totalRows=${builds.length}
                                    onRowClick=${(row) => setEditingId(String(row.id))} selectedRowId=${editingId}
                                    bulkActions=${[

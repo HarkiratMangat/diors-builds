@@ -254,6 +254,8 @@ function harnessChangesets() {
 const ROUTES = [
     [/^\/auth\/csrf$/, () => ({
         csrfToken: 'harness-csrf', discordId: FIX.OWNER_ID || '1139845545754632283',
+        // D3 (2026-09-06): the identity the live /auth/csrf now carries. avatarHash stays null on purpose so the chip's INITIAL-LETTER fallback is what the harness exercises; the real-avatar path would fetch cdn.discordapp.com, which a fixture page must not.
+        username: 'diorswrld', globalName: 'Dior', avatarHash: null,
         // The design's own viewer, so a conformance overlay compares composition rather than the difference between a fixture person and a real session. Same shape the live server would send if it carried a profile; it does not yet, and the chip falls back to the id when this is absent.
         displayName: 'dior',
         avatarUrl: 'https://cdn.discordapp.com/avatars/1139845545754632283/de36d1994e834cd75ac0b7bc3b66a6db.png?size=160',
@@ -505,6 +507,25 @@ const ROUTES = [
             return { name, start, end, ok: Boolean(name && start) };
         }).filter(Boolean);
         return { kind, rows };
+    }],
+    // 🔴 THE DRAWER'S TIER PREVIEW NEEDS THIS OR IT SHOWS ITS EMPTY STATE WITH TEXT IN THE BOX. Narrower than utils/adminParser.js on purpose, same as parse-date/parse-bulk: the four shorthands the placeholder itself teaches, so the stub cannot teach a grammar the product does not have. The Grant drawer's lookup (pin 32). A superset of both shapes the route can answer with — ok:true beside the found fields — so portalHarness.test.js's promise check is satisfied and access.js's `res.id` test takes the found branch. Any 17–20 digit id resolves to the fixture person, and the display name says so.
+    [/^\/api\/discord\/user$/, (params) => ({ ok: true, reason: '', id: params.get('id') || '1139845545754632283', username: 'diorswrld', globalName: 'Dior (fixture)', avatarUrl: 'https://cdn.discordapp.com/embed/avatars/3.png' })],
+    [/^\/api\/parse-items$/, (params, body) => {
+        const TIER = { m: 'mythic', l: 'legendary', lg: 'legacy', e: 'epic' };
+        const items = []; const errors = [];
+        String((body && body.text) || '').split('\n').forEach((raw, i) => {
+            const line = raw.trim();
+            if (!line) return;
+            if (/^-#\s*/.test(line)) {
+                const name = line.replace(/^-#\s*/, '');
+                if (!name) { errors.push({ line: i + 1, text: line }); return; }
+                items.push({ tier: 'comment', name });
+                return;
+            }
+            const m = line.match(/^(\S+)\s+(.+)$/);
+            items.push(m ? { tier: TIER[m[1].toLowerCase()] || m[1], name: m[2] } : { tier: 'epic', name: line });
+        });
+        return { items, errors };
     }],
     [/^\/api\/parse-date$/, (params) => {
         const q = (params.get('q') || '').trim().toLowerCase();
