@@ -8,6 +8,10 @@ const mongoose = require('mongoose');
 const PortalSessionSchema = new mongoose.Schema({
     sessionHash: { type: String, required: true, unique: true, index: true },
     discordId: { type: String, required: true, index: true },
+    // D3 — the Discord identity fields the OAuth callback already receives (identify scope) and used to discard. Shown in the portal's own header (shell.js's Account/Header) so an admin can tell at a glance which account is signed in, rather than a grey disc and a truncated snowflake. docs/legal/PRIVACY.md §2.1c's Portal session row and Appendix A were updated in the same change these fields were added.
+    username: { type: String, default: '' },
+    globalName: { type: String, default: '' },
+    avatarHash: { type: String, default: null },
     createdAt: { type: Date, default: Date.now },
     lastSeenAt: { type: Date, default: Date.now },
     userAgent: { type: String, default: '' },

@@ -123,6 +123,157 @@ function bulkFieldDiff(row, before) {
     return out;
 }
 
+// ── THE RACK'S SHAPE, AND THE TWO SEARCHES OVER IT ────────────────────────────────────────────
+//
+// 🔴 THE RACK IS GROUPED BY CATEGORY AND OPENS CLOSED — Harkirat, Pin 21: "WHY do I have to scroll all the way".
+// Grouped by rank tier it was five permanently-open rows over the whole catalogue, so every visit began by scrolling
+// past everything to reach the one weapon class you came for. Category is the axis a reader arrives with ("show me
+// the SMGs"); rank has not been lost, it has moved one level down — the weapon groups inside a category are ordered
+// best-first and each carries its tier as a badge, so the board still answers "what is ranked where" once it is open.
+//
+// ⚠️ THIS LIVES IN THE LOGIC FILE RATHER THAN IN armory.js BECAUSE EVERY FACT ON A CATEGORY HEADER IS ARITHMETIC —
+// the count, the ordering, the teaser — and arithmetic that only a browser can run is arithmetic nothing checks.
+// ORDER_STAMP is deliberately absent: the display order is a constant below, not a date.
+const RANK_ORDER = ['best', 'top3', 'top4', 'top5', null];
+const RANK_LABEL = { best: 'Best in category', top3: 'Top 3', top4: 'Top 4', top5: 'Top 5', null: 'Unranked' };
+// 🔴 THESE STRINGS ARE CSS CLASS NAMES. app.css's `.t-best/.t-top3/.t-top4/.t-top5/.t-unranked` are what grade a
+// tier visually, and this map once emitted `t-t3`/`t-t4`/`t-t5`/`t-none` — four selectors that named nothing while
+// every gate stayed green. They now ride on the WEAPON GROUP rather than on a tier row, because the tier row is gone.
+const RANK_KEY = { best: 'best', top3: 'top3', top4: 'top4', top5: 'top5', null: 'unranked' };
+
+// The mockup's own chip vocabulary and display order (armory.html's `renderCatChips`) — short labels, distinct from
+// the precise CATEGORY_LABEL the edit form's dropdown uses, which is verbose on purpose.
+const CATEGORY_CHIP_LABEL = { AR: 'Assault', SMG: 'SMG', LMG: 'LMG', MARKSMAN: 'Marksman', SNIPER: 'Sniper', SHOTGUN: 'Shotgun', SECONDARIES: 'Secondaries' };
+const CATEGORY_CHIP_ORDER = ['AR', 'SMG', 'LMG', 'MARKSMAN', 'SNIPER', 'SHOTGUN', 'SECONDARIES'];
+
+// A DMZ build ranks on dmzRangeRank, which also encodes a combat range (`best-close`, `best-midlong`) — the tier is
+// the part before the hyphen. An MP build ranks on categoryRank. Reading the wrong field is how DMZ builds all pile
+// into Unranked while looking correct.
+function rankOf(b) {
+    const raw = b.mode === 'DMZ' ? b.dmzRangeRank : b.categoryRank;
+    if (!raw) return null;
+    return String(raw).split('-')[0];
+}
+
+// A weapon's position is its BEST claim, never its worst: a weapon with one Best build and three unranked ones is a
+// Best weapon. `null` is RANK_ORDER's last entry, so unranked sorts last without a special case.
+function bestRankIndex(list) {
+    return (list || []).reduce((best, b) => Math.min(best, RANK_ORDER.indexOf(rankOf(b))), RANK_ORDER.length - 1);
+}
+
+// One entry per category PRESENT in the list, in the mockup's display order, with anything unexpected appended
+// alphabetically rather than dropped — a category that exists in the data and not in the order table is a build
+// nobody can find, which is worse than a row in the wrong place.
+function rackCategories(builds) {
+    const all = builds || [];
+    const present = new Set(all.map((b) => b.category));
+    const ordered = CATEGORY_CHIP_ORDER.filter((c) => present.has(c))
+        .concat([...present].filter((c) => c && !CATEGORY_CHIP_ORDER.includes(c)).sort());
+    return ordered.map((category) => {
+        const list = all.filter((b) => b.category === category);
+        const byWeapon = new Map();
+        for (const b of list) {
+            if (!byWeapon.has(b.weaponName)) byWeapon.set(b.weaponName, []);
+            byWeapon.get(b.weaponName).push(b);
+        }
+        const groups = [...byWeapon.entries()]
+            .map(([weapon, list2]) => {
+                const tier = RANK_ORDER[bestRankIndex(list2)];
+                return { weapon, builds: list2, tier, tierKey: RANK_KEY[String(tier)], tierLabel: RANK_LABEL[String(tier)] };
+            })
+            .sort((a, b) => RANK_ORDER.indexOf(a.tier) - RANK_ORDER.indexOf(b.tier) || a.weapon.localeCompare(b.weapon));
+        // The teaser is the whole point of a closed row: a header reading "SMG 28" tells you nothing you could not
+        // have guessed, and one reading "SMG 28 — Best in category: Fennec" tells you whether to open it.
+        const top = groups[0] || null;
+        const topBuild = top
+            ? [...top.builds].sort((x, y) => RANK_ORDER.indexOf(rankOf(x)) - RANK_ORDER.indexOf(rankOf(y)))[0]
+            : null;
+        return {
+            category, label: CATEGORY_CHIP_LABEL[category] || category,
+            builds: list, groups, count: list.length, weapons: byWeapon.size,
+            accent: (list[0] && list[0].accent) || null,
+            teaser: topBuild ? `${topBuild.weaponName} · ${topBuild.buildName || 'Standard Build'}` : '',
+            teaserRank: top ? top.tierLabel : RANK_LABEL['null'],
+        };
+    });
+}
+
+// ── THE WEAPON SEARCH ─────────────────────────────────────────────────────────────────────────
+//
+// 🔴 PICK-TWO WAS THE WRONG QUESTION — Harkirat, Pin 18: "why can't I just type the weapon name / compare multiple
+// builds of that weapon". Compare offered the first forty builds in the catalogue as chips and asked you to find two
+// by eye; the comparison anyone actually wants is "this weapon, all of its builds", which a chip bar can express only
+// by scrolling to two chips that happen to share a name. So the entry point is a typed weapon and the comparison is
+// its whole sibling set — which is exactly the set the near-duplicate flag is about.
+function weaponOptions(builds) {
+    const byWeapon = new Map();
+    for (const b of builds || []) {
+        if (!byWeapon.has(b.weaponName)) byWeapon.set(b.weaponName, []);
+        byWeapon.get(b.weaponName).push(b);
+    }
+    return [...byWeapon.entries()]
+        .map(([weapon, list]) => ({ weapon, builds: list, category: list[0].category }))
+        // Most builds first, because a weapon with five builds is the one this view exists for; ties by name so the
+        // list is stable between renders rather than in Map insertion order, which follows the API's own ordering.
+        .sort((a, b) => b.builds.length - a.builds.length || a.weapon.localeCompare(b.weapon));
+}
+
+// ⚠️ SUBSTRING, NOT PREFIX. "117" finds the AK117 and "fen" finds the Fennec; a prefix match would refuse the first
+// and a fuzzy match would offer weapons that share no letters in order, which reads as a broken search.
+// Already-picked weapons are removed rather than shown disabled: an option that cannot be chosen is a dead row in a
+// list whose whole job is that every row is one keystroke from being chosen.
+function matchWeapons(options, q, picked, limit = 8) {
+    const needle = String(q || '').trim().toLowerCase();
+    if (!needle) return [];
+    const taken = picked || [];
+    return (options || [])
+        .filter((o) => o.weapon.toLowerCase().includes(needle) && !taken.includes(o.weapon))
+        .slice(0, limit);
+}
+
+// ── WHAT STOPS A DRAWER FROM STAGING ──────────────────────────────────────────────────────────
+//
+// 🔴 A DISABLED CONTROL THAT DOES NOT SAY WHY IS THE SAME DEFECT AS A CHECK THAT CANNOT FAIL: the reader learns
+// nothing from it. Both drawers put the reason on the footer line beside the button, so the sentence and the state it
+// explains are one thing rather than a greyed button and a required-field marker eight hundred pixels above it.
+//
+// ⚠️ THE GUNSMITH CODE NEVER BLOCKS, and that is a decision rather than an omission. correctGunsmithCode CORRECTS a
+// code — it maps look-alike characters onto whichever type each position expects — so refusing input client-side
+// would refuse exactly the input the server was about to fix.
+function addFormBlockers(f) {
+    const out = [];
+    if (!String((f && f.weaponName) || '').trim()) out.push('a weapon name');
+    if (!String((f && f.category) || '').trim()) out.push('a category');
+    return out;
+}
+
+// The fields loadout.edit actually writes, which is what makes "nothing has changed" answerable. `attachments` is
+// compared as a LIST rather than a count: two five-attachment lists that differ in one string are a real edit, and a
+// count comparison would call them equal.
+const EDIT_DIRTY_FIELDS = ['weaponName', 'buildName', 'category', 'mode', 'shareCode', 'imageKey',
+    'isMeta', 'isToxic', 'categoryRank', 'dmzRangeRank', 'description'];
+
+function editedFields(build, draft) {
+    const before = build || {};
+    const after = draft || {};
+    const out = EDIT_DIRTY_FIELDS.filter((k) => String(before[k] ?? '') !== String(after[k] ?? ''));
+    if ((before.attachments || []).join('\u0000') !== (after.attachments || []).join('\u0000')) out.push('attachments');
+    return out;
+}
+
+// 🔴 STAGING A NO-OP EDIT IS NOT HARMLESS — it puts a row on the Review screen that changes nothing, which somebody
+// then has to read, understand and decide about. An edit drawer that cannot tell you it has nothing to stage is one
+// that quietly manufactures work for the only screen that commits.
+function editorBlockers(build, draft) {
+    const out = [];
+    if (!String((draft && draft.weaponName) || '').trim()) out.push('a weapon name');
+    else if (!editedFields(build, draft).length) out.push('a change — every field still matches the live build');
+    return out;
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { bulkFieldDiff, findLocalBuild, buildArmoryAddOp, buildArmoryEditOp, parseBadgesToken, bulkPasteSummary, armoryExportQuery, DMZ_RANGE_TOKENS, MP_RANK_TOKENS };
+    module.exports = { bulkFieldDiff, findLocalBuild, buildArmoryAddOp, buildArmoryEditOp, parseBadgesToken, bulkPasteSummary, armoryExportQuery, DMZ_RANGE_TOKENS, MP_RANK_TOKENS,
+        RANK_ORDER, RANK_LABEL, RANK_KEY, CATEGORY_CHIP_LABEL, CATEGORY_CHIP_ORDER,
+        rankOf, bestRankIndex, rackCategories, weaponOptions, matchWeapons,
+        addFormBlockers, editedFields, editorBlockers, EDIT_DIRTY_FIELDS };
 }

@@ -3453,13 +3453,9 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
 /* ══════════ ARMORY — a tier board that reads as tiered ══════════
    Best · T3 · T4 · T5 · unranked had identical visual weight, so the one thing the board exists
    to express — the ranking — was the one thing it did not show. */
-.trow.t-best{background:linear-gradient(90deg,color-mix(in srgb,var(--patch) 8%,transparent),transparent)}
-.trow.t-best .trow-k{font-size:20px;color:var(--patch)}
-.trow.t-top3 .trow-k{font-size:17px;color:var(--ink)}
-.trow.t-top4 .trow-k{font-size:var(--t-lg);color:var(--ink2)}
-.trow.t-top5 .trow-k{font-size:var(--t-md);color:var(--ink3)}
-.trow.t-unranked{opacity:.72}
-.trow.t-unranked .trow-k{font-size:var(--t-base);color:var(--ink3)}   /* --ink4 is non-text: measured 3.46:1 */
+/* The `.trow.t-*` grading (20/17/15/14/13px marks, a dimmed lower tier) was deleted 2026-09-06 01:42 EDT: the rack is a
+   category accordion now (D5) and no tier row exists, so the tier rides on the weapon group — `.bgrp.t-*`, at the
+   foot of this file. RANK_KEY's values are still class names; they just land on a different element. */
 /* the card class is `.bchip`, not `.bcard` — checked against the markup rather than assumed */
 /* 🔴 AN OPACITY DIM OVER --ink3 TEXT COSTS AA, AND --ink3 HAS 0.31 OF HEADROOM — measured 2026-09-04 22:54 EDT.
    `--ink3` on `--raised` is 4.81:1, which DESIGN.md records as deliberate (solving for four AA-passing ink tones
@@ -3467,8 +3463,6 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
    Armory's resting Board at 4.42:1 and the .86 case at 3.69:1. Hover restored it, and hover is not an
    accessibility remedy. The dim moves to the chip's BORDER and BACKGROUND, which carry no text and are where a
    depth cue belongs; the label stays at full opacity. A 6% text fade was never legible as a cue anyway. */
-.trow.t-top4,.trow.t-top5{--bc-dim:.94}
-.trow.t-unranked{--bc-dim:.86}
 .trow .bchip{border-color:color-mix(in srgb,var(--rule2) calc(var(--bc-dim,1) * 100%),transparent);
   background-color:color-mix(in srgb,var(--raised) calc(var(--bc-dim,1) * 100%),transparent)}
 .trow:hover .bchip{opacity:1}
@@ -5387,7 +5381,9 @@ button .ic,a .ic{pointer-events:none}
 .dwfield textarea:focus,.dwfield select:focus{outline:none;border-color:var(--patch)}
 .dwfield .hint{padding:0;font-size:var(--t-xs);color:var(--ink3);line-height:var(--lh-ui)}
 .dw-grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 var(--s3)}
-.dw-f .why{margin-right:auto;font-size:var(--t-sm);color:var(--warn);line-height:var(--lh-ui);align-self:center}
+/* ink3 at rest, warn only when it BLOCKS: most of the time the line reports how many fields changed, which is not a problem. */
+.dw-f .why{margin-right:auto;font-size:var(--t-sm);color:var(--ink3);line-height:var(--lh-ui);align-self:center;max-width:52%}
+.dw-f .why.blocked{color:var(--warn)}
 .dw-f .btn[disabled]{opacity:.45;cursor:not-allowed}
 
 
@@ -5465,3 +5461,158 @@ button .ic,a .ic{pointer-events:none}
  * other realm keeps it. Keyed on the data-realm attribute shell.js emits. */
 .tray{z-index:40}
 .app[data-realm=season] .tray{display:none}
+
+
+/* ═══ BUILD-OUT 2026-09-06 01:42 EDT — unit C (Armory): the category accordion, the tier on the weapon group, the weapon search, the drawers ═══ */
+/* ── THE RACK, NOW A CATEGORY ACCORDION ──────────────────────────────────────────────────────
+ * `.trow` is a 190px sidebar grid built for a tier row whose header sits beside its body. A category row is an
+ * accordion: header across the top, body under it, because the header is the thing you read when it is closed and a
+ * 190px column is not where a closed row's teaser can live. This is the same shape app.css's own max-width:900px
+ * media query already switches `.trow` into — it is being asked for by class rather than by viewport.
+ * 🔴 `display:flex` IS RESTATED HERE AND IT IS NOT REDUNDANT. app.css:1626 declares `.trow-h{display:flex}` and a
+ * later rule takes it back off, so `flex-direction:row` alone computed as row over a container that was no longer
+ * flexing: measured 2026-09-06 01:35 EDT with the header 69px tall and the teaser and the fold chevron sitting on a
+ * second line, while getComputedStyle cheerfully reported flexDirection:row and flexWrap:nowrap. Restating it takes
+ * the header to 40px and one line. Those two properties compute whatever `display` is, so they are not evidence. */
+.trow.tcat{grid-template-columns:1fr}
+.trow.tcat > .trow-h{display:flex;flex-wrap:nowrap;flex-direction:row;align-items:center;border-right:0;border-bottom:1px solid var(--rule3);
+  width:100%;text-align:left;gap:11px;padding:10px 13px}
+/* A closed row has no body element rendered at all, so nothing here needs to hide one — but the border under the
+ * header is a divider between two things, and with the body gone it is a line under nothing. */
+.trow.tcat.tclosed > .trow-h{border-bottom:0}
+.trow.tcat > .trow-h:focus-visible{outline:2px solid var(--staged);outline-offset:-2px}
+.trow.tcat > .trow-h:hover{background:var(--hi)}
+
+/* The category's own accent, which is real data from the API (getMpCategoryAccent), not a token. The mark replaces the
+ * tier board's graded star/dash: a category has no rank, so what it has to say for itself is which category it is. */
+.catdot{display:block;width:9px;height:9px;border-radius:var(--rad-1);background:var(--c);margin:0 auto}
+
+/* 🔴 NOT `.trow-note`, WHICH IS THE ONE THING IT CANNOT BE. app.css carries `.trow.tclosed .trow-note{display:none}`,
+ * so a teaser in that class would be hidden in exactly the state it exists for — the closed header is the whole
+ * reason there is a teaser at all. Same size and colour, opposite visibility rule. */
+/* ⚠️ IT GROWS, IT DOES NOT PUSH. `.trow-n` carries its own `margin-left:auto`, so a teaser placed after it with a
+ * margin of its own is handed the width that is left, which is none — measured 2026-09-06 01:33 EDT as a header
+ * wrapping to a second line reading "B". It sits BEFORE the count now and takes the free space with flex. */
+.tcat-top{flex:1 1 auto;min-width:0;font-size:var(--t-sm);color:var(--ink3);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.tcat-top b{color:var(--ink2);font-weight:600}
+@media (max-width:760px){ .tcat-top{display:none} }
+
+/* Expand all / Collapse all, and the empty-rack and empty-compare buttons, which share this strip. */
+.racktools{display:flex;align-items:center;gap:8px;padding:12px 16px 0}
+.rkt-n{margin-left:auto;font-family:var(--data);font-size:var(--t-sm);color:var(--ink3)}
+.racktools .chip[disabled]{opacity:.42;cursor:default}
+
+/* ── THE TIER, WHICH NOW RIDES ON THE WEAPON GROUP ───────────────────────────────────────────
+ * app.css grades `.trow.t-best/.t-top3/.t-top4/.t-top5/.t-unranked` — 20/17/15/14/13px marks and a `--bc-dim` that
+ * fades the lower tiers. Those selectors are scoped to `.trow`, and there is no tier row any more, so the grading has
+ * to be re-stated for the element that now carries the tier. Same idea, one level down: a Best weapon reads loudest.
+ * ⚠️ THE `.trow.t-*` RULES IN app.css ARE UNREFERENCED AS OF THIS CHANGE — see the report; they are not deleted here
+ * because deleting them is an app.css edit this unit may not make. */
+.bgrp.t-best{border-color:var(--rule2);box-shadow:inset 0 0 0 1px rgba(242,194,48,.16)}
+.bgrp.t-best .bgrp-w b{font-size:var(--t-md)}
+.bgrp.t-top4,.bgrp.t-top5{--bc-dim:.86}
+.bgrp.t-unranked{--bc-dim:.74}
+.bgrp-m .bdg.rank{flex:none}
+
+/* ── THE WEAPON SEARCH (Compare) ─────────────────────────────────────────────────────────────
+ * A combobox, so the list is positioned against the field rather than pushed into the flow: a list that moves the
+ * page down on every keystroke is a list you cannot aim at. */
+.wsrch{position:relative;flex:0 0 280px;max-width:280px}
+.wsrch .dwfield{margin-bottom:0}
+.wsrch input{width:100%}
+.wsrch-list{position:absolute;z-index:5;left:0;right:0;top:100%;margin:4px 0 0;padding:4px;list-style:none;
+  background:var(--raised);border:1px solid var(--rule2);border-radius:var(--rad-2);
+  /* The sheet's own popover shadow, spelled the way it is spelled everywhere else here — a fresh rgba() would be a
+     second black in a palette that already has one. */
+  box-shadow:0 12px 32px -12px #000;max-height:264px;overflow:auto}
+.wsrch-opt{display:flex;align-items:baseline;gap:8px;padding:7px 9px;border-radius:var(--rad-1);cursor:pointer}
+.wsrch-opt b{font:600 var(--t-base)/1.2 var(--ui);color:var(--ink)}
+.wsrch-opt span{font-size:var(--t-sm);color:var(--ink3)}
+.wsrch-opt.on{background:var(--hi)}
+.wsrch-opt.on b{color:var(--patch)}
+.wsrch-none{margin:6px 0 0;font-size:var(--t-sm);color:var(--ink3)}
+/* The picked-weapon chips sit beside the field, so the bar has to align them to its bottom edge rather than centre
+ * them against a two-line labelled input. */
+.cmpbar{align-items:flex-end;gap:9px}
+.cmpbar .chip.on{display:inline-flex;align-items:center;gap:6px}
+
+/* One build of a weapon, and the six-column truncation, both say so in the same voice. */
+.cmpone{margin:0 0 10px;font-size:var(--t-sm);color:var(--ink2);display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.cmpone b{color:var(--ink)}
+.cmptab th em{display:block;font-style:normal;font-weight:400;color:var(--ink3);letter-spacing:0;text-transform:none}
+
+
+/* The Add drawer's right column carries the record's own card rather than a Discord render — there is no id to ask
+ * the bot about yet — and a 340px column holding one card wants the card to fill it. */
+.drawer.wide .bed{gap:18px}
+.drawer.wide .bed-side .dcard.lc{width:100%}
+
+/* ── UNDERSIZED UI TEXT — the detector's largest single excess on this realm (+140 vs the mockup) ────────────────
+ * `--t-sm` (11.5px) is the floor for anything a reader has to READ; `--t-micro` (9px) is for tracked uppercase
+ * eyebrows only, where the letterspacing and the caps do the legibility work. Each rule below re-states an existing
+ * app.css declaration at the token rather than at a hardcoded px, so the change is a token swap and nothing else.
+ * ⚠️ These are the Armory's OWN classes only. `.bdg`, `.thumb` and `.dwfield label` are shared with other realms, so
+ * they are listed in the report as a cross-realm decision rather than changed unilaterally here. */
+.bc-meta{font-size:var(--t-micro)}      /* 7.5px → 9px. Uppercase and tracked, so micro is the honest floor, not sm. */
+.bc-att{font-size:var(--t-sm)}          /* 8.5px → 11.5px. "5×" is a number a reader reads, not an eyebrow. */
+.bc-foot{font-size:var(--t-sm)}         /* 9px → 11.5px. The chip's whole meta row inherits from here. */
+.bc-mode{font-size:var(--t-sm)}         /* 9.5px → 11.5px. MP/DMZ is the single most-read word on a build chip. */
+.bc-b{font-size:var(--t-sm)}            /* 11px → 11.5px. The build name — the thing that tells two siblings apart. */
+.bc-tox{font-size:var(--t-sm)}          /* 11px → 11.5px. */
+.trow-n{font-size:var(--t-sm)}          /* 10px → 11.5px. A count in a closed header is the header's only number. */
+.bf-n{font-size:var(--t-sm)}            /* 10px → 11.5px. "3 of 5" beside the attachments heading. */
+.bgrp-m .bgrp-n{font-size:var(--t-sm)}  /* 10px → 11.5px. */
+.cmpf{font-size:var(--t-sm)}            /* 10px → 11.5px. The field-name column of the comparison table. */
+.cmptab th{font-size:var(--t-sm)}       /* 9.5px → 11.5px. Column headers name the builds; they are read, not scanned. */
+.diff-r .dk{font-size:var(--t-sm)}      /* 10px → 11.5px. */
+.aflab{font-size:var(--t-micro)}        /* 9.5px → 9px, DOWN: "Showing" is a tracked uppercase eyebrow and was sitting
+                                           between the two tokens, which is what makes a scale stop being a scale. */
+.afn{font-size:var(--t-sm)}             /* 10px → 11.5px. The "12 of 133" the filter bar exists to state. */
+.afclear{font-size:var(--t-sm)}         /* 10px → 11.5px. A button label. */
+.atn{font-size:var(--t-sm)}             /* 10.5px → 11.5px. Attachment slot numbers, 1–5. */
+.attx,.atx{font-size:var(--t-sm)}       /* 11px → 11.5px. */
+.fxwas,.fxnow{font-size:var(--t-sm)}    /* 11px → 11.5px. The before/after values of a bulk overwrite. */
+.trow-note{font-size:var(--t-sm)}       /* 11px → 11.5px. ⚠️ app.css declares .trow-note TWICE (11px, then
+                                           var(--t-xs) = 10px at line 2824); this must land AFTER both or it loses. */
+
+
+/* ═══ BUILD-OUT 2026-09-06 01:46 EDT — unit D (Access + identity): the lookup preview card, the granted-row flash, the initial-letter avatar ═══ */
+/* pin32 — the Discord lookup preview card inside the Grant drawer (portal/ui/access.js's GrantForm): avatar,
+   display name, @username and the id, so an admin can see who they are about to grant before Grant enables.
+   .grantpreview/.gp-av/.gp-n are new classes; .dwbody/.dwfield/.tokgrid/.dw-p already exist and are reused
+   as-is. --avatar-a and --sunk are existing tokens (see .who .av's gradient fallback in app.css). */
+.grantpreview{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--rule2);
+  border-radius:var(--rad-1);background:var(--sunk);margin:8px 0}
+.grantpreview .gp-av{width:32px;height:32px;border-radius:var(--rad-round);flex:none;
+  background:var(--av-src,none) center/cover no-repeat,var(--avatar-a)}
+.grantpreview .gp-n{display:flex;flex-direction:column;gap:1px;min-width:0}
+.grantpreview .gp-n b{font-size:var(--t-sm);color:var(--ink)}
+.grantpreview .gp-n span{font-size:var(--t-micro);color:var(--ink3)}
+
+/* harden lens — names which single precondition is still missing before the Grant button in the drawer will
+   enable (access.logic.js's grantReady drives the text; this is only the line's own styling). New class. */
+/* scoped to the drawer body — a bare .why would restyle .card .why, .ccard .why and every footer reason line; and --t-sm, because a line that says what is still missing is read. */
+.dwbody .why{font-size:var(--t-sm);color:var(--ink3);margin-top:6px;line-height:var(--lh-ui)}
+
+/* delight lens (pin5/D1) — the admin row in the By-admin grid gets a one-time fade after a grant lands, so the
+   change is visibly acknowledged in the table itself and not only via the toast. Cleared client-side by
+   access.js's own highlightId timeout (2.4s), so the animation duration and that timeout should be kept in
+   step if either changes. --ok is an existing token (#3DDC97, the same green .thumb.ok/.health.ok already use). */
+.mx tbody tr.just-granted{animation:d-just-granted 2.2s ease-out}
+@keyframes d-just-granted{
+  0%{background:color-mix(in srgb, var(--ok) 22%, transparent)}
+  100%{background:transparent}
+}
+
+/* D3 identity chip — .who .av (header) and .umenu .uav (account menu) already exist in app.css and already
+   support a real avatar via [data-src]/--av-src (see the "a grey disc says nobody's" comment already sitting
+   on .who .av — this is that comment's own TODO, finally wired up). What was missing is centring for the
+   INITIAL-LETTER FALLBACK rendered when a session has no avatarHash yet (a session predating this field). Adds
+   properties only; does not redeclare anything the base rule already sets, so this is additive, not a
+   duplicate-selector override. */
+.who .av{display:flex;align-items:center;justify-content:center;font:600 var(--t-xs) var(--ui);color:var(--ink2);
+  text-transform:uppercase}
+.umenu .uav b.uinit{font:600 17px var(--ui);color:var(--ink2)}
+/* .umenu .uav is already display:grid;place-items:center in app.css, so the initial letter is already
+   centred there with no new rule needed. */

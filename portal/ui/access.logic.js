@@ -42,4 +42,15 @@ function sessionSummary(sessions, now) {
     return `${list.filter((s) => sessionIsLive(s, now)).length} active · ${list.length} total`;
 }
 
-if (typeof module !== 'undefined' && module.exports) module.exports = { permsAfter, describePending, sessionIsLive, sessionSummary, SESSION_LIVE_MS };
+// pin32/harden — what decides whether the Grant drawer's own button may fire, and — when it may not — which SINGLE fact is missing. Pure on purpose: the drawer layers three independent gates (a resolved Discord lookup, at least one permission picked, the typed id matching), and a reader should see the first one still open rather than a plain "disabled" with no reason. Kept here rather than inline in access.js so it can be unit-tested with no DOM (scripts/portalSession.test.js) — the same reasoning permsAfter/ describePending above already follow.
+function grantReady({ discordId, lookupStatus, pickedCount, confirmText }) {
+    if (!discordId) return { ready: false, why: 'Enter a Discord ID.' };
+    if (lookupStatus === 'loading') return { ready: false, why: 'Looking that id up…' };
+    if (lookupStatus === 'error') return { ready: false, why: 'That id did not resolve to a Discord account.' };
+    if (lookupStatus !== 'ok') return { ready: false, why: 'Enter a Discord ID.' };
+    if (!pickedCount) return { ready: false, why: 'Pick at least one permission.' };
+    if (confirmText !== discordId) return { ready: false, why: 'Type the same id again to confirm.' };
+    return { ready: true, why: '' };
+}
+
+if (typeof module !== 'undefined' && module.exports) module.exports = { permsAfter, describePending, sessionIsLive, sessionSummary, SESSION_LIVE_MS, grantReady };
