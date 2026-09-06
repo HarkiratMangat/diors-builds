@@ -293,7 +293,7 @@
 body {
     background: var(--desk);
     color: var(--ink);
-    font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-family: var(--ui);   /* the token, not a second stack that had already drifted from it */
     margin: 0;
 }
 

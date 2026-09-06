@@ -942,7 +942,7 @@ export function SeasonRealm({ session }) {
                 const refused = refusalOf(res);
                 if (refused) return overlay.say(`Not staged — ${refused}`);
                 setShowAdd(null);
-                overlay.say(`The draft's ${noun} staged.`, 'Review', () => { location.hash = '#/review'; });
+                overlay.say(`Staged · the draft's ${noun}`, 'Review →', () => { location.hash = '#/review'; });
                 fetchChangesets('season').then(setChangesets);
             },
         });
@@ -954,7 +954,7 @@ export function SeasonRealm({ session }) {
         if (!ops.length) return;
         await stageOps('season', ops, session.csrfToken);
         setShowAdd(null);
-        overlay.say(`${ops.length} ${ops.length === 1 ? 'item' : 'items'} staged from what you pasted.`, 'Review', () => { location.hash = '#/review'; });
+        overlay.say(`Staged · ${ops.length} ${ops.length === 1 ? 'item' : 'items'} from what you pasted`, 'Review →', () => { location.hash = '#/review'; });
         fetchChangesets('season').then(setChangesets);
     }
 
@@ -981,7 +981,7 @@ export function SeasonRealm({ session }) {
         const res = await stageOps('season', [op], session.csrfToken);
         const refused = refusalOf(res);
         if (refused) return overlay.say(`Draft not started — ${refused}`);
-        overlay.say('Draft staged. Nothing is public until you promote it.', 'Review', () => { location.hash = '#/review'; });
+        overlay.say('Staged · a new draft. Nothing is public until you promote it', 'Review →', () => { location.hash = '#/review'; });
         fetchChangesets('season').then(setChangesets);
     }
 
@@ -998,7 +998,7 @@ export function SeasonRealm({ session }) {
                 const res = await stageOps('season', [{ type: 'season.discardDraft', target: null, payload: {} }], session.csrfToken);
                 const refused = refusalOf(res);
                 if (refused) return overlay.say(`Not discarded — ${refused}`);
-                overlay.say('Discard staged.', 'Review', () => { location.hash = '#/review'; });
+                overlay.say('Staged · the discard', 'Review →', () => { location.hash = '#/review'; });
                 fetchChangesets('season').then(setChangesets);
             },
         });
@@ -1009,7 +1009,7 @@ export function SeasonRealm({ session }) {
         const res = await stageOps('season', [op], session.csrfToken);
         const refused = refusalOf(res);
         if (refused) return overlay.say(`Not staged — ${refused}`);
-        overlay.say(`${item.title} staged — it needs an export before it can commit.`, 'Review', () => { location.hash = '#/review'; });
+        overlay.say(`Staged · ${item.title} — it needs an export before it can commit`, 'Review →', () => { location.hash = '#/review'; });
         fetchChangesets('season').then(setChangesets);
     }
 
@@ -1042,7 +1042,7 @@ export function SeasonRealm({ session }) {
                 : { type: 'calendar.delete', target: { elementId: r.id }, payload: {} };
         });
         if (ops.length) await stageOps('season', ops, session.csrfToken);
-        overlay.say(`${ops.length} deletion${ops.length === 1 ? '' : 's'} staged.`, 'Review', () => { location.hash = '#/review'; });
+        overlay.say(`Staged · ${ops.length} deletion${ops.length === 1 ? '' : 's'}`, 'Review →', () => { location.hash = '#/review'; });
         fetchChangesets('season').then(setChangesets);
     }
 

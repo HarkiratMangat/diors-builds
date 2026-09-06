@@ -45,8 +45,9 @@ function sessionSummary(sessions, now) {
 // pin32/harden — what decides whether the Grant drawer's own button may fire, and — when it may not — which SINGLE fact is missing. Pure on purpose: the drawer layers three independent gates (a resolved Discord lookup, at least one permission picked, the typed id matching), and a reader should see the first one still open rather than a plain "disabled" with no reason. Kept here rather than inline in access.js so it can be unit-tested with no DOM (scripts/portalSession.test.js) — the same reasoning permsAfter/ describePending above already follow.
 function grantReady({ discordId, lookupStatus, pickedCount, confirmText }) {
     if (!discordId) return { ready: false, why: 'Enter a Discord ID.' };
-    if (lookupStatus === 'loading') return { ready: false, why: 'Looking that id up…' };
-    if (lookupStatus === 'error') return { ready: false, why: 'That id did not resolve to a Discord account.' };
+    // Silent while loading and on a failed lookup (2026-09-06 09:15 EDT): the drawer's own .dw-p line already says both, and two regions saying one thing makes a reader reconcile them. The reason line speaks only for what the reader still has to DO.
+    if (lookupStatus === 'loading') return { ready: false, why: '' };
+    if (lookupStatus === 'error') return { ready: false, why: '' };
     if (lookupStatus !== 'ok') return { ready: false, why: 'Enter a Discord ID.' };
     if (!pickedCount) return { ready: false, why: 'Pick at least one permission.' };
     if (confirmText !== discordId) return { ready: false, why: 'Type the same id again to confirm.' };

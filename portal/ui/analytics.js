@@ -268,14 +268,14 @@ function Health({ health, timingStats, usageStats, onOpenTiming, onFilterLevel, 
                 <span class="t">Health</span>
             </div>
             <div class="tiles">
-                <${Tile} label="Interactions 7d" value=${usage.current ?? '—'} onClick=${onOpenTiming}
+                <${Tile} label="Interactions" value=${usage.current ?? '—'} onClick=${onOpenTiming}
                          sub="product traffic this week — admin excluded" />
                 <${Tile} label="Success rate" value=${successRate == null ? '—' : successRate.toFixed(1)}
                          unit=${successRate == null ? '' : '%'}
                          onClick=${() => onFilterRiver({ kind: 'alert', level: 'error' })}
                          tone=${successRate == null ? '' : !errCount ? 'ok' : successRate < 99 ? 'warn' : ''}
                          sub=${outcomeTotal ? `${errCount} error${errCount === 1 ? '' : 's'} across ${outcomeTotal} interactions this week` : 'nothing recorded this week'} />
-                <${Tile} label="Restarts 7d" value=${h.restarts7d ?? 0} onClick=${() => onFilterRiver({ kind: 'boot' })}
+                <${Tile} label="Restarts" value=${h.restarts7d ?? 0} onClick=${() => onFilterRiver({ kind: 'boot' })}
                          tone=${(h.restarts7d ?? 0) > 20 ? 'warn' : ''}
                          sub=${`${h.restarts24h ?? 0} in the last 24 hours`} />
                 <${Tile} label="Memory" value=${h.rssPeakMb || '—'} unit=${h.rssPeakMb ? 'MB' : ''}

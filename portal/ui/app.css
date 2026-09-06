@@ -102,7 +102,8 @@ nav.rail{background:var(--sunk);border-right:1px solid var(--rule);display:flex;
 .realm[aria-current]{color:var(--ink)}
 .realm[aria-current]::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--patch)}
 .realm .cnt{position:absolute;top:6px;right:12px;font-family:var(--data);font-size:var(--t-micro);color:var(--staged)}
-main{overflow:auto;padding-bottom:96px}
+/* 140, not 96 (2026-09-06 09:15 EDT): the floating staged tray is 104px tall and sits 20px off the bottom, so the last 124px of any realm scrolled to its end sat under it — Access's "Revoking an admin in Discord does not end their browser session" was 64% hidden. The page now ends clear of the tray. */
+main{overflow:auto;padding-bottom:140px}
 
 /* masthead — every realm states its own job */
 /* 23, not 22 and not 24: .panel is margin 22 + border 1, so panel CONTENT starts at 23.
@@ -473,7 +474,8 @@ td.d{font-family:var(--data);font-size:var(--t-sm);color:var(--ink3);white-space
 /* `.btn{flex:1}` above was written for a 420px drawer. On a `wide` one it produced two
    400px-wide buttons — a button's width should follow its label, not the dialog. Scoped to
    `.wide` so every existing confirm dialog is untouched. */
-.drawer.wide .dw-f .btn{flex:0 0 auto;min-width:132px}
+/* one footer rule for every drawer width: the buttons hug the right at a fixed minimum, never stretch to a 50/50 split in a narrow drawer. */
+.dw-f .btn{flex:0 0 auto;min-width:132px}
 .dw-f{display:flex;gap:9px;justify-content:flex-end;padding:14px 20px;flex:none;
   border-top:1px solid var(--rule);background:var(--sunk)}
 .drawer h5{margin:0 0 10px;font-size:var(--t-micro);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:700;
@@ -1579,11 +1581,7 @@ tr[role=button]:focus-visible{outline:2px solid var(--patch);outline-offset:-2px
   white-space:nowrap}
 .health.ok{color:var(--ok);background:rgba(61,220,151,.1)}
 .health.bad{color:var(--warn);background:rgba(255,122,69,.12);cursor:help}
-.bdg{display:inline-block;font-family:var(--data);font-size:var(--t-micro);font-weight:700;letter-spacing:.07em;
-  border-radius:var(--rad-1);padding:2px 5px;margin-left:4px}
-.bdg.rank{color:var(--patch);box-shadow:inset 0 0 0 1px rgba(242,194,48,.45)}
-.bdg.dmz{color:#5FA8D8;box-shadow:inset 0 0 0 1px rgba(95,168,216,.45)}
-.bdg.toxic{color:var(--del);box-shadow:inset 0 0 0 1px rgba(255,107,107,.45)}
+/* The inset-ring .bdg set that lived here was deleted 2026-09-06 09:15 EDT: the filled set below ("the real badge set") is declared later and won every shared property, so a rank chip rendered a gold ring UNDER a blue border — two topic colours on one badge, and the duplicate-selector trap this file names at .t-epic, one screen over. */
 .dwissues{margin-top:16px;border-top:1px solid var(--rule);padding-top:13px}
 .dwissues h6{margin:0 0 9px;font:700 var(--t-micro)/1 var(--data);letter-spacing:.12em;text-transform:uppercase;color:var(--warn)}
 .dwissue{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:var(--rad-2);
@@ -2554,7 +2552,7 @@ button.mxs.mxcol:hover .mxn2{color:var(--ink2)}
   border:1px solid var(--rule);border-radius:var(--rad-1);padding:2px 6px;white-space:nowrap;
   max-width:150px;overflow:hidden;text-overflow:ellipsis}
 .attpeek em.more{color:var(--ink3)}
-.bdg{font-family:var(--data);font-size:var(--t-micro);letter-spacing:.06em;font-weight:700;border-radius:var(--rad-1);
+.bdg{display:inline-block;font-family:var(--data);font-size:var(--t-micro);letter-spacing:.06em;font-weight:700;border-radius:var(--rad-1);
   padding:2px 5px;line-height:1.3;background:rgba(242,194,48,.14);color:var(--patch);
   border:1px solid rgba(242,194,48,.4)}
 .bdg.rank{background:rgba(64,154,208,.14);color:var(--info);border-color:rgba(64,154,208,.4)}
@@ -5461,6 +5459,8 @@ button .ic,a .ic{pointer-events:none}
  * other realm keeps it. Keyed on the data-realm attribute shell.js emits. */
 .tray{z-index:40}
 .app[data-realm=season] .tray{display:none}
+/* Home too: its banner already carries the count, the first change and the same Review & commit button, so the tray was a second identical CTA 600px below the first. */
+.app[data-realm=home] .tray{display:none}
 
 
 /* ═══ BUILD-OUT 2026-09-06 01:42 EDT — unit C (Armory): the category accordion, the tier on the weapon group, the weapon search, the drawers ═══ */
@@ -5616,3 +5616,10 @@ button .ic,a .ic{pointer-events:none}
 .umenu .uav b.uinit{font:600 17px var(--ui);color:var(--ink2)}
 /* .umenu .uav is already display:grid;place-items:center in app.css, so the initial letter is already
    centred there with no new rule needed. */
+
+/* ── the matrix cell's HIT AREA is 24px while its DRAWN box stays 16 (2026-09-06 09:15 EDT) ──
+ * WCAG 2.2 AA target size is 24×24; a 16px cell in a twelve-column grid cannot grow without the grid leaving the laptop
+ * (its written exception), but the thing a finger meets need not be the thing the eye sees. An invisible ::before
+ * extends the target 4px each way; ::after stays the checkmark. */
+.mxcell{position:relative}
+.mxcell::before{content:"";position:absolute;inset:-4px}

@@ -157,13 +157,14 @@ async function run() {
     await check('lookup still loading blocks Grant even if the confirm text already matches', () => {
         const r = grantReady({ discordId: '111111111111111111', lookupStatus: 'loading', pickedCount: 1, confirmText: '111111111111111111' });
         assert.strictEqual(r.ready, false);
-        assert.ok(/Looking that id up/.test(r.why));
+        // silent on purpose since 2026-09-06 09:16 EDT: the drawer's .dw-p line says "Looking that id up…"; a second copy in the reason line made a reader reconcile two regions
+        assert.strictEqual(r.why, '');
     });
 
-    await check('a failed lookup blocks Grant with its own reason, not the generic "enter an id"', () => {
+    await check('a failed lookup blocks Grant without restating the .dw-p reason', () => {
         const r = grantReady({ discordId: '111111111111111111', lookupStatus: 'error', pickedCount: 1, confirmText: '111111111111111111' });
         assert.strictEqual(r.ready, false);
-        assert.ok(/did not resolve/.test(r.why));
+        assert.strictEqual(r.why, '');   // the server's own reason is in .dw-p; the reason line does not restate it
     });
 
     await check('lookup ok + a permission + a matching confirm is the only ready state', () => {

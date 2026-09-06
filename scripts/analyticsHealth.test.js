@@ -30,7 +30,7 @@ check("Health leads with the mockup's four tiles, in the mockup's order", () => 
     assert.ok(at > 0, 'Health() is gone from portal/ui/analytics.js');
     const end = ui.indexOf('\nfunction Usage(', at);
     const body = ui.slice(at, end === -1 ? ui.length : end);
-    const labels = ['Interactions 7d', 'Success rate', 'Restarts 7d', 'Memory'];
+    const labels = ['Interactions', 'Success rate', 'Restarts', 'Memory'];
     let cursor = -1;
     for (const label of labels) {
         const idx = body.indexOf(`label="${label}"`);
@@ -43,13 +43,13 @@ check('THE ORDER GATE CAN FAIL: two tile labels swapped is caught', () => {
     const at = ui.indexOf('function Health(');
     const end = ui.indexOf('\nfunction Usage(', at);
     const body = ui.slice(at, end === -1 ? ui.length : end);
-    assert.ok(body.includes('label="Interactions 7d"') && body.includes('label="Restarts 7d"'),
+    assert.ok(body.includes('label="Interactions"') && body.includes('label="Restarts"'),
         'the anchors this proof swaps have drifted from the real tile labels');
-    const swapped = body.replace('label="Interactions 7d"', 'label="__TMP__"')
-        .replace('label="Restarts 7d"', 'label="Interactions 7d"')
-        .replace('label="__TMP__"', 'label="Restarts 7d"');
+    const swapped = body.replace('label="Interactions"', 'label="__TMP__"')
+        .replace('label="Restarts"', 'label="Interactions"')
+        .replace('label="__TMP__"', 'label="Restarts"');
     assert.notStrictEqual(swapped, body, 'the swap produced no change — this proof is vacuous');
-    const labels = ['Interactions 7d', 'Success rate', 'Restarts 7d', 'Memory'];
+    const labels = ['Interactions', 'Success rate', 'Restarts', 'Memory'];
     let cursor = -1, brokenAt = null;
     for (const label of labels) {
         const idx = swapped.indexOf(`label="${label}"`);

@@ -248,7 +248,7 @@ function LiveNow({ season, broadcast, today }) {
                     <p class="lmore">${items.length - SHOW} more running · <a href="#/season">open the Track</a></p>` : null}
                 ${!items.length ? html`
                     <p class="lmore">Nothing is scheduled for today. The season runs, but no draw, event or playlist
-                        opens or closes. <a href="#/season">Open the Track</a>.</p>` : null}
+                        opens or closes. <a href="#/season">Open Season</a>.</p>` : null}
             </div>
             <div class="lp">
                 <h2>Showing to players</h2>

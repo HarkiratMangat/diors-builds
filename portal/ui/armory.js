@@ -202,7 +202,7 @@ function Rack({ builds, onPick, onAdd }) {
                         </div>`;
                 })}
             </div>
-            <p class="racknote">A badge describes the <b>weapon</b>, not one build of it — the bot propagates it across every build sharing a <code>weaponKey</code> value and mode, so a weapon with five builds contributes five cards to its category. Rank is <b>per category</b>: “Best” means best AR, best SMG, and so on, rendered as <code>BEST ASSAULT</code> on the card — which is why the tier now rides on the weapon group inside its category rather than on a row of its own. The words are the bot's own — <code>best</code> then <code>top3</code> then <code>top4</code> then <code>top5</code> — and anything else is refused when you save. <b>DMZ builds never use it</b> — they carry <code>dmzRangeRank</code> instead, which also encodes a combat range such as <code>best-close</code> or <code>best-midlong</code> as well.</p>
+            <p class="racknote">A badge describes the <b>weapon</b>, not one build of it — the bot propagates it across every build sharing a <code>weaponKey</code> value and mode, so a weapon with five builds contributes five cards to its category. Rank is <b>per category</b>: “Best” means best AR, best SMG, and so on, rendered as <code>BEST ASSAULT</code> on the card. The words are the bot's own — <code>best</code> then <code>top3</code> then <code>top4</code> then <code>top5</code> — and anything else is refused when you save. <b>DMZ builds never use it</b> — they carry <code>dmzRangeRank</code> instead, which also encodes a combat range such as <code>best-close</code> or <code>best-midlong</code> as well.</p>
         </div>
     `;
 }
@@ -335,7 +335,7 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
         <${Drawer} eyebrow=${`loadout.add · ${f.mode} · tier 1`} title=${`New ${f.mode} build`} wide onClose=${onCancel}
                    actions=${html`
                        <span class=${'why' + (blockers.length ? ' blocked' : '')}>${blockers.length
-                           ? `Still needs ${blockers.join(' and ')}.`
+                           ? `Still needs ${blockers[0]}.`
                            : 'Stages one operation. Nothing reaches a player until you commit it on Review.'}</span>
                        <button class="btn" onClick=${onCancel}>Cancel</button>
                        <button class="btn go" disabled=${blockers.length > 0} onClick=${submit}>Stage this ${f.mode} build</button>`}>

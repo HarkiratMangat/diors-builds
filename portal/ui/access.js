@@ -58,7 +58,7 @@ function GrantForm({ onGrant, scopes, onCancel }) {
     const { ready, why } = grantReady({ discordId, lookupStatus: lookup.status, pickedCount: picked.length, confirmText });
 
     return html`
-        <${Drawer} eyebrow="admin.grant · commits immediately, typed confirmation" title="Grant portal access" onClose=${onCancel}
+        <${Drawer} eyebrow="admin.grant · tier 3" title="Grant portal access" onClose=${onCancel}
                    actions=${html`
                        <button class="btn" onClick=${onCancel}>Cancel</button>
                        <button class="btn go" disabled=${!ready} onClick=${() => onGrant(discordId, picked, confirmText, note)}>Grant now</button>`}>
