@@ -45,6 +45,50 @@ rounded:
   rad3: "10px"
   round: "50%"
   pill: "999px"
+components:
+  button:
+    backgroundColor: "{colors.raised}"
+    textColor: "{colors.ink2}"
+    rounded: "{rounded.rad2}"
+    padding: "9px"
+    height: "44px"
+  chip:
+    backgroundColor: "{colors.sunk}"
+    textColor: "{colors.ink2}"
+    rounded: "{rounded.pill}"
+    padding: "6px 11px"
+    height: "32px"
+  pill:
+    backgroundColor: "{colors.sunk}"
+    textColor: "{colors.ink2}"
+    rounded: "{rounded.pill}"
+    padding: "8px 13px"
+  input:
+    backgroundColor: "{colors.sunk}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.rad2}"
+    padding: "8px 10px"
+    height: "44px"
+  card:
+    backgroundColor: "{colors.raised}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.rad2}"
+    padding: "9px 10px"
+  drawer:
+    backgroundColor: "{colors.raised}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.rad3}"
+    width: "min(560px, calc(100vw - 40px))"
+  tooltip:
+    backgroundColor: "{colors.raised}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.rad2}"
+    padding: "6px 10px"
+  flag:
+    backgroundColor: "{colors.sunk}"
+    textColor: "{colors.ink2}"
+    rounded: "{rounded.rad2}"
+    padding: "8px 11px"
 ---
 
 # Design — Dioreo admin portal
@@ -89,6 +133,42 @@ Applied via a `--topic-accent` custom property set on the element, never via a c
 Structure is carried by **borders** (`--rule`, `--rule2`) — but "no shadows" is false and was an error in the previous version of this file: the package carries **98 `box-shadow` declarations**, overwhelmingly *inset* rings that occupy no layout (`inset 0 0 0 1px`) plus the drawer's single lift. **An inset ring is a border that does not take space** — that is the depth strategy, and it is why a ring can be added to an element whose box is already committed.
 
 **Five radii, named by size rather than by component:** `--rad-1:3px` (chips, ticks, tags — boxes under ~24px) · `--rad-2:6px` (**the default**: buttons, inputs, cards, panels) · `--rad-3:10px` (drawers, modals, the ⌘K palette) · `--rad-round:50%` (avatars, dots, beads) · `--rad-pill:999px` (a radius that always exceeds half the height). A workbench control reads as machined, not soft.
+
+## Components
+
+*Added 2026-09-06 00:27 EDT, from `impeccable doctor`'s only finding: nothing here told a screen generator what a control looks like, so the live design panel drew generic approximations in their place.*
+
+🔴 **Extracted from the design package's `assets/app.css`, then diffed against `portal/ui/app.css`. All ten primitives below are BYTE-IDENTICAL on the two sides** — so unusually for this file, the Components section describes the mockups and the portal at once, and needs no divergence note.
+
+**Every control is a rectangle of `--sunk` or `--raised` inside a one-pixel `--rule2` border.** There is no filled-button variant anywhere in the system: emphasis is carried by *ground* (`--raised` sits forward, `--sunk` sits back) and by the accent appearing on a border or an inset ring, never by a saturated fill behind label text. That is what keeps `--on-accent` off the critical path — and it is why a new filled state is the one addition that has to declare which ground it is for.
+
+| Component | Ground | Border | Radius | Padding | Height |
+|---|---|---|---|---|---|
+| `.btn` | `--raised` | `--rule2` | `--rad-2` 6px | `9px` | `--tap` 44px |
+| `.chip` | `--sunk` | `--rule2` | `--rad-pill` | `6px 11px` | 32px |
+| `.pill` | `--sunk` | `--rule` | `--rad-pill` | `8px 13px` | auto |
+| `input` / `select` | `--sunk` | `--rule2` | `--rad-2` | `8px 10px` | `--tap` 44px |
+| `.card` | `--raised` | `--rule2` | `--rad-2` | `9px 10px` | content |
+| `.drawer` | `--raised` | `--rule2` | `--rad-3` 10px | — | `min(84vh,860px)` |
+| `.tip` | `--raised` | `--rule2` | `--rad-2` | `6px 10px` | content |
+| `.flag` | `--sunk` | `--rule` + **`2px --warn` on the left** | `--rad-2` | `8px 11px` | content |
+| `.realm` (rail item) | none | none | — | `11px 4px` | `--tap` 44px |
+| `.mark` (record diamond) | `--c` fallback `--ink3` | none | `--rad-1` | — | 13×13 rotated 45° |
+
+### The three named rules this vocabulary already obeys
+
+**The Ground Rule.** Two grounds and only two. `--raised` is a thing you act *on*; `--sunk` is a well you put something *into*. A control that inverts this reads as a different kind of object — which is precisely how `.btn` (raised) and `.chip` (sunk) stay distinguishable at 11.5px with the same border colour.
+
+**The 44px Rule.** `--tap:44px` is the floor for anything a pointer lands on, and `.btn`, `input`, `select` and `.realm` all state it explicitly rather than reaching it by accident. ⚠️ **It is bypassed in exactly one place, deliberately and with a dated comment** (`portal/ui/app.css`, the 32px control) — a documented exception, not drift. `.chip`'s 32px is the second, and it is the pattern to check before adding a third.
+
+**The Left-Edge Rule.** A `2px` coloured left border means *this row is telling you something*, and `.flag` is its only base-level use. ⚠️ **The impeccable detector calls this the single most recognisable tell of AI-generated UI** and counts **59 instances in the design package** against 29 in the portal. It is the design's own signature and predates the detector — but it is the one component decision in this file that an outside reviewer would challenge first, and it is recorded here so the challenge is answered from evidence rather than re-litigated from taste.
+
+### What a new component must state
+
+1. Which of the two grounds it sits on.
+2. Which radius step, by name — never a literal `px`.
+3. Whether it is a tap target, and therefore whether `--tap` applies.
+4. If it carries a fill, **which ground that fill is for** — `--on-accent` is near-black and reads at 2.86:1 on a dark fill.
 
 ## Motion
 

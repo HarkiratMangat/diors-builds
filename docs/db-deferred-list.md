@@ -465,6 +465,21 @@ Home's fixture went `sizeIssues` **33 → 35** across four re-records this Part,
 
 ## 🔔 Reminders / watch-for
 
+### 🎨 The impeccable design hook is WIRED BY HAND, and it will be silently wrong after any skill move `[P2 · XS]`
+
+*Filed 2026-09-06 00:29 EDT at Harkirat's instruction — "wire it but also file it so its remembered, incase it becomes friction."*
+
+`.claude/settings.json` now carries a `PostToolUse` (`Edit|Write`, 5s) and a `Stop` (30s) entry running `node "$HOME/.claude/skills/impeccable/scripts/hook.mjs"`. Per edit it reports only what is objectively broken; the full rule set fires once at session end.
+
+🔴 **It is hand-wired because `impeccable hooks on` CANNOT install it here.** `hook-admin.mjs`'s `repairHookManifests()` skips every target whose `skillRel` is absent, and it looks for a PROJECT-scope `.claude/skills/impeccable`. This machine installs the skill at USER scope (`~/.claude/skills/impeccable`), so the loop matches nothing and writes nothing — while `hooks status` still prints `state: enabled`. **A hook that looks installed and scans nothing, which is the exact failure impeccable's own `doctor` documentation names and which its `doctor` does not catch** (it checks whether a hook's script path resolves, not whether the manifest exists).
+
+**If it becomes friction, the OFF switch is `IMPECCABLE_HOOK_DISABLED=1` for one shell, or `"enabled": false` in `.impeccable/config.json` for the project.** Removing the two `settings.json` entries is the permanent form.
+
+⚠️ **The verify condition, because silence is what this fails as:** write a CSS file under `portal/ui/` containing a literal colour that is not in DESIGN.md and confirm a `[impeccable@1]` block comes back. A pipe-test of `hook.mjs` proves the SCRIPT works and never that the HOOK fires — proven fired 2026-09-06 00:29 EDT with a probe file, since deleted.
+
+⚠️ **`$HOME` is hardcoded in the command.** A second machine, or a move of the skill, breaks it silently.
+
+
 ### Before promoting any gate to AUTO-CORRECTING, check these three `[P2 · XS]`
 *Filed 2026-09-02 18:28 EDT from a `/code-review` medium pass that found seven defects on a green suite — three of them auto-corrections that corrupted the exact thing they existed to protect.*
 
