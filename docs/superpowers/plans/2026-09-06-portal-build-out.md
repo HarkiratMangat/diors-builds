@@ -1,10 +1,12 @@
 ---
 kind: plan
-status: live
+status: frozen
 scope: The portal BUILD-OUT — every pin, the design queue, the impeccable findings, and the fifteen refine/enhance/fix lenses, applied on top of the conformed base. Supersedes the stand-down rule; the resting-frame floors in the ledger are historical from this plan on.
 ---
 
 # PLAN — the portal build-out, 2026-09-06 00:54 EDT
+
+> ✅ **BUILT AND MERGED 2026-09-06 10:08 EDT — PR #185, v3.78.0-pre, `v3-pre-release` at `67fa4dff`.** Every unit in §1 ran (A by the orchestrator, B–E as subagents), every lens in §2 landed where §2 says, the five reviews in §3 step 6 were folded, and the consolidation ran to sixteen thoughts. What changed against this plan while building: the tray hides on Home as well as Season; `.dw-f .why` is ink at rest and warn when it blocks; the draw-window kind is gone rather than hidden; the four forks in the handoff's §8.5 were decided rather than popped (Harkirat asleep, 01:28 EDT). Records: `docs/CHANGELOG.md` v3.78.0-pre · `docs/reference/portal-decision-ledger.md` § Superseded 2026-09-06 · `DESIGN.md` § Known divergences. This file is frozen from here.
 
 *Harkirat, 2026-09-06 00:43 EDT: "finish the portal… I don't care about the plan's prior conventions/rules, the conformance is more or less done, it just needs correcting… consider the pending redesign items, the pins, the impeccable findings, fix them, any bugs, gaps, improvements… awwwards worthy." And 00:52: "write up a solid plan for yourself… utilize tightly scoped subagents… in parallel when it makes sense."*
 
