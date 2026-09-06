@@ -201,97 +201,157 @@ function fmtUptime(since) {
 }
 
 
-function Health({ health, onOpenTiming, onFilterLevel, onOpenReach, onFilterRiver }) {
+// 🔴 PIN 37, 2026-09-06 01:28 EDT — THE LEAD NOW MATCHES THE MOCKUP'S FOUR TILES AND ITS "WHERE THE
+// MILLISECONDS GO" SPLIT (analytics.html:100-200). The 2026-09-04 two-tile cut reasoned that a
+// tile repeating a masthead figure is a second statement of it — that argument still holds, which
+// is why Interactions and Success rate below read the SAME population Usage/Timing already filter
+// to (7 days, admin traffic excluded) rather than the masthead's 24h/admin-inclusive commands24h
+// and errors24h. Nothing here is invented: every value comes from usageStats/timingStats, which
+// this view already had via the same page load — no new request, per the build-out's `optimize` lens.
+function DepBars({ byDep = [] }) {
+    // Lifted out of Timing() (it used to own this panel, at the foot of that view) rather than
+    // duplicated: the mockup draws "Where the milliseconds go" ONLY on Health — analytics.html
+    // never repeats it on the Timing tab — so Timing loses the block instead of gaining a second
+    // copy of it. The per-call colour rule, the atlas total-vs-average distinction and the empty
+    // banner are unchanged from Timing's own version; only the home of the function moved.
+    const depTop = Math.max(1, ...byDep.map((d) => d.totalMs || 0));
+    const worst = byDep.length ? byDep.map((d) => ({ name: d._id, calls: d.calls || 0, per: d.calls ? d.totalMs / d.calls : d.totalMs }))
+        .sort((x, y) => y.per - x.per)[0] : null;
+    const over = worst && worst.per >= ACK_LIMIT_MS;
+    const atlas = byDep.find((d) => d._id === 'atlas');
+    return html`
+        <section class="hpanel">
+            <h4>Where the milliseconds go</h4>
+            <p class="hp">Timings are aggregated <b>per dependency name</b>, never per call — that is what
+                keeps the array on each event bounded. Read a row as: what this subsystem costs across the
+                week, when it is used.</p>
+            ${byDep.length ? html`
+                <div class="depbars">
+                    ${byDep.map((d) => {
+                        const per = d.calls ? d.totalMs / d.calls : d.totalMs;
+                        return html`
+                            <div class=${'depb' + (per >= 1000 ? ' slow' : '')} key=${d._id}>
+                                <span class="dn">${d._id}</span>
+                                <span class="dt"><i style=${`width:${pct(d.totalMs, depTop)}%`}></i></span>
+                                <span class="dv">${fmtMs(d.totalMs)}</span>
+                                <span class="dc">${(d.calls || 0).toLocaleString()} call${d.calls === 1 ? '' : 's'}${' '}
+                                    · ${fmtMs(per)} each</span>
+                            </div>`;
+                    })}
+                </div>
+                <div class=${'hbanner' + (over ? ' warn' : '')}>
+                    <span class="hbi"><${Icon} name=${over ? 'triangle-alert' : 'check'} cls="sm" /></span>
+                    <div>
+                        <h4>${worst.name} is the slowest per call, at ${fmtMs(worst.per)}</h4>
+                        <p>${atlas
+                            ? html`Atlas costs ${' '}<b>${fmtMs(atlas.totalMs)}</b>${' '}
+                                across <b>${(atlas.calls || 0).toLocaleString()}</b> calls this week, so the database is not the cost. `
+                            : html`Atlas has not been called in this window, so the database is not in this picture at all. `}
+                            ${over
+                                ? html`At ${fmtMs(worst.per)} it exceeds Discord's ${ACK_LIMIT_MS / 1000}s acknowledgement deadline
+                                    on its own, which is survivable only where it runs as a background job rather than inside an interaction.`
+                                : html`It stays inside the interaction budget.`}</p>
+                    </div>
+                </div>` : html`
+                <div class="hbanner">
+                    <span class="hbi"><${Icon} name="check" cls="sm" /></span>
+                    <div><h4>No timings recorded yet</h4>
+                        <p>A dependency only appears here once something has called it. On a bot that has
+                           just started, that is the correct reading — not a gap.</p></div>
+                </div>`}
+        </section>`;
+}
+
+function Health({ health, timingStats, usageStats, onOpenTiming, onFilterLevel, onOpenReach, onFilterRiver }) {
     const h = health || {};
-    const errors = h.errors24h ?? 0;
+    const usage = usageStats || {};
+    const byOutcome = usage.byOutcome || [];
+    const outcomeTotal = byOutcome.reduce((a, o) => a + (o.c || 0), 0);
+    const errOutcome = byOutcome.find((o) => o._id === 'error');
+    const errCount = errOutcome ? errOutcome.c : 0;
+    // null, not 0, when nothing has run this week — a rate computed over zero interactions is not
+    // "100%", it is unmeasured, and the tile says so rather than claiming a perfect week it never had.
+    const successRate = outcomeTotal ? (100 - pct(errCount, outcomeTotal)) : null;
+    const byDep = (timingStats || {}).byDep || [];
     return html`
         <div class="panel" id="health">
             <div class="ph">
                 <span class="t">Health</span>
             </div>
-            <!-- 🔴 THE TILES SAID WHAT THE MASTHEAD HAD JUST SAID. Measured 2026-08-27: the masthead read
-                 uptime 1h 30m · errors 24h 23 · commands 24h 496, and three of the four tiles beneath it
-                 repeated those three figures verbatim, a few hundred pixels lower. Four tiles above two
-                 panels is the shape the completion plan calls a generic dashboard, and this is why it read
-                 as one — the tiles were not a second layer of information, they were the first one again.
-                 The mockup's Analytics makes them disagree on purpose: its masthead carries the headline
-                 counts and its tiles carry a derived rate, a restart count and a memory range.
-                 🔴 EACH TILE NOW CARRIES SOMETHING THE MASTHEAD CANNOT, and every one of them was already
-                 on this page in a weaker position — restarts were a sentence inside a panel, distinct
-                 users and the quiet-alert count were sub-lines under figures they were not about. ⚠️ The
-                 quiet count is deliberately its OWN figure rather than a footnote to errors: this repo's
-                 three-tier error model must never collapse into one number, and a caution that only exists
-                 as small print under a red count has collapsed. -->
-            <!-- ⚠️ EACH TILE GOES WHERE ITS OWN FIGURE IS ANSWERED, WHICH IS NOT ONE PLACE. The first version wired all four to Timing because the DESIGN wires its four there -- and the design's four are timing figures (interactions, success rate, restarts, memory) while these are not. "Distinct users 24h" and "Quiet alerts 24h" jumped to a view containing neither. Four buttons that all go somewhere irrelevant are worse than four divs, because the affordance promises an answer. -->
             <div class="tiles">
+                <${Tile} label="Interactions 7d" value=${usage.current ?? '—'} onClick=${onOpenTiming}
+                         sub="product traffic this week — admin excluded" />
+                <${Tile} label="Success rate" value=${successRate == null ? '—' : successRate.toFixed(1)}
+                         unit=${successRate == null ? '' : '%'}
+                         onClick=${() => onFilterRiver({ kind: 'alert', level: 'error' })}
+                         tone=${successRate == null ? '' : !errCount ? 'ok' : successRate < 99 ? 'warn' : ''}
+                         sub=${outcomeTotal ? `${errCount} error${errCount === 1 ? '' : 's'} across ${outcomeTotal} interactions this week` : 'nothing recorded this week'} />
                 <${Tile} label="Restarts 7d" value=${h.restarts7d ?? 0} onClick=${() => onFilterRiver({ kind: 'boot' })}
                          tone=${(h.restarts7d ?? 0) > 20 ? 'warn' : ''}
                          sub=${`${h.restarts24h ?? 0} in the last 24 hours`} />
-                <${Tile} label="RAM at last alert" value=${h.rssPeakMb || '—'} unit=${h.rssPeakMb ? 'MB' : ''}
+                <${Tile} label="Memory" value=${h.rssPeakMb || '—'} unit=${h.rssPeakMb ? 'MB' : ''}
                          onClick=${onOpenTiming} tone=${h.rssPeakMb > 400 ? 'warn' : ''}
                          sub=${h.rssSampleCount ? `highest of ${h.rssSampleCount} ${h.rssSampleCount === 1 ? 'sample' : 'samples'} in 7d` : 'no alerts fired in 7 days'} />
-                <!-- 🔴 TWO TILES, NOT FOUR — 2026-09-04 22:54 EDT. The row held four metrics across three time windows
-                     and three units, and the code comment above records that the first version wired all four to
-                     Timing *because the design wires its four there*: four slots existed, then four numbers were
-                     found to fill them. The rule for which two go is not taste — **a tile whose own subtitle is
-                     defined against a masthead figure is a third statement of that figure.** Distinct users 24h
-                     read "across N commands" beside a masthead reading COMMANDS 24H, and Quiet alerts 24h read
-                     "below the N errors" beside ERRORS 24H. The two that remain say something the masthead
-                     cannot. Their filters are still reachable: the level rows scope the river to alerts, and
-                     Reach is a view tab. -->
             </div>
-            <!-- 🔴 ELEVEN FACTS ARE WRITTEN ON EVERY BOOT AND THE PANEL SHOWED TWO. models/BootRecord.js
-                 stores the commit, the guild count, how many commands registered and how many emoji synced
-                 or went MISSING — and that last one is the known stale-prod-id trap, where a non-zero
-                 number means emoji will render as raw ids in Discord. All of it was recorded and read by
-                 nobody. -->
-            ${h.lastBoot ? html`
-                <div class="bootcard">
-                    <h5>Last boot</h5>
-                    <div class="bootgrid">
-                        <span>Version</span><b>${h.lastBoot.version || '—'}</b>
-                        <span>Commit</span><b>${h.lastBoot.commit || 'not recorded'}</b>
-                        <span>Kind</span><b>${h.lastBoot.kind || '—'}</b>
-                        <span>Host</span><b>${h.lastBoot.host || '—'}</b>
-                        <span>Guilds</span><b>${h.lastBoot.guilds ?? '—'}</b>
-                        <span>Commands</span><b>${h.lastBoot.commandsRegistered ?? '—'}</b>
-                        <span>Emoji</span>
-                        <b class=${h.lastBoot.emojiMissing ? 'bad' : 'ok'}>${h.lastBoot.emojiSynced ?? 0} synced${h.lastBoot.emojiMissing ? `, ${h.lastBoot.emojiMissing} missing` : ''}</b>
-                        <span>Cloudinary</span>
-                        <b class=${h.lastBoot.cloudinaryConfigured ? 'ok' : 'bad'}>${h.lastBoot.cloudinaryConfigured ? 'configured' : 'not configured'}</b>
-                        ${h.lastBoot.restartContext ? html`<span>Restarts</span><b>${h.lastBoot.restartContext}</b>` : null}
-                    </div>
-                    <!-- A non-zero missing count is not cosmetic: it is the emoji-capture trap, and the card
-                         says what it means rather than only how many. -->
-                    ${h.lastBoot.emojiMissing
-                        ? html`<p class="pnote">${h.lastBoot.emojiMissing} emoji did not resolve at boot — those render as raw ids in Discord until the next sync.</p>`
-                        : null}
-                </div>` : null}
-            <!-- 🔴 THE LEVELS WERE A FILTER AND A PAIR OF TOTALS, NEVER A DISTRIBUTION. errors 24h
-                 and quiet alerts 24h sit either side of one line, which answers whether anything is on
-                 fire and not what the channel is actually full of. ⚠️ It names only levels PRESENT in the
-                 window, the rule every key and legend here follows -- a week with no errors should not
-                 draw an empty error bar, which reads as a measurement rather than as an absence. -->
-            ${(h.alertsByLevel || []).length ? html`
+            <!-- 🔴 THE SPLIT IS THE MOCKUP'S, NOT THE PORTAL'S PRIOR ONE. analytics.html's Health leads
+                 with its dependency-timing panel beside "Alerts by level" — the portal's own hsplit here
+                 used to pair the Restarts/Where-these-come-from spark bars instead; those are demoted
+                 below rather than dropped, since the mockup has no per-day chart at all and it is real,
+                 portal-only depth worth keeping. -->
+            <div class="hsplit">
+                <${DepBars} byDep=${byDep} />
                 <section class="hpanel">
                     <h4>Alerts by level</h4>
-                    <p class="hp">Three tiers, and they never collapse into one number:${' '}
-                        <b>info</b> is a record, <b>caution</b> is a look-when-convenient,${' '}
-                        <b>error</b> pings a human. Seven days.</p>
-                    <div class="lvlbars">
-                        ${h.alertsByLevel.map((a) => html`
-                            <button class=${LEVEL_ROW[a.level] || LEVEL_ROW.info} key=${a.level}
-                                    onClick=${() => onFilterLevel(a.level)}>
-                                <span class="ln">${a.level}</span>${' '}
-                                <span class="lt"><i style=${`width:${Math.max(1, Math.round((a.n / Math.max(1, h.alerts7d || 1)) * 100))}%`}></i></span>${' '}
-                                <span class="lv2">${a.n}</span>${' '}
-                                <!-- ⚠️ "never pings" is a FACT about this level in this window, not a rule:
-                                     sendAlert can ping on request, so a level that usually stays quiet can
-                                     still have pinged once, and stating the rule would hide that. -->
-                                <span class="lp">${a.pinged ? `${a.pinged} pinged` : 'never pinged'}${a.silent ? ` · ${a.silent} not posted` : ''}</span>
-                            </button>`)}
-                    </div>
-                </section>` : null}
+                    <!-- 🔴 THE LEVELS WERE A FILTER AND A PAIR OF TOTALS, NEVER A DISTRIBUTION. errors 24h
+                         and quiet alerts 24h sit either side of one line, which answers whether anything is on
+                         fire and not what the channel is actually full of. ⚠️ It names only levels PRESENT in the
+                         window, the rule every key and legend here follows -- a week with no errors should not
+                         draw an empty error bar, which reads as a measurement rather than as an absence. -->
+                    ${(h.alertsByLevel || []).length ? html`
+                        <p class="hp">Three tiers, and they never collapse into one number:${' '}
+                            <b>info</b> is a record, <b>caution</b> is a look-when-convenient,${' '}
+                            <b>error</b> pings a human. Seven days.</p>
+                        <div class="lvlbars">
+                            ${h.alertsByLevel.map((a) => html`
+                                <button class=${LEVEL_ROW[a.level] || LEVEL_ROW.info} key=${a.level}
+                                        onClick=${() => onFilterLevel(a.level)}>
+                                    <span class="ln">${a.level}</span>${' '}
+                                    <span class="lt"><i style=${`width:${Math.max(1, Math.round((a.n / Math.max(1, h.alerts7d || 1)) * 100))}%`}></i></span>${' '}
+                                    <span class="lv2">${a.n}</span>${' '}
+                                    <!-- ⚠️ "never pings" is a FACT about this level in this window, not a rule:
+                                         sendAlert can ping on request, so a level that usually stays quiet can
+                                         still have pinged once, and stating the rule would hide that. -->
+                                    <span class="lp">${a.pinged ? `${a.pinged} pinged` : 'never pinged'}${a.silent ? ` · ${a.silent} not posted` : ''}</span>
+                                </button>`)}
+                        </div>` : html`<p class="hp">No alerts recorded in the last seven days.</p>`}
+                    <!-- 🔴 ELEVEN FACTS ARE WRITTEN ON EVERY BOOT. models/BootRecord.js stores the commit,
+                         the guild count, how many commands registered and how many emoji synced or went
+                         MISSING — that last one is the known stale-prod-id trap. Nested here now, matching
+                         the mockup, which puts the boot card inside this same panel rather than above the tiles. -->
+                    ${h.lastBoot ? html`
+                        <div class="bootcard">
+                            <h5>Last boot</h5>
+                            <div class="bootgrid">
+                                <span>Version</span><b>${h.lastBoot.version || '—'}</b>
+                                <span>Commit</span><b>${h.lastBoot.commit || 'not recorded'}</b>
+                                <span>Kind</span><b>${h.lastBoot.kind || '—'}</b>
+                                <span>Host</span><b>${h.lastBoot.host || '—'}</b>
+                                <span>Guilds</span><b>${h.lastBoot.guilds ?? '—'}</b>
+                                <span>Commands</span><b>${h.lastBoot.commandsRegistered ?? '—'}</b>
+                                <span>Emoji</span>
+                                <b class=${h.lastBoot.emojiMissing ? 'bad' : 'ok'}>${h.lastBoot.emojiSynced ?? 0} synced${h.lastBoot.emojiMissing ? `, ${h.lastBoot.emojiMissing} missing` : ''}</b>
+                                <span>Cloudinary</span>
+                                <b class=${h.lastBoot.cloudinaryConfigured ? 'ok' : 'bad'}>${h.lastBoot.cloudinaryConfigured ? 'configured' : 'not configured'}</b>
+                                ${h.lastBoot.restartContext ? html`<span>Restarts</span><b>${h.lastBoot.restartContext}</b>` : null}
+                            </div>
+                            <!-- A non-zero missing count is not cosmetic: it is the emoji-capture trap, and the card
+                                 says what it means rather than only how many. -->
+                            ${h.lastBoot.emojiMissing
+                                ? html`<p class="pnote">${h.lastBoot.emojiMissing} emoji did not resolve at boot — those render as raw ids in Discord until the next sync.</p>`
+                                : null}
+                        </div>` : null}
+                </section>
+            </div>
             <div class="hsplit">
                 <section class="hpanel">
                     <h4>Restarts</h4>
@@ -511,54 +571,9 @@ function Timing({ stats }) {
                         : html`<p class="hp">No command has recorded a finish time in this window.</p>`}
                 </section>
             </div>
-            ${byDep.length ? html`
-                <div class="hsplit">
-                    <section class="hpanel" style="grid-column:1/-1">
-                        <h4>Where the milliseconds go</h4>
-                        <p class="hp">Timings are aggregated <b>per dependency name</b>, never per call — that is what
-                            keeps the array on each event bounded. Read a row as: what this subsystem costs across the
-                            week, when it is used.</p>
-                        <!-- 🔴 THE BAR AND THE COLOUR ANSWER DIFFERENT QUESTIONS, AND MERGING THEM PAINTED THE LEADER ORANGE FOREVER. The bar is share of the week's total, so the top row is always full width; a fault colour keyed off that same total (over half the leader) therefore fires on the leader by construction, whatever the numbers are — the same shape as the success-rate tile that was orange at 99% because there is always at least one error. Total is not a speed at all: 52ms across 447 calls and 3.6s across one call are opposite facts. So the colour comes from the per-call average, which IS a speed, and the row states that average so the colour has a visible cause. -->
-                        <div class="depbars">
-                            ${byDep.map((d) => {
-                                const per = d.calls ? d.totalMs / d.calls : d.totalMs;
-                                return html`
-                                    <div class=${'depb' + (per >= 1000 ? ' slow' : '')} key=${d._id}>
-                                        <span class="dn">${d._id}</span>
-                                        <span class="dt"><i style=${`width:${pct(d.totalMs, depTop)}%`}></i></span>
-                                        <span class="dv">${fmtMs(d.totalMs)}</span>
-                                        <span class="dc">${(d.calls || 0).toLocaleString()} call${d.calls === 1 ? '' : 's'}${' '}
-                                            · ${fmtMs(per)} each</span>
-                                    </div>`;
-                            })}
-                        </div>
-                        <!-- The design closes this panel by NAMING the outlier and saying what it costs; the portal drew the bars and stopped, so the one row a reader needs to act on had to be found by eye every time. Carried across with the panel when it moved to Timing, and the banner was the half that did not come with it.
-                             ⚠️ IT RANKS BY PER-CALL AVERAGE, NOT BY TOTAL, because the panel's own colour rule two comments above says a total is not a speed — 52ms across 447 calls and 3.6s across one call are opposite facts. A banner ranking by total would name a different row than the one painted slow, directly beneath it. -->
-                        ${(() => {
-                            const worst = byDep.map((d) => ({ name: d._id, calls: d.calls || 0, per: d.calls ? d.totalMs / d.calls : d.totalMs }))
-                                .sort((x, y) => y.per - x.per)[0];
-                            if (!worst) return null;
-                            const over = worst.per >= ACK_LIMIT_MS;
-                            const atlas = byDep.find((d) => d._id === 'atlas');
-                            return html`
-                                <div class=${'hbanner' + (over ? ' warn' : '')}>
-                                    <span class="hbi"><${Icon} name=${over ? 'triangle-alert' : 'check'} cls="sm" /></span>
-                                    <div>
-                                        <h4>${worst.name} is the slowest per call, at ${fmtMs(worst.per)}</h4>
-                                        <!-- ⚠️ THE ATLAS LINE IS A TOTAL WHERE THE HEADLINE IS AN AVERAGE, and that is deliberate rather than an inconsistency. The headline ranks by per-call speed because that is what the panel's colour means; this sentence answers a different question — how much of the week's cost the database accounts for — which is a total by definition. Written as an average it read "Atlas answers in 0ms", a real 52ms across 437 calls rendered as nothing at all. -->
-                                        <p>${atlas
-                                            ? html`Atlas costs ${' '}<b>${fmtMs(atlas.totalMs)}</b>${' '}
-                                                across <b>${(atlas.calls || 0).toLocaleString()}</b> calls this week, so the database is not the cost. `
-                                            : html`Atlas has not been called in this window, so the database is not in this picture at all. `}
-                                            ${over
-                                                ? html`At ${fmtMs(worst.per)} it exceeds Discord's ${ACK_LIMIT_MS / 1000}s acknowledgement deadline
-                                                    on its own, which is survivable only where it runs as a background job rather than inside an interaction.`
-                                                : html`It stays inside the interaction budget.`}</p>
-                                    </div>
-                                </div>`;
-                        })()}
-                    </section>
-                </div>` : null}
+            <!-- 🔴 "WHERE THE MILLISECONDS GO" MOVED TO HEALTH, 2026-09-06 01:28 EDT (pin 37). The mockup draws that
+                 panel only on the Health tab (analytics.html never repeats it on Timing), so it now lives
+                 there as the shared DepBars component instead of being drawn twice on one realm. -->
         </div>`;
 }
 
@@ -809,7 +824,7 @@ export function AnalyticsRealm({ session }) {
 
     // A lookup, not a ternary chain: three views nested two deep was already at the edge of readable, and this is five.
     const VIEWS = {
-        Health: () => html`<${Health} health=${data.health} onOpenTiming=${() => setView('Timing')} onFilterLevel=${(level) => filterRiver({ kind: 'alert', level })} onOpenReach=${() => setView('Reach')} onFilterRiver=${filterRiver} />`,
+        Health: () => html`<${Health} health=${data.health} timingStats=${data.timingStats} usageStats=${data.usageStats} onOpenTiming=${() => setView('Timing')} onFilterLevel=${(level) => filterRiver({ kind: 'alert', level })} onOpenReach=${() => setView('Reach')} onFilterRiver=${filterRiver} />`,
         Usage: () => html`<${Usage} stats=${data.usageStats} outcomeKeys=${data.outcomeKeys} entryKeys=${data.entryKeys} />`,
         Timing: () => html`<${Timing} stats=${data.timingStats} />`,
         Reach: () => html`<${Reach} rows=${data.reach} />`,
