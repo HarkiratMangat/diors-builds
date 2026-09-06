@@ -340,11 +340,6 @@ Both selectors are emitted by `portal/ui/season.js` and `portal/ui/composer.js`,
 
 ---
 
-### `[P2 · S · Sonnet5-High]` `days left` was dropped from Home's masthead and should come back on merit
-*Filed 2026-09-03 21:40 EDT, Part 6b.*
-
-COMPANION §16.6 and §5.9z.5 both NAME four figures for Home — days left · live now · staged · needs you — and the design RENDERS three. Conformance took the design's three (Harkirat, 2026-09-03 21:40 EDT: *"Three now, revisit at the redesign phase"*). **Do.** In the redesign phase, decide whether the countdown earns a masthead figure given that Home's own clock panel sits ~200px below it stating the same deadline with two item columns off it. **Verify by:** either a fourth `.stat` in `home.js`'s `stats` array with a stated reason, or a line in the decision ledger saying it was considered and dropped.
-
 ### `[P2 · S · Sonnet5-High]` Armory's masthead is mode-scoped, so it can never show the console's true repair count
 *Filed 2026-09-03 21:40 EDT, Part 6b.*
 

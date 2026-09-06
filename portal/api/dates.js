@@ -21,16 +21,9 @@ function register(route) {
 
     // POST /api/parse-items { text } -> { items: [{ tier, name }], errors: [] }
     //
-    // 🔴 THE BOT'S OWN SHORTHAND PARSER, FOR THE SAME REASON THE DATE IS PARSED HERE. `/manage`'s add-draw
-    // modal has taken an items list as one-per-line shorthand since it was built — "m Character", "l Gun",
-    // "-# a note" — and `parseItemLine` is the single implementation of that grammar, including the trap
-    // already paid for there: a `-#` comment line must be matched BEFORE the tier-shorthand branch, or the
-    // comment text is title-cased and stored under a nonsense tier. A browser copy would preview tiers the
-    // bot then resolves differently, which is the one thing a preview must not do.
+    // 🔴 THE BOT'S OWN SHORTHAND PARSER, FOR THE SAME REASON THE DATE IS PARSED HERE. `/manage`'s add-draw modal has taken an items list as one-per-line shorthand since it was built — "m Character", "l Gun", "-# a note" — and `parseItemLine` is the single implementation of that grammar, including the trap already paid for there: a `-#` comment line must be matched BEFORE the tier-shorthand branch, or the comment text is title-cased and stored under a nonsense tier. A browser copy would preview tiers the bot then resolves differently, which is the one thing a preview must not do.
     //
-    // ⚠️ A LINE IT COULD NOT READ IS REPORTED, NEVER DROPPED — same contract as /api/parse-bulk. The only
-    // unreadable line is one that leaves no name behind, since resolveTier falls back to `epic` rather than
-    // failing, so `errors` carries the line number and the text as typed.
+    // ⚠️ A LINE IT COULD NOT READ IS REPORTED, NEVER DROPPED — same contract as /api/parse-bulk. The only unreadable line is one that leaves no name behind, since resolveTier falls back to `epic` rather than failing, so `errors` carries the line number and the text as typed.
     route('POST', /^\/api\/parse-items$/, requireAdmin(async (req, res) => {
         const body = await readJsonBody(req);
         const text = String(body.text || '');

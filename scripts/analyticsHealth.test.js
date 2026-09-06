@@ -1,14 +1,7 @@
 #!/usr/bin/env node
-// scripts/analyticsHealth.test.js — pin 37's Health lead: the tile order matches the mockup, "Where
-// the milliseconds go" lives on Health only (not duplicated on Timing), and the four-level alert
-// table stays in conservation with utils/alertWebhook.js, the module that actually assigns levels.
+// scripts/analyticsHealth.test.js — pin 37's Health lead: the tile order matches the mockup, "Where the milliseconds go" lives on Health only (not duplicated on Timing), and the four-level alert table stays in conservation with utils/alertWebhook.js, the module that actually assigns levels.
 //
-// These are source-text checks, not a rendered-DOM test: portal/ui/*.js imports the buildless
-// vendor bundle (../vendor/preact.mjs etc.), which does not exist until `npm run build` copies it
-// in, so importing the module directly in a bare `node` process fails before a single assertion
-// runs. scripts/portalAnalytics.test.js already established this file's testing convention — read
-// the source as text, strip comments before scanning it, and falsify each check against a real
-// mutation of the real file rather than a fixture built to pass. This file follows the same shape.
+// These are source-text checks, not a rendered-DOM test: portal/ui/*.js imports the buildless vendor bundle (../vendor/preact.mjs etc.), which does not exist until `npm run build` copies it in, so importing the module directly in a bare `node` process fails before a single assertion runs. scripts/portalAnalytics.test.js already established this file's testing convention — read the source as text, strip comments before scanning it, and falsify each check against a real mutation of the real file rather than a fixture built to pass. This file follows the same shape.
 //
 // Run: node scripts/analyticsHealth.test.js (also via npm test)
 
@@ -27,9 +20,7 @@ say('analyticsHealth — pin 37: the Health lead matches the mockup, and nothing
 
 const ROOT = path.join(__dirname, '..');
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
-// ⚠️ COMMENTS ARE STRIPPED BEFORE ANY SCAN, same rule portalAnalytics.test.js states: this file's
-// own comments habitually quote the code they describe, so an unstripped scan can match prose
-// rather than the thing under test.
+// ⚠️ COMMENTS ARE STRIPPED BEFORE ANY SCAN, same rule portalAnalytics.test.js states: this file's own comments habitually quote the code they describe, so an unstripped scan can match prose rather than the thing under test.
 const stripJsComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
 
 const ui = read('portal/ui/analytics.js');

@@ -201,19 +201,9 @@ function fmtUptime(since) {
 }
 
 
-// 🔴 PIN 37, 2026-09-06 01:28 EDT — THE LEAD NOW MATCHES THE MOCKUP'S FOUR TILES AND ITS "WHERE THE
-// MILLISECONDS GO" SPLIT (analytics.html:100-200). The 2026-09-04 two-tile cut reasoned that a
-// tile repeating a masthead figure is a second statement of it — that argument still holds, which
-// is why Interactions and Success rate below read the SAME population Usage/Timing already filter
-// to (7 days, admin traffic excluded) rather than the masthead's 24h/admin-inclusive commands24h
-// and errors24h. Nothing here is invented: every value comes from usageStats/timingStats, which
-// this view already had via the same page load — no new request, per the build-out's `optimize` lens.
+// 🔴 PIN 37, 2026-09-06 01:28 EDT — THE LEAD NOW MATCHES THE MOCKUP'S FOUR TILES AND ITS "WHERE THE MILLISECONDS GO" SPLIT (analytics.html:100-200). The 2026-09-04 two-tile cut reasoned that a tile repeating a masthead figure is a second statement of it — that argument still holds, which is why Interactions and Success rate below read the SAME population Usage/Timing already filter to (7 days, admin traffic excluded) rather than the masthead's 24h/admin-inclusive commands24h and errors24h. Nothing here is invented: every value comes from usageStats/timingStats, which this view already had via the same page load — no new request, per the build-out's `optimize` lens.
 function DepBars({ byDep = [] }) {
-    // Lifted out of Timing() (it used to own this panel, at the foot of that view) rather than
-    // duplicated: the mockup draws "Where the milliseconds go" ONLY on Health — analytics.html
-    // never repeats it on the Timing tab — so Timing loses the block instead of gaining a second
-    // copy of it. The per-call colour rule, the atlas total-vs-average distinction and the empty
-    // banner are unchanged from Timing's own version; only the home of the function moved.
+    // Lifted out of Timing() (it used to own this panel, at the foot of that view) rather than duplicated: the mockup draws "Where the milliseconds go" ONLY on Health — analytics.html never repeats it on the Timing tab — so Timing loses the block instead of gaining a second copy of it. The per-call colour rule, the atlas total-vs-average distinction and the empty banner are unchanged from Timing's own version; only the home of the function moved.
     const depTop = Math.max(1, ...byDep.map((d) => d.totalMs || 0));
     const worst = byDep.length ? byDep.map((d) => ({ name: d._id, calls: d.calls || 0, per: d.calls ? d.totalMs / d.calls : d.totalMs }))
         .sort((x, y) => y.per - x.per)[0] : null;
@@ -269,8 +259,7 @@ function Health({ health, timingStats, usageStats, onOpenTiming, onFilterLevel, 
     const outcomeTotal = byOutcome.reduce((a, o) => a + (o.c || 0), 0);
     const errOutcome = byOutcome.find((o) => o._id === 'error');
     const errCount = errOutcome ? errOutcome.c : 0;
-    // null, not 0, when nothing has run this week — a rate computed over zero interactions is not
-    // "100%", it is unmeasured, and the tile says so rather than claiming a perfect week it never had.
+    // null, not 0, when nothing has run this week — a rate computed over zero interactions is not "100%", it is unmeasured, and the tile says so rather than claiming a perfect week it never had.
     const successRate = outcomeTotal ? (100 - pct(errCount, outcomeTotal)) : null;
     const byDep = (timingStats || {}).byDep || [];
     return html`

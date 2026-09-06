@@ -238,18 +238,9 @@ function DayDrawer({ day, live, draft, withDraft, onWithDraft, onClose, onDay })
         <//>`;
 }
 
-// 01-season-spine.html's Staged panel -- the mockup keeps pending changes visible and actionable right beside the Track instead of buried in the flat Manifest table below. describeOp/blockedReason are board.logic.js globals (every *.logic.js file loads on every page -- see track.js's header), the same functions Board's own cards already use, so the two views can never describe a change differently. Reads changesets Season already fetches; asks for nothing new.
-// 🔴 A STRIP, NOT A PANEL, AND IT MOVED OUT OF THE TRACK TAB. Harkirat on the panel this replaces: it
-// "feels squeezed in" — a 438px callout inset 22px from a page that is otherwise full-bleed, listing every
-// staged change with its own tier chip and its own discard button, directly above the instrument it was
-// pushing down. Two problems in one shape: it repeated the Board, which is the screen whose entire job is
-// the changeset pipeline, and it was only on the Track, so staging from the Board or Repairs left the page
-// silent. One line under the view bar says the same four things — how many, what the first one was, the way
-// forward, and the way out — on every view, in the height of a sentence.
+// 01-season-spine.html's Staged panel -- the mockup keeps pending changes visible and actionable right beside the Track instead of buried in the flat Manifest table below. describeOp/blockedReason are board.logic.js globals (every *.logic.js file loads on every page -- see track.js's header), the same functions Board's own cards already use, so the two views can never describe a change differently. Reads changesets Season already fetches; asks for nothing new. 🔴 A STRIP, NOT A PANEL, AND IT MOVED OUT OF THE TRACK TAB. Harkirat on the panel this replaces: it "feels squeezed in" — a 438px callout inset 22px from a page that is otherwise full-bleed, listing every staged change with its own tier chip and its own discard button, directly above the instrument it was pushing down. Two problems in one shape: it repeated the Board, which is the screen whose entire job is the changeset pipeline, and it was only on the Track, so staging from the Board or Repairs left the page silent. One line under the view bar says the same four things — how many, what the first one was, the way forward, and the way out — on every view, in the height of a sentence.
 //
-// ⚠️ IT NAMES A BLOCKED CHANGE RATHER THAN COUNTING IT. A blocked changeset cannot commit, so a strip that
-// folded it into "4 staged" would send somebody to Review to find out why. `blockedReason` is board.logic.js's,
-// the same function the Board's own cards read, so the two can never describe one change differently.
+// ⚠️ IT NAMES A BLOCKED CHANGE RATHER THAN COUNTING IT. A blocked changeset cannot commit, so a strip that folded it into "4 staged" would send somebody to Review to find out why. `blockedReason` is board.logic.js's, the same function the Board's own cards read, so the two can never describe one change differently.
 function StagedPanel({ changesets, onDiscardAll, onReview }) {
     const pending = (changesets || []).filter((c) => c.state === 'staged' || c.state === 'blocked');
     if (!pending.length) return null;
@@ -387,9 +378,7 @@ const composeTypes = () => (COMPOSE_TYPES.map((t) => ({
 })));
 
 const COMPOSE_TYPES = [
-    // `windowable` is what makes the form ask for a second, OPTIONAL date and then stage two ops. It is not
-    // `shape`: the draw's own record still stores exactly one date (models/SeasonalData.js), and a shape of
-    // 'span' would put a start date on a subdocument that has no field for one.
+    // `windowable` is what makes the form ask for a second, OPTIONAL date and then stage two ops. It is not `shape`: the draw's own record still stores exactly one date (models/SeasonalData.js), and a shape of 'span' would put a start date on a subdocument that has no field for one.
     { key: 'draw', label: 'Draw', hex: 'var(--draw)', shape: 'point', windowable: true, nameLabel: 'Draw name',
       opName: 'draw.add',
       placeholder: 'Crimson Moonlight', dateLabel: 'Releases',
@@ -398,12 +387,7 @@ const COMPOSE_TYPES = [
       opName: 'draw.add',
       placeholder: 'Havoc rerun', dateLabel: 'Returns',
       pointNote: 'A returning draw stores one date, the same as a new one.' },
-    // 🔴 THE DRAW WINDOW WAS A SIXTH KIND HERE AND IS NOT ANY MORE — Harkirat, 2026-09-06 01:25 EDT. A window is when a
-    // draw can be BOUGHT, which is a fact about a draw you are already describing, so offering it as its own
-    // chip made you compose the same thing twice and hope the two titles matched. Nothing checked that they
-    // did; the Track's own "orphan window" repair finding exists because they often did not. The draw form
-    // takes an optional closing date instead, and buildSeasonAddOps stages the `calendar.add` behind it.
-    // ⚠️ `drawwindow` IS STILL A LANE, A FILTER CHIP AND A CALENDAR CATEGORY. Only the creation kind is gone.
+    // 🔴 THE DRAW WINDOW WAS A SIXTH KIND HERE AND IS NOT ANY MORE — Harkirat, 2026-09-06 01:25 EDT. A window is when a draw can be BOUGHT, which is a fact about a draw you are already describing, so offering it as its own chip made you compose the same thing twice and hope the two titles matched. Nothing checked that they did; the Track's own "orphan window" repair finding exists because they often did not. The draw form takes an optional closing date instead, and buildSeasonAddOps stages the `calendar.add` behind it. ⚠️ `drawwindow` IS STILL A LANE, A FILTER CHIP AND A CALENDAR CATEGORY. Only the creation kind is gone.
     { key: 'event', label: 'Event', hex: 'var(--ev)', shape: 'span', nameLabel: 'Event name',
       opName: 'calendar.add',
       placeholder: 'Clan Wars' },
@@ -419,11 +403,7 @@ const COMPOSE_TYPES = [
       pointNote: 'A patch note is published once. The record stores one date and no end — which is why it is not a lane on the Track.' },
 ];
 
-// 🔴 FOUR CHIPS, AND TWO WERE REMOVED FOR DIFFERENT REASONS. `drawwindow` is no longer a kind at all (see
-// COMPOSE_TYPES above). `patchnote` still is — but it had TWO entry points, this one and the Season Record
-// panel's own CTA, and the record panel's is the one that sits beside the list it adds to. A control that
-// creates a publication belongs next to the publications, not in a row of season-schedule chips it shares
-// nothing with. The masthead keeps the four kinds that land on the Track.
+// 🔴 FOUR CHIPS, AND TWO WERE REMOVED FOR DIFFERENT REASONS. `drawwindow` is no longer a kind at all (see COMPOSE_TYPES above). `patchnote` still is — but it had TWO entry points, this one and the Season Record panel's own CTA, and the record panel's is the one that sits beside the list it adds to. A control that creates a publication belongs next to the publications, not in a row of season-schedule chips it shares nothing with. The masthead keeps the four kinds that land on the Track.
 const ADD_CHIPS = [
     { key: 'draw', label: 'Draw', accent: 'var(--draw)' },
     { key: 'returning', label: 'Returning draw', accent: 'var(--ret)' },
@@ -978,13 +958,9 @@ export function SeasonRealm({ session }) {
         fetchChangesets('season').then(setChangesets);
     }
 
-    // 🔴 ONE COMPOSER ENTRY CAN BE TWO OPS, AND THEY ARE ONE CHANGESET. A draw with a closing date stages the
-    // draw and its calendar window together (buildSeasonAddOps) — staging them separately would put two rows
-    // on Review for one act and let the window commit without the draw it is a window onto.
+    // 🔴 ONE COMPOSER ENTRY CAN BE TWO OPS, AND THEY ARE ONE CHANGESET. A draw with a closing date stages the draw and its calendar window together (buildSeasonAddOps) — staging them separately would put two rows on Review for one act and let the window commit without the draw it is a window onto.
     //
-    // ⚠️ IT SAID NOTHING AT ALL BEFORE. Every other staging path in this realm toasts; this one closed the
-    // form and left the reader looking at an unchanged Track, because the staged row does not appear until
-    // the changeset fetch returns. The arrow is a real link to the only screen that commits.
+    // ⚠️ IT SAID NOTHING AT ALL BEFORE. Every other staging path in this realm toasts; this one closed the form and left the reader looking at an unchanged Track, because the staged row does not appear until the changeset fetch returns. The arrow is a real link to the only screen that commits.
     async function handleAdd(opOrOps) {
         const ops = [].concat(opOrOps).filter(Boolean);
         if (!ops.length) return;
@@ -1184,9 +1160,7 @@ export function SeasonRealm({ session }) {
         onConfirm: () => handleDiscard(String(c._id)),
     });
 
-    // The strip's own way out. With exactly one staged change this IS the single discard, so the two
-    // controls never ask the same question in two different voices — the defect confirmDiscard was written
-    // to close, one level up.
+    // The strip's own way out. With exactly one staged change this IS the single discard, so the two controls never ask the same question in two different voices — the defect confirmDiscard was written to close, one level up.
     function confirmDiscardAll(pending) {
         if (pending.length === 1) return confirmDiscard(pending[0]);
         overlay.confirm({
@@ -1214,11 +1188,7 @@ export function SeasonRealm({ session }) {
                                                  today=${todayIso()} onSave=${handleIdentitySave} onScope=${setIdScope}
                                                  draftSlot=${draftZone} />`;
 
-    // The window range is the view bar's meta line on EVERY view of this panel, not only the Track: it says where in the season you are, and the Board and Repairs are just as much a view of it. Extracted so the conformance mount above can take it: one Composer, two possible positions, never two instances.
-    // 🔴 IT MOVED OUT OF THE MASTHEAD AND INTO THE OVERLAY SLOT, because it is a modal drawer now and this
-    // file already knows where overlays live: "one overlay in the wrong place is a bug; two is the shape of
-    // the thing, and the shape is that overlays do not live in the content tree." Rendered under the
-    // masthead it would have had main's stacking context above its own scrim, exactly as the day drawer did.
+    // The window range is the view bar's meta line on EVERY view of this panel, not only the Track: it says where in the season you are, and the Board and Repairs are just as much a view of it. Extracted so the conformance mount above can take it: one Composer, two possible positions, never two instances. 🔴 IT MOVED OUT OF THE MASTHEAD AND INTO THE OVERLAY SLOT, because it is a modal drawer now and this file already knows where overlays live: "one overlay in the wrong place is a bug; two is the shape of the thing, and the shape is that overlays do not live in the content tree." Rendered under the masthead it would have had main's stacking context above its own scrim, exactly as the day drawer did.
     const composerSlot = showAdd ? html`<${Composer} types=${composeTypes()} initialType=${showAdd === true ? null : showAdd}
                                               onStage=${(kind, fields) => handleAdd(buildSeasonAddOps(kind, fields))}
                                               onStageMany=${handleStageMany}

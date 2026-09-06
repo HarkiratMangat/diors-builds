@@ -508,10 +508,7 @@ const ROUTES = [
         }).filter(Boolean);
         return { kind, rows };
     }],
-    // 🔴 THE DRAWER'S TIER PREVIEW NEEDS THIS OR IT SHOWS ITS EMPTY STATE WITH TEXT IN THE BOX. Narrower than
-    // utils/adminParser.js on purpose, same as parse-date/parse-bulk: the four shorthands the placeholder
-    // itself teaches, so the stub cannot teach a grammar the product does not have.
-    // The Grant drawer's lookup (pin 32). A superset of both shapes the route can answer with — ok:true beside the found fields — so portalHarness.test.js's promise check is satisfied and access.js's `res.id` test takes the found branch. Any 17–20 digit id resolves to the fixture person, and the display name says so.
+    // 🔴 THE DRAWER'S TIER PREVIEW NEEDS THIS OR IT SHOWS ITS EMPTY STATE WITH TEXT IN THE BOX. Narrower than utils/adminParser.js on purpose, same as parse-date/parse-bulk: the four shorthands the placeholder itself teaches, so the stub cannot teach a grammar the product does not have. The Grant drawer's lookup (pin 32). A superset of both shapes the route can answer with — ok:true beside the found fields — so portalHarness.test.js's promise check is satisfied and access.js's `res.id` test takes the found branch. Any 17–20 digit id resolves to the fixture person, and the display name says so.
     [/^\/api\/discord\/user$/, (params) => ({ ok: true, reason: '', id: params.get('id') || '1139845545754632283', username: 'diorswrld', globalName: 'Dior (fixture)', avatarUrl: 'https://cdn.discordapp.com/embed/avatars/3.png' })],
     [/^\/api\/parse-items$/, (params, body) => {
         const TIER = { m: 'mythic', l: 'legendary', lg: 'legacy', e: 'epic' };

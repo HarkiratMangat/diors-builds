@@ -1,15 +1,8 @@
 // scripts/armoryRealm.test.js — the Armory's three build-out decisions, asserted rather than described.
 //
-// 🔴 THE RACK, THE WEAPON SEARCH AND THE TWO DRAWER GATES ARE ALL ARITHMETIC OVER A BUILD LIST, which is why they
-// live in portal/ui/armory.logic.js and not inside the components. A grouping that only a browser can compute is a
-// grouping nothing checks, and the failure mode of every one of these is SILENT: a teaser naming the wrong build, a
-// search that quietly drops the weapon you typed, a Stage button enabled over an edit that changes nothing. None of
-// those throws, and none of them is visible to a screenshot diff.
+// 🔴 THE RACK, THE WEAPON SEARCH AND THE TWO DRAWER GATES ARE ALL ARITHMETIC OVER A BUILD LIST, which is why they live in portal/ui/armory.logic.js and not inside the components. A grouping that only a browser can compute is a grouping nothing checks, and the failure mode of every one of these is SILENT: a teaser naming the wrong build, a search that quietly drops the weapon you typed, a Stage button enabled over an edit that changes nothing. None of those throws, and none of them is visible to a screenshot diff.
 //
-// ⚠️ EVERY FIXTURE HERE IS BUILT SO THE NAIVE ANSWER IS WRONG. Alphabetical order disagrees with rank order; the
-// search corpus contains a weapon whose name is a substring of another's; the no-op edit fixture changes an
-// attachment STRING without changing the attachment COUNT. A fixture where the right answer and the lazy answer
-// coincide is a vacuous pass, and a vacuous pass is permanent.
+// ⚠️ EVERY FIXTURE HERE IS BUILT SO THE NAIVE ANSWER IS WRONG. Alphabetical order disagrees with rank order; the search corpus contains a weapon whose name is a substring of another's; the no-op edit fixture changes an attachment STRING without changing the attachment COUNT. A fixture where the right answer and the lazy answer coincide is a vacuous pass, and a vacuous pass is permanent.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -31,9 +24,7 @@ const {
 
 // ── THE FIXTURE ───────────────────────────────────────────────────────────────────────────────
 //
-// Two categories, deliberately in the WRONG relative order for both a naive sort and the data's own order: SMG is
-// second in CATEGORY_CHIP_ORDER and first alphabetically, and the list below leads with an SMG so insertion order
-// cannot accidentally produce the right answer either.
+// Two categories, deliberately in the WRONG relative order for both a naive sort and the data's own order: SMG is second in CATEGORY_CHIP_ORDER and first alphabetically, and the list below leads with an SMG so insertion order cannot accidentally produce the right answer either.
 const B = (over) => ({ mode: 'MP', category: 'AR', weaponName: 'AK117', buildName: 'Standard Build',
     attachments: ['a', 'b'], accent: '#8899AA', ...over });
 
@@ -107,10 +98,7 @@ check('a DMZ build ranks on its RANGE field, so it does not silently pile into U
     assert.strictEqual(dmz.groups[0].tier, 'best');
 });
 
-// 🔴 THE DEFAULT IS COLLAPSED, AND THE MECHANISM IS THAT THE OPEN SET IS STORED RATHER THAN THE CLOSED ONE. This runs
-// the real functions out of armory.js against a stub sessionStorage rather than asserting on their source text: the
-// claim is behavioural ("an untouched armory has nothing open"), and a source match would pass on a file that stored
-// the closed set under the same names.
+// 🔴 THE DEFAULT IS COLLAPSED, AND THE MECHANISM IS THAT THE OPEN SET IS STORED RATHER THAN THE CLOSED ONE. This runs the real functions out of armory.js against a stub sessionStorage rather than asserting on their source text: the claim is behavioural ("an untouched armory has nothing open"), and a source match would pass on a file that stored the closed set under the same names.
 check('an armory nobody has touched opens with every category CLOSED', () => {
     const src = fs.readFileSync(path.join(ROOT, 'portal', 'ui', 'armory.js'), 'utf8');
     const key = /const COPEN_KEY = '([^']+)';/.exec(src);
@@ -122,8 +110,7 @@ check('an armory nobody has touched opens with every category CLOSED', () => {
     const run = new Function('sessionStorage', `${load[1]}\n${save[1]}\nconst COPEN_KEY='${key[1]}';return { loadCOpen, saveCOpen };`)(sandbox);
 
     assert.strictEqual(run.loadCOpen().size, 0, 'an empty store must mean nothing is open, with no seeding step');
-    // The falsifier: the failed design stores the CLOSED set, and under it an empty store means everything is OPEN.
-    // That difference is exactly what a category appearing later inherits.
+    // The falsifier: the failed design stores the CLOSED set, and under it an empty store means everything is OPEN. That difference is exactly what a category appearing later inherits.
     run.saveCOpen(new Set(['AR']));
     assert.deepStrictEqual([...run.loadCOpen()], ['AR'], 'what was opened must survive a reload');
     assert.ok(!run.loadCOpen().has('SMG'),
@@ -184,8 +171,7 @@ check('the add drawer refuses until the two fields the op REQUIRES are there, an
         'whitespace is not a weapon name');
     assert.deepStrictEqual(addFormBlockers({ weaponName: 'AK117', category: '' }), ['a category']);
     assert.deepStrictEqual(addFormBlockers({ weaponName: 'AK117', category: 'AR' }), []);
-    // The gunsmith code deliberately never blocks: correctGunsmithCode CORRECTS look-alike characters server-side, so
-    // a client-side refusal would refuse exactly the input the server was about to fix.
+    // The gunsmith code deliberately never blocks: correctGunsmithCode CORRECTS look-alike characters server-side, so a client-side refusal would refuse exactly the input the server was about to fix.
     assert.deepStrictEqual(addFormBlockers({ weaponName: 'AK117', category: 'AR', shareCode: 'nonsense' }), []);
 });
 
@@ -222,18 +208,14 @@ check('every field loadout.edit writes is watched, so a change to one of them ca
 
 // ── THE DRAWERS ARE DRAWERS ───────────────────────────────────────────────────────────────────
 //
-// ⚠️ A SOURCE ASSERTION, AND IT IS THE RIGHT SHAPE FOR THIS ONE CLAIM: "these two forms mount in the shared modal
-// drawer" is a statement about which component wraps them, and the thing that would silently undo it is somebody
-// reinstating the inline panel. The behavioural half — inert, focus restore, Escape — is Drawer's own, and
-// portalHarnessRender/portalA11y already own it.
+// ⚠️ A SOURCE ASSERTION, AND IT IS THE RIGHT SHAPE FOR THIS ONE CLAIM: "these two forms mount in the shared modal drawer" is a statement about which component wraps them, and the thing that would silently undo it is somebody reinstating the inline panel. The behavioural half — inert, focus restore, Escape — is Drawer's own, and portalHarnessRender/portalA11y already own it.
 check('both Armory forms mount in the shared Drawer, in the overlay slot rather than inside main', () => {
     const src = fs.readFileSync(path.join(ROOT, 'portal', 'ui', 'armory.js'), 'utf8');
     assert.ok(src.includes("import { useOverlay, Drawer } from './overlay.js';"), 'Drawer is no longer imported');
     assert.strictEqual((src.match(/<\$\{Drawer\}/g) || []).length, 2, 'the add form and the build editor are the two drawers');
     assert.ok(!src.includes('class="panel bform"'), 'the add form is an inline panel again');
     assert.ok(!src.includes('id="build-editor"'), 'the build editor is an inline panel again');
-    // 🔴 WHERE THEY RENDER IS LOAD-BEARING: Drawer marks `.app > main` inert, so a drawer rendered inside the view
-    // slot would mark ITSELF inert along with the page behind it.
+    // 🔴 WHERE THEY RENDER IS LOAD-BEARING: Drawer marks `.app > main` inert, so a drawer rendered inside the view slot would mark ITSELF inert along with the page behind it.
     const overlay = src.slice(src.indexOf('overlaySlot=${html`'), src.indexOf('exports=${exportScopes}'));
     assert.ok(overlay.includes('AddBuildForm') && overlay.includes('BuildEditor'),
         'a drawer moved back into the view slot, where Drawer\'s own inert call would disable it');

@@ -1,13 +1,6 @@
 // portal/ui/composer.js — ESM. The in-page composer: the adopted design's own "add to the season" surface.
 //
-// 🔴 IT IS A MODAL DRAWER, AND IT WAS INLINE UNTIL 2026-09-06 01:22 EDT. Harkirat's decision: every creation
-// form in this portal is a modal drawer, so the six that exist read as one act rather than six layouts.
-// Broadcast's PostForm is the worked example. ⚠️ THE ARGUMENT THIS REPLACES WAS REAL AND IS NOT DISMISSED —
-// the composer sat above the Track so the thing you describe and the picture of where it lands were on
-// screen together, which is what the live ghost below is for. The ghost survives the move: the dialog is
-// 880px on a 1282px page, so the lanes run past it on both sides and a marker appearing at a date is still
-// visible while you type. What did NOT survive is the scrollIntoView that brought the inline form into view;
-// a fixed dialog has nowhere to scroll to, so the effect and its comment went with the layout they described.
+// 🔴 IT IS A MODAL DRAWER, AND IT WAS INLINE UNTIL 2026-09-06 01:22 EDT. Harkirat's decision: every creation form in this portal is a modal drawer, so the six that exist read as one act rather than six layouts. Broadcast's PostForm is the worked example. ⚠️ THE ARGUMENT THIS REPLACES WAS REAL AND IS NOT DISMISSED — the composer sat above the Track so the thing you describe and the picture of where it lands were on screen together, which is what the live ghost below is for. The ghost survives the move: the dialog is 880px on a 1282px page, so the lanes run past it on both sides and a marker appearing at a date is still visible while you type. What did NOT survive is the scrollIntoView that brought the inline form into view; a fixed dialog has nowhere to scroll to, so the effect and its comment went with the layout they described.
 //
 // 🔴 AND THE FORM FOLLOWS THE RECORD. A draw has one date; an event has a window. The fields change with the type rather than showing a union of every type's fields with the irrelevant ones greyed out — that shape is how a form starts lying about what the record holds.
 //
@@ -142,15 +135,9 @@ function ComposePreview({ state, type }) {
 
 // The items a draw carries, in the bot's own shorthand, previewed as it is typed.
 //
-// 🔴 THE PARSING IS THE BOT'S, OVER HTTP — the same argument SmartDate makes for dates. `parseItemLine` in
-// utils/adminParser.js is what /manage's add-draw modal has read this shorthand with since it was built,
-// including the trap already paid for there (a "-#" comment line must be matched before the tier branch, or
-// the note is title-cased and filed under a nonsense tier). A browser copy would preview tiers the bot then
-// resolves differently. See portal/api/dates.js.
+// 🔴 THE PARSING IS THE BOT'S, OVER HTTP — the same argument SmartDate makes for dates. `parseItemLine` in utils/adminParser.js is what /manage's add-draw modal has read this shorthand with since it was built, including the trap already paid for there (a "-#" comment line must be matched before the tier branch, or the note is title-cased and filed under a nonsense tier). A browser copy would preview tiers the bot then resolves differently. See portal/api/dates.js.
 //
-// ⚠️ THE PREVIEW SITS BESIDE THE BOX, NOT UNDER IT. What this answers is "did the first word read as a
-// tier", which is a question about the line you are looking at — under the box it would be off the fold by
-// the fifth item, which is where the answer stops being free.
+// ⚠️ THE PREVIEW SITS BESIDE THE BOX, NOT UNDER IT. What this answers is "did the first word read as a tier", which is a question about the line you are looking at — under the box it would be off the fold by the fifth item, which is where the answer stops being free.
 function ItemsField({ text, rows, errors, onChange }) {
     const latest = useRef(text);
     latest.current = text;
@@ -202,11 +189,7 @@ function ItemsField({ text, rows, errors, onChange }) {
     `;
 }
 
-// 🔴 THE PREVIEW IS THE BROKEN-LINK DETECTOR, and that is the whole reason it is an image rather than a
-// tidy chip saying "1 URL". Every thumbnail in this project is re-hosted on Cloudinary when it commits, so a
-// link that is already dead when it is typed produces a draw with no image and no complaint — the exact
-// failure the season record's own banner fields were given a broken-state for. An `img` that cannot load
-// says so at the moment somebody can still fix it.
+// 🔴 THE PREVIEW IS THE BROKEN-LINK DETECTOR, and that is the whole reason it is an image rather than a tidy chip saying "1 URL". Every thumbnail in this project is re-hosted on Cloudinary when it commits, so a link that is already dead when it is typed produces a draw with no image and no complaint — the exact failure the season record's own banner fields were given a broken-state for. An `img` that cannot load says so at the moment somebody can still fix it.
 function ThumbField({ value, onChange }) {
     const [broken, setBroken] = useState(false);
     const url = String(value || '').trim();
@@ -230,10 +213,7 @@ function ThumbField({ value, onChange }) {
     `;
 }
 
-// The kinds whose pasted lines utils/adminParser.js actually has a bulk grammar for. A patch note has none,
-// and the box used to render for it anyway: pasting there ran the CALENDAR parser and staged publications
-// from rows it had read as events. A control that offers a grammar the parser does not have is worse than
-// no control, because the preview looks like a confirmation.
+// The kinds whose pasted lines utils/adminParser.js actually has a bulk grammar for. A patch note has none, and the box used to render for it anyway: pasting there ran the CALENDAR parser and staged publications from rows it had read as events. A control that offers a grammar the parser does not have is worse than no control, because the preview looks like a confirmation.
 const PASTEABLE = ['draw', 'returning', 'event', 'playlist'];
 
 export function Composer({ types, initialType, onStage, onStageMany, onCancel, onLive }) {
@@ -246,24 +226,17 @@ export function Composer({ types, initialType, onStage, onStageMany, onCancel, o
         aText: todayISO(), aIso: todayISO() });
     const type = types.find((t) => t.key === state.type) || null;
 
-    // 🔴 THE SIGNATURE MOMENT, and the one thing /manage structurally cannot do: it answers "when" with a
-    // line of text, and this draws the item where it will land, in its own lane, before it is staged. The
-    // composer does not own the Track, so it reports and the page draws.
+    // 🔴 THE SIGNATURE MOMENT, and the one thing /manage structurally cannot do: it answers "when" with a line of text, and this draws the item where it will land, in its own lane, before it is staged. The composer does not own the Track, so it reports and the page draws.
     //
-    // ⚠️ ONE EFFECT. There were two, with the same body and near-identical dep arrays — the second was added
-    // for the open-with-a-date case the first already covered, so every keystroke reported the ghost twice.
+    // ⚠️ ONE EFFECT. There were two, with the same body and near-identical dep arrays — the second was added for the open-with-a-date case the first already covered, so every keystroke reported the ghost twice.
     //
-    // ⚠️ The ISO date is reported, never the typed text. `aText` is only what the field shows so a repaint
-    // does not throw away half-typed words; `aIso` is what the server resolved. A ghost placed from the raw
-    // text would jump around while somebody types "sep" on the way to "sep 21".
+    // ⚠️ The ISO date is reported, never the typed text. `aText` is only what the field shows so a repaint does not throw away half-typed words; `aIso` is what the server resolved. A ghost placed from the raw text would jump around while somebody types "sep" on the way to "sep 21".
     useEffect(() => { if (onLive) onLive(composeGhostFor(state, type)); }, [state.type, state.name, state.aIso, state.bIso]);
 
     const reason = composerReason(state, type);
     const set = (patch) => setState((prev) => ({ ...prev, ...patch }));
 
-    // Switching type keeps the name and drops everything else: the name is about the thing, and every other
-    // field belongs to a record shape that just changed. Carrying a draw's item list into a playlist would
-    // hand the next payload a field its schema does not declare.
+    // Switching type keeps the name and drops everything else: the name is about the thing, and every other field belongs to a record shape that just changed. Carrying a draw's item list into a playlist would hand the next payload a field its schema does not declare.
     const pickType = (key) => setState((prev) => ({ ...BLANK, type: key, name: prev.name }));
 
     // ⚠️ THE MASTHEAD'S ADD CHIPS WERE DEAD ONCE THE COMPOSER WAS OPEN. They call setShowAdd(key), which lands here as `initialType` — and `useState(initialType)` reads its argument once and ignores every later value, so pressing "Playlist" while composing a draw looked like a switch and did nothing. Adopting the new value is the same act as pressing this composer's own type chip, so it goes through pickType rather than a second code path with its own idea of what a switch means.
@@ -271,8 +244,7 @@ export function Composer({ types, initialType, onStage, onStageMany, onCancel, o
         if (initialType && initialType !== state.type) pickType(initialType);
     }, [initialType]);
 
-    // ⚠️ THE REASON IS THE FOOTER'S FIRST CHILD, not a line under the offending field. It is the answer to
-    // "why can I not press this", so it belongs where the question is asked — beside the button it explains.
+    // ⚠️ THE REASON IS THE FOOTER'S FIRST CHILD, not a line under the offending field. It is the answer to "why can I not press this", so it belongs where the question is asked — beside the button it explains.
     const actions = html`
         <span class="nw-why">${reason || 'Ready to stage.'}</span>
         <button class="btn" onClick=${onCancel}>Cancel</button>

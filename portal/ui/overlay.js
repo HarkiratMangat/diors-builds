@@ -36,8 +36,7 @@ export function Drawer({ eyebrow, title, children, actions, wide, side, onClose 
         const first = ref.current && ref.current.querySelector('button, input, a, textarea, select');
         if (first) first.focus();
         return () => {
-            // Only if it is still in the document — a drawer whose opener was a row that the commit removed has nowhere to go back to, and focusing a detached node silently sends focus to body anyway.
-            // ⚠️ `preventScroll` — a bare .focus() scrolls the opener into view, which moves the page out from under whatever the reader was reading. It also stalled the states walk twice on Season's identity panel, 2026-09-04 22:45 EDT, which is how this was caught within a minute of writing it.
+            // Only if it is still in the document — a drawer whose opener was a row that the commit removed has nowhere to go back to, and focusing a detached node silently sends focus to body anyway. ⚠️ `preventScroll` — a bare .focus() scrolls the opener into view, which moves the page out from under whatever the reader was reading. It also stalled the states walk twice on Season's identity panel, 2026-09-04 22:45 EDT, which is how this was caught within a minute of writing it.
             if (opener && opener.isConnected && typeof opener.focus === 'function') opener.focus({ preventScroll: true });
         };
     }, []);

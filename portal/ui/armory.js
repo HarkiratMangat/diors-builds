@@ -70,17 +70,9 @@ const COVERAGE_LABEL = {
 //
 // `accent` is real DATA (portal/api/armory.js stamps it from getMpCategoryAccent), not a CSS token. That is the correct mechanism and deliberately unlike Season's --topic-accent tokens: the bot owns these hues, so reading them from the payload means the two can never drift apart.
 //
-// 🔴 IT IS GROUPED BY CATEGORY AND IT OPENS CLOSED — Harkirat, Pin 21: "WHY do I have to scroll all the way". This reverses the 2026-08-26 rebuild onto rank tiers, and the reasoning that rebuild gave is still true and is no longer the whole story: a tier board answers "what is ranked where", which is the question the badges exist for, but it answers it by putting the entire catalogue on screen at once in five rows nothing could close. Category is the axis a reader arrives with, and rank has moved one level down rather than away — the weapon groups inside an open category are ordered best-first and each carries its tier as a `.bdg.rank` chip, the same mark the Manifest uses for the same fact.
-// ⚠️ RANK_ORDER / RANK_LABEL / RANK_KEY / rankOf() MOVED TO armory.logic.js in the same change that made the rack
-// category-first: they are what orders the weapon groups inside a category and what labels the teaser on a closed
-// header, so they are read by rackCategories() and are tested there. RANK_KEY's values are still CSS class names —
-// they ride on the weapon group now (.bgrp.t-best) rather than on a tier row, because there is no tier row left.
+// 🔴 IT IS GROUPED BY CATEGORY AND IT OPENS CLOSED — Harkirat, Pin 21: "WHY do I have to scroll all the way". This reverses the 2026-08-26 rebuild onto rank tiers, and the reasoning that rebuild gave is still true and is no longer the whole story: a tier board answers "what is ranked where", which is the question the badges exist for, but it answers it by putting the entire catalogue on screen at once in five rows nothing could close. Category is the axis a reader arrives with, and rank has moved one level down rather than away — the weapon groups inside an open category are ordered best-first and each carries its tier as a `.bdg.rank` chip, the same mark the Manifest uses for the same fact. ⚠️ RANK_ORDER / RANK_LABEL / RANK_KEY / rankOf() MOVED TO armory.logic.js in the same change that made the rack category-first: they are what orders the weapon groups inside a category and what labels the teaser on a closed header, so they are read by rackCategories() and are tested there. RANK_KEY's values are still CSS class names — they ride on the weapon group now (.bgrp.t-best) rather than on a tier row, because there is no tier row left.
 
-// 🔴 THE OPEN SET IS STORED, NOT THE CLOSED ONE, AND THAT IS WHAT MAKES "CLOSED BY DEFAULT" SURVIVE A NEW CATEGORY.
-// The tier board stored the CLOSED keys, which works only while the set of rows is fixed: to open closed you have to
-// seed the store with every category that exists, and the first SHOTGUN build to land is then absent from that seed
-// and arrives OPEN — the one state the default exists to forbid. An empty store is all-closed with nothing to
-// enumerate, so a category that appears later inherits the default for free.
+// 🔴 THE OPEN SET IS STORED, NOT THE CLOSED ONE, AND THAT IS WHAT MAKES "CLOSED BY DEFAULT" SURVIVE A NEW CATEGORY. The tier board stored the CLOSED keys, which works only while the set of rows is fixed: to open closed you have to seed the store with every category that exists, and the first SHOTGUN build to land is then absent from that seed and arrives OPEN — the one state the default exists to forbid. An empty store is all-closed with nothing to enumerate, so a category that appears later inherits the default for free.
 const COPEN_KEY = 'dioreo-armory-catopen';
 function loadCOpen() { try { return new Set(JSON.parse(sessionStorage.getItem(COPEN_KEY)) || []); } catch { return new Set(); } }
 function saveCOpen(set) { try { sessionStorage.setItem(COPEN_KEY, JSON.stringify([...set])); } catch (e) {} }
@@ -128,10 +120,7 @@ function BuildChip({ b, onPick }) {
 
 // 🔴 ONE CARD SHAPE, ALWAYS — a weapon with one build is a group of one. Returning a bare chip for singles and a group for multiples put two visual languages side by side for the same kind of object, which Harkirat read as a rendering bug rather than as a distinction. And siblings genuinely ARE a group: six pairs of adjacent cards differed only by a stored buildName that is an index ("Build 1", "Build 2"), so the rack was asking a reader to spot a one-character difference between two identical rectangles.
 //
-// ⚠️ THE TIER RIDES HERE NOW. With categories as the top axis, a weapon's rank has to be visible on the weapon or it is
-// nowhere — so the group carries `t-<tierKey>` (the class names app.css grades) and prints the tier in the Manifest's
-// own short spelling, TOP3 rather than "Top 3", because one field wearing two spellings on one screen is the defect
-// the Category column already had to have fixed once.
+// ⚠️ THE TIER RIDES HERE NOW. With categories as the top axis, a weapon's rank has to be visible on the weapon or it is nowhere — so the group carries `t-<tierKey>` (the class names app.css grades) and prints the tier in the Manifest's own short spelling, TOP3 rather than "Top 3", because one field wearing two spellings on one screen is the defect the Category column already had to have fixed once.
 function WeaponGroup({ group, onPick }) {
     const short = group.tier === 'best' ? 'BEST' : String(group.tier).toUpperCase();
     return html`
@@ -167,8 +156,7 @@ function Rack({ builds, onPick, onAdd }) {
     };
     const openCount = cats.filter((c) => copen.has(c.category)).length;
 
-    // An empty armory is not an error and it is not a table with no rows: it is a page whose only useful content is
-    // the way out of it, so it carries the button rather than describing one.
+    // An empty armory is not an error and it is not a table with no rows: it is a page whose only useful content is the way out of it, so it carries the button rather than describing one.
     if (!builds.length) {
         return html`
             <div id="rack">
@@ -324,8 +312,7 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
     const set = (patch) => setF((prev) => ({ ...prev, ...patch }));
     const dmz = f.mode === 'DMZ';
     const filled = atts.map((a) => a.trim()).filter(Boolean);
-    // harden — the reasons, not a boolean. A form whose only required fields are at the very top is exactly the one
-    // where a disabled Stage button eight hundred pixels below them explains nothing; the footer says which.
+    // harden — the reasons, not a boolean. A form whose only required fields are at the very top is exactly the one where a disabled Stage button eight hundred pixels below them explains nothing; the footer says which.
     const blockers = addFormBlockers(f);
     const code = f.shareCode.trim();
     const img = f.imageKey.trim();
@@ -338,10 +325,7 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
         }));
     }
 
-    // ⚠️ THE PREVIEW IS LOCAL, BECAUSE THERE IS NOTHING TO ASK THE SERVER ABOUT YET. The editor's side column renders
-    // what Discord actually sends, by calling /api/armory/preview with a real id; a build being typed has no id, so this
-    // draws the same record through Compare's own card component — the fields you are filling in, in the order the card
-    // puts them. It is a preview of the RECORD and it says so, rather than claiming to be the Discord render.
+    // ⚠️ THE PREVIEW IS LOCAL, BECAUSE THERE IS NOTHING TO ASK THE SERVER ABOUT YET. The editor's side column renders what Discord actually sends, by calling /api/armory/preview with a real id; a build being typed has no id, so this draws the same record through Compare's own card component — the fields you are filling in, in the order the card puts them. It is a preview of the RECORD and it says so, rather than claiming to be the Discord render.
     const previewBuild = {
         ...f, attachments: filled, buildName: f.buildName || 'Standard Build', _id: 'draft',
         categoryRank: dmz ? null : (f.rank || null), dmzRangeRank: dmz ? (f.rank || null) : null,
@@ -558,9 +542,7 @@ function BuildEditor({ build, csrfToken, onStage, onClose }) {
     }
 
     const dmz = draft.mode === 'DMZ';
-    // harden — two things make a Stage pointless, and both are stated on the footer line rather than left for the
-    // Review screen to discover. A no-op edit is the interesting one: it is not harmless, it puts a row on the only
-    // screen that commits for somebody to read, understand and decide about, and it changes nothing when they do.
+    // harden — two things make a Stage pointless, and both are stated on the footer line rather than left for the Review screen to discover. A no-op edit is the interesting one: it is not harmless, it puts a row on the only screen that commits for somebody to read, understand and decide about, and it changes nothing when they do.
     const changed = editedFields(build, draft);
     const blockers = editorBlockers(build, draft);
     return html`
@@ -747,10 +729,7 @@ function LoadoutCard({ build, siblings }) {
 const MAX_COMPARE_WEAPONS = 2;
 const MAX_COMPARE_COLUMNS = 6;
 
-// ⚠️ A COMBOBOX, NOT AN INPUT WITH A LIST UNDER IT. `aria-expanded`/`aria-controls`/`aria-activedescendant` are what
-// make the arrow keys mean anything to a screen reader: without them the highlighted row is a class name and the
-// reader is told nothing has changed. The list is filtered on every keystroke rather than on a debounce, because the
-// corpus is the weapons in one armory — tens, not thousands — and a debounce would only add lag to a local filter.
+// ⚠️ A COMBOBOX, NOT AN INPUT WITH A LIST UNDER IT. `aria-expanded`/`aria-controls`/`aria-activedescendant` are what make the arrow keys mean anything to a screen reader: without them the highlighted row is a class name and the reader is told nothing has changed. The list is filtered on every keystroke rather than on a debounce, because the corpus is the weapons in one armory — tens, not thousands — and a debounce would only add lag to a local filter.
 function WeaponSearch({ options, picked, onPick }) {
     const [q, setQ] = useState('');
     const [hi, setHi] = useState(0);
@@ -798,8 +777,7 @@ function Compare({ builds, weapons, onSetWeapons, onOpenRack, onAdd }) {
     const all = picked.flatMap((w) => optionOf(w).builds);
     const chosen = all.slice(0, MAX_COMPARE_COLUMNS);
     const siblingsOf = (b) => builds.filter((x) => x.weaponKey === b.weaponKey && x.mode === b.mode);
-    // The suggestion is the point of the empty state: "type a weapon name" is an instruction, and a button carrying a
-    // weapon that actually has siblings is the thing the instruction was for.
+    // The suggestion is the point of the empty state: "type a weapon name" is an instruction, and a button carrying a weapon that actually has siblings is the thing the instruction was for.
     const suggest = options.find((o) => o.builds.length > 1) || null;
     const singles = picked.map(optionOf).filter((o) => o.builds.length === 1);
 
@@ -1109,18 +1087,12 @@ export function ArmoryRealm({ session }) {
     const [notice, setNotice] = useState('');
     // ⚠️ THE VIEW NAMES ARE THE MOCKUP'S, chosen at Harkirat's call on 2026-08-27 after seeing both bars rendered side by side. `Repairs` is the one that earns it outright: `Coverage` named a measurement, `Repairs` names what you came to do, and Season already calls the same idea by the same word -- so the two realms finally agree.
     const [view, setView] = useState(VIEWS.rack);
-    // Compare is keyed on WEAPONS now, not on build ids: the question is "this weapon, all of its builds", so the
-    // selection is the weapon and the build set falls out of it. A stale id could survive a refresh that deleted its
-    // build; a stale weapon name simply stops matching and is filtered out.
+    // Compare is keyed on WEAPONS now, not on build ids: the question is "this weapon, all of its builds", so the selection is the weapon and the build set falls out of it. A stale id could survive a refresh that deleted its build; a stale weapon name simply stops matching and is filtered out.
     const [comparedWeapons, setComparedWeapons] = useState([]);
     // What the Manifest's own filter chips are set to. Owned here only because the EXPORT strip scopes by them; the Manifest still owns the filtering itself.
     const [manifestFilters, setManifestFilters] = useState({});
     const [editingId, setEditingId] = useState(null);
-    // 🔴 BOTH FORMS ARE MODAL DRAWERS NOW, so the view slot no longer has to make room for one. `wrapBed` used to wrap
-    // the whole view in the editor's `.bed` grid whenever something was being edited — which meant the rack, the repairs
-    // cards and the bulk panel all inherited a layout that exists for a form none of them contain. The drawer carries its
-    // own `.bed` internally and the page behind it is `inert`, so the view is only ever the view.
-    // 🔴 THE MODE IS A PROPERTY OF THE REALM, NOT OF ONE PANEL. It began as BulkView's private state, so the Rack, Repairs and Compare all showed MP and DMZ mixed together while a fourth view quietly filtered to one of them. MP and DMZ are two armories with different rules -- DMZ has no share code and ranks by combat range -- and every figure on this page is a count of one population or the other, so a masthead that totals both answers a question nobody asked.
+    // 🔴 BOTH FORMS ARE MODAL DRAWERS NOW, so the view slot no longer has to make room for one. `wrapBed` used to wrap the whole view in the editor's `.bed` grid whenever something was being edited — which meant the rack, the repairs cards and the bulk panel all inherited a layout that exists for a form none of them contain. The drawer carries its own `.bed` internally and the page behind it is `inert`, so the view is only ever the view. 🔴 THE MODE IS A PROPERTY OF THE REALM, NOT OF ONE PANEL. It began as BulkView's private state, so the Rack, Repairs and Compare all showed MP and DMZ mixed together while a fourth view quietly filtered to one of them. MP and DMZ are two armories with different rules -- DMZ has no share code and ranks by combat range -- and every figure on this page is a count of one population or the other, so a masthead that totals both answers a question nobody asked.
     const [armMode, setArmMode] = useState('MP');
     const overlay = useOverlay();
 
@@ -1175,10 +1147,7 @@ export function ArmoryRealm({ session }) {
         .filter((b) => !weaponFilter || b.weaponName === weaponFilter)
         .map((b) => ({ ...b, id: b._id, topicVar: null, accentHex: b.accent }));
 
-    // 🔴 A DRAWER OVER A ROW THAT NO LONGER EXISTS. The editor used to be handed `builds.find(...)` inline, so a staged
-    // bulk deletion followed by a refresh could hand it `undefined` and the first field read would throw inside a modal
-    // with the page behind it inert — a dead screen with no way out but Escape. Resolved once here, and the drawer is
-    // simply not rendered when the build it was opened for has gone.
+    // 🔴 A DRAWER OVER A ROW THAT NO LONGER EXISTS. The editor used to be handed `builds.find(...)` inline, so a staged bulk deletion followed by a refresh could hand it `undefined` and the first field read would throw inside a modal with the page behind it inert — a dead screen with no way out but Escape. Resolved once here, and the drawer is simply not rendered when the build it was opened for has gone.
     const editingBuild = editingId ? builds.find((b) => String(b._id) === editingId) || null : null;
 
     // 🔴 STAGING WITH NO ACKNOWLEDGEMENT READS AS A DROPPED CLICK. The form closed, the table did not change (a staged build is not a live one), and nothing anywhere said the work had landed — so the only way to find out was to open Review and look. The toast carries the way there, because "it is staged" and "here is where staged things go" are the same sentence.

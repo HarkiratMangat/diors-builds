@@ -2,11 +2,7 @@
 //
 // The composer's form, after it became a modal drawer and grew the fields /manage always had.
 //
-// 🔴 EVERY CHECK HERE IS ABOUT A FIELD THAT USED TO BE HARDCODED OR ABSENT. The portal could create a draw
-// with no items and no thumbnail and a patch note with an empty body, because `buildSeasonAddOp` wrote
-// `items: []`, `description: ''`, `urls1: []`, `urls2: []` into the payload and nothing collected them.
-// Those are not rendering bugs — they are records saved wrong — so they are tested at the payload, which is
-// the only place the difference is visible without a browser.
+// 🔴 EVERY CHECK HERE IS ABOUT A FIELD THAT USED TO BE HARDCODED OR ABSENT. The portal could create a draw with no items and no thumbnail and a patch note with an empty body, because `buildSeasonAddOp` wrote `items: []`, `description: ''`, `urls1: []`, `urls2: []` into the payload and nothing collected them. Those are not rendering bugs — they are records saved wrong — so they are tested at the payload, which is the only place the difference is visible without a browser.
 const assert = require('assert');
 const { Readable } = require('stream');
 
@@ -68,8 +64,7 @@ check('items reach the payload, and the note is stored as the comment item /mana
 });
 
 check('a blank thumbnail is ABSENT from the payload, not an empty string', () => {
-    // core/ops/draws.js spreads the payload straight onto the subdocument, and an empty string is a stored
-    // value that means "no image", where an absent key means "reuse whatever is cached for this title".
+    // core/ops/draws.js spreads the payload straight onto the subdocument, and an empty string is a stored value that means "no image", where an absent key means "reuse whatever is cached for this title".
     assert.ok(!('thumbnailUrl' in buildSeasonAddOp('draw', composerFields(base, DRAW)).payload));
     const withThumb = buildSeasonAddOp('draw', composerFields({ ...base, thumb: '  https://x/y.png  ' }, DRAW));
     assert.strictEqual(withThumb.payload.thumbnailUrl, 'https://x/y.png');
@@ -140,10 +135,7 @@ check('drawwindow is no longer a COMPOSE_TYPE, and no longer an ADD_CHIP', () =>
 
 // ── the new route ─────────────────────────────────────────────────────────────────────────────
 //
-// ⚠️ THE ROUTE IS DRIVEN, NOT DESCRIBED. Testing `parseItemLine` alone would prove the parser works and say
-// nothing about the endpoint the drawer actually calls — which is where the last three portal defects of
-// this shape lived (a stub whose regex never matched, a route registered for one method and stubbed for the
-// other). `requireAdmin` is replaced in the module cache because auth is not what is under test here.
+// ⚠️ THE ROUTE IS DRIVEN, NOT DESCRIBED. Testing `parseItemLine` alone would prove the parser works and say nothing about the endpoint the drawer actually calls — which is where the last three portal defects of this shape lived (a stub whose regex never matched, a route registered for one method and stubbed for the other). `requireAdmin` is replaced in the module cache because auth is not what is under test here.
 const asyncChecks = [];
 function checkAsync(name, fn) { asyncChecks.push(fn().then(() => console.log(`  ✓ ${name}`),
     (e) => { failures++; console.error(`  ✗ ${name}\n      ${e.message}`); })); }
@@ -166,9 +158,7 @@ checkAsync('POST /api/parse-items answers { items, errors } in the bot\'s own ti
     assert.deepStrictEqual(captured.items, [
         { tier: 'mythic', name: 'Ghost' },
         { tier: 'legendary', name: 'Fennec' },
-        // ⚠️ NOT title-cased, and that is the parser's own documented behaviour rather than an oversight:
-        // a "-#" line is a free-text note, and toTitleCase mangles a sentence. The first draft of this test
-        // asserted "Bundle only" and the code was right.
+        // ⚠️ NOT title-cased, and that is the parser's own documented behaviour rather than an oversight: a "-#" line is a free-text note, and toTitleCase mangles a sentence. The first draft of this test asserted "Bundle only" and the code was right.
         { tier: 'comment', name: 'bundle only' },
     ], 'the tiers and the title-casing are utils/adminParser.js\'s, not a browser copy');
     // A line that leaves no name behind is REPORTED, never dropped — the same contract /api/parse-bulk keeps.

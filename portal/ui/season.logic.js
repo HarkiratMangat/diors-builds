@@ -288,22 +288,14 @@ function buildSeasonAddOp(kind, fields) {
     //
     // ⚠️ The op is `patchnote.addSeason`, whose payload keys are its OWN (`titleOverride`, `releaseDate`) and not the calendar's — `resolveReleaseDate()` in core/ops/patchnotes.js reads `releaseDate`, so sending `endDate` here would parse an empty string. Description and image URLs are genuinely absent rather than defaulted: the composer collects a name and a date, and /manage is where the rest of a patch note is written.
     if (kind === 'patchnote') {
-        // 🔴 THE DESCRIPTION AND THE IMAGE SLOTS ARE COLLECTED NOW, AND THEY USED TO BE HARDCODED EMPTY.
-        // /manage's own Add New Season modal takes all four (commands/manage.js's buildPatchAddSeasonModal:
-        // season title override, release date, additional info, and two URL paragraphs), so the portal's
-        // control created a publication with no content in it and sent the reader to Discord to finish the
-        // job. The keys are the op's own — resolveReleaseDate() in core/ops/patchnotes.js reads `releaseDate`.
+        // 🔴 THE DESCRIPTION AND THE IMAGE SLOTS ARE COLLECTED NOW, AND THEY USED TO BE HARDCODED EMPTY. /manage's own Add New Season modal takes all four (commands/manage.js's buildPatchAddSeasonModal: season title override, release date, additional info, and two URL paragraphs), so the portal's control created a publication with no content in it and sent the reader to Discord to finish the job. The keys are the op's own — resolveReleaseDate() in core/ops/patchnotes.js reads `releaseDate`.
         return { type: 'patchnote.addSeason', target: null,
                  payload: { titleOverride: fields.title, releaseDate: fields.endDate,
                             description: fields.description || '', urls1: fields.urls1 || [], urls2: fields.urls2 || [] } };
     }
     const entity = KIND_TO_ENTITY[kind];
     if (entity === 'draw') {
-        // core/ops/draws.js validates payload.date (matching the SeasonalData schema's newDraws/ returningDraws[].date field, and utils/adminParser.js's parseBulkDrawList -- draws have no separate start/end, unlike calendar events, whose schema genuinely has both).
-        // ⚠️ `windowEnd` IS DELIBERATELY NOT SPREAD IN. A draw's record has one date and no window (see
-        // buildSeasonAddOps below), so the payload is written key by key rather than from `...fields` —
-        // a spread would put a field the schema does not declare onto the subdocument, which Mongoose
-        // silently drops on the next fetch and nothing would report.
+        // core/ops/draws.js validates payload.date (matching the SeasonalData schema's newDraws/ returningDraws[].date field, and utils/adminParser.js's parseBulkDrawList -- draws have no separate start/end, unlike calendar events, whose schema genuinely has both). ⚠️ `windowEnd` IS DELIBERATELY NOT SPREAD IN. A draw's record has one date and no window (see buildSeasonAddOps below), so the payload is written key by key rather than from `...fields` — a spread would put a field the schema does not declare onto the subdocument, which Mongoose silently drops on the next fetch and nothing would report.
         const payload = { title: fields.title, category: KIND_TO_DRAW_CATEGORY[kind], date: fields.endDate, items: fields.items || [] };
         if (fields.thumbnailUrl) payload.thumbnailUrl = fields.thumbnailUrl;
         return { type: 'draw.add', target: null, payload };
@@ -314,20 +306,11 @@ function buildSeasonAddOp(kind, fields) {
     return { type: 'calendar.add', target: null, payload: { title: fields.title, startDate: fields.startDate, endDate: fields.endDate, category, isOngoing: !!fields.isOngoing, isDoubleCP: !!fields.isDoubleCP } };
 }
 
-// 🔴 ONE COMPOSER ENTRY, TWO OPS — AND THAT IS WHY "DRAW WINDOW" IS NO LONGER A KIND YOU PICK.
-// A draw window is not a thing anybody sets out to create: it is the answer to "how long can this draw be
-// bought for", which is a property of the draw you are already describing. Offering it as a seventh chip
-// made the reader compose the same draw twice, in two controls, and hope the two titles matched — and
-// nothing checked that they did, which is exactly what the Track's own "orphan window" repair finding is
-// for. So the draw form takes an optional closing date, and when it is set this stages the draw AND the
-// `calendar.add` row that is its window, in one changeset, under one title, by construction.
+// 🔴 ONE COMPOSER ENTRY, TWO OPS — AND THAT IS WHY "DRAW WINDOW" IS NO LONGER A KIND YOU PICK. A draw window is not a thing anybody sets out to create: it is the answer to "how long can this draw be bought for", which is a property of the draw you are already describing. Offering it as a seventh chip made the reader compose the same draw twice, in two controls, and hope the two titles matched — and nothing checked that they did, which is exactly what the Track's own "orphan window" repair finding is for. So the draw form takes an optional closing date, and when it is set this stages the draw AND the `calendar.add` row that is its window, in one changeset, under one title, by construction.
 //
-// ⚠️ THE WINDOW OPENS ON THE RELEASE DATE, never on today: a draw window that starts before the draw exists
-// is a row the Track would draw running past its own subject.
+// ⚠️ THE WINDOW OPENS ON THE RELEASE DATE, never on today: a draw window that starts before the draw exists is a row the Track would draw running past its own subject.
 //
-// ⚠️ It reuses KIND_TO_CALENDAR_CATEGORY's `drawwindow` entry rather than writing 'Draw' here. The mapping
-// is still the one table that says what each kind stores, and a literal at this call site would be a second
-// copy of it that could drift while agreeing with itself.
+// ⚠️ It reuses KIND_TO_CALENDAR_CATEGORY's `drawwindow` entry rather than writing 'Draw' here. The mapping is still the one table that says what each kind stores, and a literal at this call site would be a second copy of it that could drift while agreeing with itself.
 function buildSeasonAddOps(kind, fields) {
     const ops = [buildSeasonAddOp(kind, fields)];
     if (fields && fields.windowEnd) {
