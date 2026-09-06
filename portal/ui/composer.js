@@ -246,7 +246,7 @@ export function Composer({ types, initialType, onStage, onStageMany, onCancel, o
 
     // ⚠️ THE REASON IS THE FOOTER'S FIRST CHILD, not a line under the offending field. It is the answer to "why can I not press this", so it belongs where the question is asked — beside the button it explains.
     const actions = html`
-        <span class="nw-why">${reason || 'Ready to stage.'}</span>
+        <span class="nw-why" role="status">${reason || 'Ready to stage.'}</span>
         <button class="btn" onClick=${onCancel}>Cancel</button>
         <button class="btn go" disabled=${Boolean(reason)}
                 onClick=${() => onStage(state.type, composerFields(state, type))}>
@@ -337,7 +337,7 @@ export function Composer({ types, initialType, onStage, onStageMany, onCancel, o
                                             onClick=${() => set({ doubleCP: !state.doubleCP,
                                                 name: !state.doubleCP && !state.name.trim() ? 'Double CP Weekend' : state.name })}>
                                         <span class="nw-dot"></span>Double CP${' '}
-                                        <em>marks the window</em>
+                                        <em aria-hidden="true">marks the window</em>
                                     </button>
                                 </div>
                                 <p class="nw-note">A stored flag, not a title — <b>/calendar</b> draws the Double CP mark

@@ -36,13 +36,23 @@ export function Drawer({ eyebrow, title, children, actions, wide, side, onClose 
         const first = ref.current && ref.current.querySelector('button, input, a, textarea, select');
         if (first) first.focus();
         return () => {
-            // Only if it is still in the document — a drawer whose opener was a row that the commit removed has nowhere to go back to, and focusing a detached node silently sends focus to body anyway. ⚠️ `preventScroll` — a bare .focus() scrolls the opener into view, which moves the page out from under whatever the reader was reading. It also stalled the states walk twice on Season's identity panel, 2026-09-04 22:45 EDT, which is how this was caught within a minute of writing it.
-            if (opener && opener.isConnected && typeof opener.focus === 'function') opener.focus({ preventScroll: true });
+            // 🔴 DEFERRED ONE FRAME, 2026-09-06 09:22 EDT. The cleanup runs while the opener still sits inside a region that is `inert` — the ref callback that lifts `inert` fires after it — and a focus() into an inert subtree is a silent no-op, so focus landed on <body> after every close (measured on all four drawers by the accessibility review). By the next frame the attribute is gone and the opener takes focus. Only if it is still in the document — a drawer whose opener was a row that the commit removed has nowhere to go back to, and focusing a detached node silently sends focus to body anyway. ⚠️ `preventScroll` — a bare .focus() scrolls the opener into view, which moves the page out from under whatever the reader was reading. It also stalled the states walk twice on Season's identity panel, 2026-09-04 22:45 EDT, which is how this was caught within a minute of writing it.
+            requestAnimationFrame(() => { if (opener && opener.isConnected && typeof opener.focus === 'function') opener.focus({ preventScroll: true }); });
         };
     }, []);
 
     useEffect(() => {
-        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); onClose(); } };
+        // 🔴 `inert` IS NOT A TRAP, 2026-09-06 09:22 EDT: it removes the page from the tab order but the browser's own chrome is still past the last control, so Tab from the last field left the dialog for <body> (Season at stop 14, Armory at 23). The APG dialog pattern wraps at both edges; this is that, on the dialog's own keydown so it cannot interfere with anything outside.
+        const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
+        const onKey = (e) => {
+            if (e.key === 'Escape') { e.preventDefault(); onClose(); return; }
+            if (e.key !== 'Tab' || !ref.current) return;
+            const items = [...ref.current.querySelectorAll(FOCUSABLE)].filter((el) => el.offsetParent !== null);
+            if (!items.length) return;
+            const first = items[0], last = items[items.length - 1], active = document.activeElement;
+            if (!e.shiftKey && (active === last || !ref.current.contains(active))) { e.preventDefault(); first.focus(); }
+            else if (e.shiftKey && (active === first || !ref.current.contains(active))) { e.preventDefault(); last.focus(); }
+        };
         document.addEventListener('keydown', onKey);
         return () => document.removeEventListener('keydown', onKey);
     }, []);

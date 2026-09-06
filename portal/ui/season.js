@@ -250,9 +250,9 @@ function StagedPanel({ changesets, onDiscardAll, onReview }) {
     return html`
         <div class="stg-strip" role="status">
             <span class="ss-n"><b>${pending.length}</b> staged</span>
-            <span class="ss-sep">·</span>
+            <span class="ss-sep" aria-hidden="true">·</span>
             <span class="ss-d">${first}${more ? ` and ${more} more` : ''}</span>
-            ${blocked.length ? html`<span class="ss-sep">·</span>
+            ${blocked.length ? html`<span class="ss-sep" aria-hidden="true">·</span>
                 <span class="ss-w">${blocked.length === 1 ? blockedReason(blocked[0]) : `${blocked.length} blocked`}</span>` : null}
             <span class="ss-sp"></span>
             <button class="chip" onClick=${onReview} data-tip="Nothing is live until you commit it there">Review →</button>

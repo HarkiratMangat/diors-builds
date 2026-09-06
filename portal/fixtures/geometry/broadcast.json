@@ -1,7 +1,7 @@
 {
   "realm": "broadcast",
-  "recordedAt": "2026-09-05T02:54:35.076Z",
-  "commit": "bba9d30e",
+  "recordedAt": "2026-09-06T13:24:32.874Z",
+  "commit": "ec4a9958",
   "viewport": {
     "w": 1282,
     "h": 888
@@ -10,14 +10,15 @@
     "Delivery queue": {
       "grid": {
         "examined": 235,
-        "nearMisses": 32,
-        "sizeIssues": 10,
+        "nearMisses": 23,
+        "sizeIssues": 11,
         "sizeGroups": [
           "[object>[object.SVGAnimatedString]|TOP-OFFSET",
           "[object>[object.SVGAnimatedString]|h",
           "[object>[object.SVGAnimatedString]|w",
           "dcard>row|TOP-OFFSET",
           "dcard>row|h",
+          "ncell>sev|w",
           "nscard>nsmeta|h",
           "row>b|TOP-OFFSET",
           "row>span|TOP-OFFSET",
@@ -46,11 +47,12 @@
       "grid": {
         "examined": 231,
         "nearMisses": 36,
-        "sizeIssues": 7,
+        "sizeIssues": 8,
         "sizeGroups": [
           "[object>[object.SVGAnimatedString]|TOP-OFFSET",
           "[object>[object.SVGAnimatedString]|h",
           "[object>[object.SVGAnimatedString]|w",
+          "ncell>sev|w",
           "racknote>code|w",
           "ruler>span|w",
           "stat>k|TOP-OFFSET",

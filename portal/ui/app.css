@@ -5476,7 +5476,7 @@ button .ic,a .ic{pointer-events:none}
  * the header to 40px and one line. Those two properties compute whatever `display` is, so they are not evidence. */
 .trow.tcat{grid-template-columns:1fr}
 .trow.tcat > .trow-h{display:flex;flex-wrap:nowrap;flex-direction:row;align-items:center;border-right:0;border-bottom:1px solid var(--rule3);
-  width:100%;text-align:left;gap:11px;padding:10px 13px}
+  width:100%;min-height:44px;text-align:left;gap:11px;padding:10px 13px}   /* 44, the tap floor the rest of the console honours; it measured 40 */
 /* A closed row has no body element rendered at all, so nothing here needs to hide one — but the border under the
  * header is a divider between two things, and with the body gone it is a line under nothing. */
 .trow.tcat.tclosed > .trow-h{border-bottom:0}

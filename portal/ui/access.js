@@ -96,7 +96,7 @@ function GrantForm({ onGrant, scopes, onCancel }) {
                     screen — typing the id is the entire gate, because there is no data to export and nothing
                     meaningful to preview. The allowlist cache is invalidated on write, so it is live in the bot on
                     their very next click.</p>
-                ${why ? html`<p class="why">${why}</p>` : null}
+                ${why ? html`<p class="why" role="status">${why}</p>` : null}
             </div>
         <//>
     `;

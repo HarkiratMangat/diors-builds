@@ -263,7 +263,7 @@ function PostForm({ onSubmit, onCancel }) {
     return html`
         <${Drawer} eyebrow="announcement.post · tier 1" title="Post an announcement" onClose=${onCancel}
                    actions=${html`
-                       <span class=${'why' + (ready ? '' : ' blocked')}>${ready ? 'Stages one operation. Nothing reaches a player until you commit it on Review.' : 'Write the announcement first.'}</span>
+                       <span role="status" class=${'why' + (ready ? '' : ' blocked')}>${ready ? 'Stages one operation. Nothing reaches a player until you commit it on Review.' : 'Write the announcement first.'}</span>
                        <button class="btn" onClick=${onCancel}>Cancel</button>
                        <button class="btn go" disabled=${!ready} onClick=${submit}>Stage post</button>`}>
             <div class="dwbody">

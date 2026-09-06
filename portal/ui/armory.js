@@ -334,7 +334,7 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
     return html`
         <${Drawer} eyebrow=${`loadout.add · ${f.mode} · tier 1`} title=${`New ${f.mode} build`} wide onClose=${onCancel}
                    actions=${html`
-                       <span class=${'why' + (blockers.length ? ' blocked' : '')}>${blockers.length
+                       <span role="status" class=${'why' + (blockers.length ? ' blocked' : '')}>${blockers.length
                            ? `Still needs ${blockers[0]}.`
                            : 'Stages one operation. Nothing reaches a player until you commit it on Review.'}</span>
                        <button class="btn" onClick=${onCancel}>Cancel</button>
@@ -353,15 +353,15 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
                                     onClick=${() => set({ mode: m, rank: '' })}>${m}</button>`)}
                     </div>
                     <div class="bed-g2" style="margin-top:11px">
-                        <label class="dwfield"><span>Weapon name <span class="req">*</span></span>
-                            <input value=${f.weaponName} placeholder="AK117" autocomplete="off"
+                        <div class="dwfield"><label for="ab-weapon"><span>Weapon name <span class="req">*</span></span></label>
+                            <input id="ab-weapon" aria-describedby="ab-weapon-hint" value=${f.weaponName} placeholder="AK117" autocomplete="off"
                                    onInput=${(e) => set({ weaponName: e.target.value })} />
-                            <i class="bf-hint">As it should read on the card. <code>weaponKey</code> is derived from it —${' '}
-                                lowercased, spaces stripped${f.weaponName.trim() ? html` → <code>${f.weaponName.toLowerCase().replace(/\s+/g, '')}</code>` : ''}.</i></label>
-                        <label class="dwfield"><span>Build name</span>
-                            <input value=${f.buildName} placeholder="Aggressive Flex" autocomplete="off"
+                            <i class="bf-hint" id="ab-weapon-hint">As it should read on the card. <code>weaponKey</code> is derived from it —${' '}
+                                lowercased, spaces stripped${f.weaponName.trim() ? html` → <code>${f.weaponName.toLowerCase().replace(/\s+/g, '')}</code>` : ''}.</i></div>
+                        <div class="dwfield"><label for="ab-build"><span>Build name</span></label>
+                            <input id="ab-build" aria-describedby="ab-build-hint" value=${f.buildName} placeholder="Aggressive Flex" autocomplete="off"
                                    onInput=${(e) => set({ buildName: e.target.value })} />
-                            <i class="bf-hint">A human variant label, not a code. Defaults to <b>Standard Build</b>.</i></label>
+                            <i class="bf-hint" id="ab-build-hint">A human variant label, not a code. Defaults to <b>Standard Build</b>.</i></div>
                     </div>
                     <div class="dwfield"><label for="ab-category"><span>Category <span class="req">*</span></span></label>
                         <select id="ab-category" value=${f.category} onChange=${(e) => set({ category: e.target.value })}>
@@ -381,7 +381,7 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
                                 <label class="sr" for=${`ab-att-${i}`}>Attachment ${i + 1}</label>
                                 <input class="ati" id=${`ab-att-${i}`} value=${a} placeholder=${ATT_HINTS[i] || 'Attachment'}
                                        onInput=${(e) => setAtts(atts.map((v, n) => (n === i ? e.target.value : v)))} />
-                                ${''/* 🔴 A SELECT NEVER SITS INSIDE ITS LABEL — four did, and the states walk's PASS 6 read each label's name as every option run together ("Category rankUnrankedBest in categoryTop 3…"): label[for] + select#id now. 🔴 REACHABLE BY TAB, 2026-09-06 01:45 EDT. The clear button carried tabIndex -1 — an arrow-key pattern nothing here implements — so the states walk's PASS 4 found five visible buttons no Tab could reach inside a dialog that had just declared the rest of the page inert. And the glyph is drawn, not typed: a text ✕ inherits metrics nothing here controls (reference_never_text_glyphs_for_icons). */}
+                                ${''/* 🔴 A HINT INSIDE A LABEL BECOMES PART OF THE NAME (2026-09-06 09:22 EDT): the accessibility review read "Weapon name * As it should read on the card. weaponKey is derived from it…" as the field's whole accessible name, on five fields. label[for] + input#id + aria-describedby now, so the hint is a description. 🔴 A SELECT NEVER SITS INSIDE ITS LABEL — four did, and the states walk's PASS 6 read each label's name as every option run together ("Category rankUnrankedBest in categoryTop 3…"): label[for] + select#id now. 🔴 REACHABLE BY TAB, 2026-09-06 01:45 EDT. The clear button carried tabIndex -1 — an arrow-key pattern nothing here implements — so the states walk's PASS 4 found five visible buttons no Tab could reach inside a dialog that had just declared the rest of the page inert. And the glyph is drawn, not typed: a text ✕ inherits metrics nothing here controls (reference_never_text_glyphs_for_icons). */}
                                 <button class="atx" aria-label=${`Clear attachment ${i + 1}`}
                                         onClick=${() => setAtts(atts.map((v, n) => (n === i ? '' : v)))}><${Icon} name="x" cls="sm" /></button>
                             </div>`)}
@@ -394,24 +394,24 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
                         <p class="bf-p bf-na"><b>DMZ builds have no share code.</b> That screen does not generate one, so
                             the field is absent rather than shown and ignored.</p>`
                     : html`
-                        <label class="dwfield"><span>Share code</span>
-                            <input value=${f.shareCode} placeholder="1C2B4A8B9A" autocomplete="off" spellcheck="false" maxLength="12"
+                        <div class="dwfield"><label for="ab-share"><span>Share code</span></label>
+                            <input id="ab-share" aria-describedby="ab-share-hint" value=${f.shareCode} placeholder="1C2B4A8B9A" autocomplete="off" spellcheck="false" maxLength="12"
                                    onInput=${(e) => set({ shareCode: e.target.value })} />
-                            <i class="bf-hint">Ten characters, a digit and a letter alternating. Look-alike characters are
+                            <i class="bf-hint" id="ab-share-hint">Ten characters, a digit and a letter alternating. Look-alike characters are
                                 corrected on save rather than refused${code && code.length !== 10 ? html`, but ${code.length} characters is not ten` : ''}.
-                                Leave it blank if you do not have one — a blank field sends no value at all.</i></label>`}
+                                Leave it blank if you do not have one — a blank field sends no value at all.</i></div>`}
                 </section>
 
                 <section class="bf-sec">
                     <h4 class="bf-h">Image</h4>
-                    <label class="dwfield"><span>Cloudinary key, or a full URL</span>
-                        <input value=${f.imageKey} placeholder="AK117-1" autocomplete="off" spellcheck="false"
+                    <div class="dwfield"><label for="ab-image"><span>Cloudinary key, or a full URL</span></label>
+                        <input id="ab-image" aria-describedby="ab-image-hint" value=${f.imageKey} placeholder="AK117-1" autocomplete="off" spellcheck="false"
                                onInput=${(e) => set({ imageKey: e.target.value })} />
-                        <i class="bf-hint">${!img
+                        <i class="bf-hint" id="ab-image-hint">${!img
                             ? html`Convention is <code>WEAPON-N</code> — all caps, spaces to hyphens, N being this build's position among its siblings.`
                             : (/^https?:\/\//i.test(img)
                                 ? html`Read as a <b>full URL</b>, stored as-is — and it will not survive a bulk-export round trip, because only a real key is emitted there.`
-                                : html`Read as a <b>Cloudinary key</b>, delivered with <code>f_auto,q_auto</code> baked in.`)}</i></label>
+                                : html`Read as a <b>Cloudinary key</b>, delivered with <code>f_auto,q_auto</code> baked in.`)}</i></div>
                 </section>
 
                 <section class="bf-sec">
@@ -434,10 +434,10 @@ function AddBuildForm({ onSubmit, onCancel, mode = 'MP' }) {
 
                 <section class="bf-sec">
                     <h4 class="bf-h">Description</h4>
-                    <label class="dwfield"><span>Usage blurb</span>
-                        <textarea rows="2" value=${f.description} placeholder="When to reach for this build."
+                    <div class="dwfield"><label for="ab-usage"><span>Usage blurb</span></label>
+                        <textarea id="ab-usage" aria-describedby="ab-usage-hint" rows="2" value=${f.description} placeholder="When to reach for this build."
                                   onInput=${(e) => set({ description: e.target.value })}></textarea>
-                        <i class="bf-hint">Rendered as a blockquote above the attachments. <b>2 of 133</b> builds carry one.</i></label>
+                        <i class="bf-hint" id="ab-usage-hint">Rendered as a blockquote above the attachments. <b>2 of 133</b> builds carry one.</i></div>
                 </section>
 
                 </div>
@@ -549,7 +549,7 @@ function BuildEditor({ build, csrfToken, onStage, onClose }) {
         <${Drawer} eyebrow=${`loadout.edit · ${build.mode} · tier 1`}
                    title=${`${build.weaponName} — ${build.buildName || 'Standard Build'}`} wide onClose=${onClose}
                    actions=${html`
-                       <span class=${'why' + (blockers.length ? ' blocked' : '')}>${blockers.length
+                       <span role="status" class=${'why' + (blockers.length ? ' blocked' : '')}>${blockers.length
                            ? `Still needs ${blockers[0]}.`
                            : `${changed.length} field${changed.length === 1 ? '' : 's'} changed, staged as one operation.`}</span>
                        <button class="btn" onClick=${onClose}>Cancel</button>
