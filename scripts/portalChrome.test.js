@@ -192,8 +192,9 @@ check('a point puts its one date where the op reads it', () => {
 });
 
 check('a span fills both ends', () => {
+    // isDoubleCP rides on every event since the composer drawer gained the Double CP preset (2026-09-06 01:49 EDT); false is the honest default, not an absence.
     assert.deepStrictEqual(composerFields(ready, SPAN),
-        { title: 'Clan Wars', startDate: '2026-09-21', endDate: '2026-09-30' });
+        { title: 'Clan Wars', startDate: '2026-09-21', endDate: '2026-09-30', isDoubleCP: false });
 });
 
 // ── THE TRACK'S VISIBLE WINDOW ───────────────────────────────────────────────────────────────

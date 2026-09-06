@@ -277,7 +277,8 @@ function Account({ session, staged, onSignOut, chrome }) {
                     onClick=${(e) => { e.stopPropagation(); setOpen(!open); }}>
                 <span class="av" data-src=${avatarUrl ? '' : null}
                       style=${avatarUrl ? `--av-src:url(${avatarUrl})` : null} aria-hidden="true">${avatarUrl ? '' : initialOf(session)}</span>
-                <span class="id" title=${id}>…${id.slice(-4)}</span>
+                ${''/* 2026-09-06 01:49 EDT — pin 5, "missing my username/avatar": the chip read the id's last four digits even once the session carried a name. The display name is what a person recognises as themselves; the id stays in the title and in the menu. */}
+                <span class="id" title=${id}>${session.globalName || session.username || ('…' + id.slice(-4))}</span>
                 <span class="cv" aria-hidden="true"></span>
             </button>
             <div class="umenu" role="menu" aria-label="Account" hidden=${!open}>
