@@ -239,35 +239,34 @@ function DayDrawer({ day, live, draft, withDraft, onWithDraft, onClose, onDay })
 }
 
 // 01-season-spine.html's Staged panel -- the mockup keeps pending changes visible and actionable right beside the Track instead of buried in the flat Manifest table below. describeOp/blockedReason are board.logic.js globals (every *.logic.js file loads on every page -- see track.js's header), the same functions Board's own cards already use, so the two views can never describe a change differently. Reads changesets Season already fetches; asks for nothing new.
-function StagedPanel({ changesets, onDiscard, onReview, stagedOnly, onStagedOnly }) {
+// 🔴 A STRIP, NOT A PANEL, AND IT MOVED OUT OF THE TRACK TAB. Harkirat on the panel this replaces: it
+// "feels squeezed in" — a 438px callout inset 22px from a page that is otherwise full-bleed, listing every
+// staged change with its own tier chip and its own discard button, directly above the instrument it was
+// pushing down. Two problems in one shape: it repeated the Board, which is the screen whose entire job is
+// the changeset pipeline, and it was only on the Track, so staging from the Board or Repairs left the page
+// silent. One line under the view bar says the same four things — how many, what the first one was, the way
+// forward, and the way out — on every view, in the height of a sentence.
+//
+// ⚠️ IT NAMES A BLOCKED CHANGE RATHER THAN COUNTING IT. A blocked changeset cannot commit, so a strip that
+// folded it into "4 staged" would send somebody to Review to find out why. `blockedReason` is board.logic.js's,
+// the same function the Board's own cards read, so the two can never describe one change differently.
+function StagedPanel({ changesets, onDiscardAll, onReview }) {
     const pending = (changesets || []).filter((c) => c.state === 'staged' || c.state === 'blocked');
     if (!pending.length) return null;
-    // The staged strip in the adopted vocabulary: one row per change, tier first, and the ONE action that matters — review and commit — as the row of controls rather than a footer. A blocked change says why on its own row; a strip that hides the reason behind a click is a receipt.
+    const first = describeOp((pending[0].ops || [])[0]);
+    const more = pending.length - 1;
+    const blocked = pending.filter((c) => blockedReason(c));
     return html`
-        <div class="callout stg" style="margin:0 22px 14px">
-            <!-- 🔴 THE PANEL NAMED THE CHANGES AND THE TABLE BELOW DID NOT SHOW YOU WHICH ROWS THEY WERE. "3 staged" over 39 rows means finding three dashed borders by eye, and a staged DELETION has no row left to find at all. The chip is dashed for the same reason the staged rows are — the legend in the masthead already teaches that mark, so the control and the thing it selects look alike. -->
-
-            <div class="rvlist" role="list">
-                ${pending.map((c) => html`
-                    <div class="rvopwrap" role="listitem" key=${String(c._id)}>
-                        <span class=${'rvop' + (c.tier === 3 ? ' t3' : '')}>
-                            <span class="rvt">T${c.tier}</span>
-                            <span class="rvn">
-                                <b>${describeOp((c.ops || [])[0])}</b>
-                                <span>${c.realm || 'season'}${(c.ops || []).length > 1 ? ` · +${c.ops.length - 1} more` : ''}</span>
-                                ${blockedReason(c) ? html`<span class="rvw">${blockedReason(c)}</span>` : null}
-                            </span>
-                        </span>
-                        <button class="rvdrop" aria-label=${`Discard ${describeOp((c.ops || [])[0])}`}
-                                data-tip="Discard this staged change — nothing live is undone"
-                                onClick=${() => onDiscard(c)}>×</button>
-                    </div>`)}
-            </div>
-            <div class="rvfoot">
-                <span class="rvn-sum"><b>${pending.length}</b> staged change${pending.length === 1 ? '' : 's'} · nothing is live until you commit</span>
-                <span class="sp"></span>
-                <button class="commit" onClick=${onReview}>Review & commit</button>
-            </div>
+        <div class="stg-strip" role="status">
+            <span class="ss-n"><b>${pending.length}</b> staged</span>
+            <span class="ss-sep">·</span>
+            <span class="ss-d">${first}${more ? ` and ${more} more` : ''}</span>
+            ${blocked.length ? html`<span class="ss-sep">·</span>
+                <span class="ss-w">${blocked.length === 1 ? blockedReason(blocked[0]) : `${blocked.length} blocked`}</span>` : null}
+            <span class="ss-sp"></span>
+            <button class="chip" onClick=${onReview} data-tip="Nothing is live until you commit it there">Review →</button>
+            <button class="chip" onClick=${onDiscardAll}
+                    data-tip="Discard every staged change — nothing live is undone">Discard all</button>
         </div>
     `;
 }
@@ -388,34 +387,48 @@ const composeTypes = () => (COMPOSE_TYPES.map((t) => ({
 })));
 
 const COMPOSE_TYPES = [
-    { key: 'draw', label: 'Draw', hex: 'var(--draw)', shape: 'point', nameLabel: 'Draw name',
+    // `windowable` is what makes the form ask for a second, OPTIONAL date and then stage two ops. It is not
+    // `shape`: the draw's own record still stores exactly one date (models/SeasonalData.js), and a shape of
+    // 'span' would put a start date on a subdocument that has no field for one.
+    { key: 'draw', label: 'Draw', hex: 'var(--draw)', shape: 'point', windowable: true, nameLabel: 'Draw name',
+      opName: 'draw.add',
       placeholder: 'Crimson Moonlight', dateLabel: 'Releases',
       pointNote: 'A draw has no end date — the record stores the day it releases.' },
-    { key: 'returning', label: 'Returning draw', hex: 'var(--ret)', shape: 'point', nameLabel: 'Draw name',
+    { key: 'returning', label: 'Returning draw', hex: 'var(--ret)', shape: 'point', windowable: true, nameLabel: 'Draw name',
+      opName: 'draw.add',
       placeholder: 'Havoc rerun', dateLabel: 'Returns',
       pointNote: 'A returning draw stores one date, the same as a new one.' },
-    // 🔴 THE SIXTH TYPE. A draw WINDOW is when a draw can be bought, which is a span, and it is a calendar entry with category 'draw' -- `fixtures.js` says so (`source: "calendar category:'draw'"`) and the mockup maps it to `calendar.add`, the same op Event and Playlist use. The portal could always store one; it never offered the control, so the one calendar category of the three that a person could not create from here was the one the Track draws its own lane for.
-    { key: 'drawwindow', label: 'Draw window', hex: 'var(--dw)', shape: 'span', nameLabel: 'Window name',
-      placeholder: 'Judgment Day draw window' },
+    // 🔴 THE DRAW WINDOW WAS A SIXTH KIND HERE AND IS NOT ANY MORE — Harkirat, 2026-09-06 01:25 EDT. A window is when a
+    // draw can be BOUGHT, which is a fact about a draw you are already describing, so offering it as its own
+    // chip made you compose the same thing twice and hope the two titles matched. Nothing checked that they
+    // did; the Track's own "orphan window" repair finding exists because they often did not. The draw form
+    // takes an optional closing date instead, and buildSeasonAddOps stages the `calendar.add` behind it.
+    // ⚠️ `drawwindow` IS STILL A LANE, A FILTER CHIP AND A CALENDAR CATEGORY. Only the creation kind is gone.
     { key: 'event', label: 'Event', hex: 'var(--ev)', shape: 'span', nameLabel: 'Event name',
+      opName: 'calendar.add',
       placeholder: 'Clan Wars' },
     { key: 'playlist', label: 'Playlist', hex: 'var(--play)', shape: 'span', nameLabel: 'Playlist name',
+      opName: 'calendar.add',
       placeholder: 'Hardpoint 24/7' },
     // A patch note is not released, it is PUBLISHED, and the design says so — `dateLabel` was falling through to the shared 'Releases' default written for draws. The note is the design's too: it answers the question the composer actually provokes, which is why this record has no lane on the Track, and it is one line longer, which is the whole of the 19.56px that made this overlay the worst-matching of the six at 8.4%.
     //
     // ⚠️ THE SENTENCE THIS REPLACED IS NOT WORTHLESS AND IS NOT STOOD DOWN. It said the description and the images are written in /manage — operational fact the design's copy does not carry. But §0.1b's default is that the mockup wins unless a COMPANION section or a dated decision postdates it, and there is no citation for the portal's wording, so it was not a portal-ahead advance to keep. Filed in the post-conformance queue instead, where the two can be merged deliberately rather than one silently outliving the other.
     { key: 'patchnote', label: 'Patch note', hex: 'var(--pn)', shape: 'point', nameLabel: 'Season title',
+      opName: 'patchnote.addSeason',
       placeholder: 'Season 8 — Codename', dateLabel: 'Published',
       pointNote: 'A patch note is published once. The record stores one date and no end — which is why it is not a lane on the Track.' },
 ];
 
+// 🔴 FOUR CHIPS, AND TWO WERE REMOVED FOR DIFFERENT REASONS. `drawwindow` is no longer a kind at all (see
+// COMPOSE_TYPES above). `patchnote` still is — but it had TWO entry points, this one and the Season Record
+// panel's own CTA, and the record panel's is the one that sits beside the list it adds to. A control that
+// creates a publication belongs next to the publications, not in a row of season-schedule chips it shares
+// nothing with. The masthead keeps the four kinds that land on the Track.
 const ADD_CHIPS = [
     { key: 'draw', label: 'Draw', accent: 'var(--draw)' },
     { key: 'returning', label: 'Returning draw', accent: 'var(--ret)' },
-    { key: 'drawwindow', label: 'Draw window', accent: 'var(--dw)' },
     { key: 'event', label: 'Event', accent: 'var(--ev)' },
     { key: 'playlist', label: 'Playlist', accent: 'var(--play)' },
-    { key: 'patchnote', label: 'Patch note', accent: 'var(--pn)' },
 ];
 
 // ⚠️ THE ACCESS KEY IS ANNOUNCED, NOT MERELY BOUND -- the same rule MastheadNew follows, and the mockup draws the `N` badge for exactly this reason. `n` opens the composer with no type chosen, which is the right default for a group of six: picking the type is the composer's first field, so a shortcut per chip would be six shortcuts for one act. useCreateKey already refuses to fire while somebody is typing, so the letter cannot be swallowed mid-title.
@@ -814,7 +827,9 @@ function PatchRecord({ live, openId, onOpen, onPublish, onStage, onPreview }) {
             <header class="rec-h">
                 <span class="rec-t">Season record</span>
                 <span class="rec-n">${rows.length} published · newest first</span>
-                <button type="button" class="rec-cta" onClick=${onPublish}>+ Publish</button>
+                <!-- "+ Publish" named the verb and not the thing, on the one control that creates a patch
+                     note — and it is now the ONLY way in, since the masthead's chip was dropped. -->
+                <button type="button" class="rec-cta" onClick=${onPublish}>+ New patch note</button>
             </header>
             <ol class="rec-list">
                 ${rows.length ? rows.map((n) => html`
@@ -831,7 +846,8 @@ function PatchRecord({ live, openId, onOpen, onPublish, onStage, onPreview }) {
                         <span class="rec-meta">${n.images.length} img</span>${' '}
                         <span class="rec-tag">${n.current ? 'current' : 'history'}</span>
                     </li>`)
-                : html`<li class="rec-empty">Nothing published this season yet.</li>`}
+                : html`<li class="rec-empty">Nothing published this season yet.${' '}
+                    <button type="button" class="chip" onClick=${onPublish}>+ New patch note</button></li>`}
             </ol>
             ${open ? html`<${PatchEditor} entry=${open} onStage=${(ops) => onStage(open, ops)} onClose=${() => onOpen(null)} />` : null}
         </section>
@@ -962,9 +978,22 @@ export function SeasonRealm({ session }) {
         fetchChangesets('season').then(setChangesets);
     }
 
-    async function handleAdd(op) {
-        await stageOps('season', [op], session.csrfToken);
+    // 🔴 ONE COMPOSER ENTRY CAN BE TWO OPS, AND THEY ARE ONE CHANGESET. A draw with a closing date stages the
+    // draw and its calendar window together (buildSeasonAddOps) — staging them separately would put two rows
+    // on Review for one act and let the window commit without the draw it is a window onto.
+    //
+    // ⚠️ IT SAID NOTHING AT ALL BEFORE. Every other staging path in this realm toasts; this one closed the
+    // form and left the reader looking at an unchanged Track, because the staged row does not appear until
+    // the changeset fetch returns. The arrow is a real link to the only screen that commits.
+    async function handleAdd(opOrOps) {
+        const ops = [].concat(opOrOps).filter(Boolean);
+        if (!ops.length) return;
+        const res = await stageOps('season', ops, session.csrfToken);
+        const refused = refusalOf(res);
+        if (refused) return overlay.say(`Not staged — ${refused}`);
         setShowAdd(null);
+        setComposeGhost(null);
+        overlay.say(ops.length > 1 ? `Staged · ${ops.length} changes` : 'Staged', 'Review →', () => { location.hash = '#/review'; });
         fetchChangesets('season').then(setChangesets);
     }
 
@@ -1155,6 +1184,20 @@ export function SeasonRealm({ session }) {
         onConfirm: () => handleDiscard(String(c._id)),
     });
 
+    // The strip's own way out. With exactly one staged change this IS the single discard, so the two
+    // controls never ask the same question in two different voices — the defect confirmDiscard was written
+    // to close, one level up.
+    function confirmDiscardAll(pending) {
+        if (pending.length === 1) return confirmDiscard(pending[0]);
+        overlay.confirm({
+            op: 'changeset.discard', tier: 1, danger: true, confirmLabel: `Discard all ${pending.length}`,
+            title: `Discard ${pending.length} staged changes?`,
+            body: html`<p class="dw-p">Nothing live is undone — none of these reached Discord. Everything staged
+                on this realm is abandoned, including anything staged from the Board or the Manifest.</p>`,
+            onConfirm: async () => { for (const c of pending) await handleDiscard(String(c._id)); },
+        });
+    }
+
     // ⚠️ THE WHOLE SET GOES IN ONE CHANGESET. Editing the current entry can produce up to three ops — date/info and each image slot — and they are one act; staging them separately would put three rows on Review for one edit and let two of them commit without the third.
     async function handlePatchStage(entry, ops) {
         if (!ops.length) return;
@@ -1172,8 +1215,12 @@ export function SeasonRealm({ session }) {
                                                  draftSlot=${draftZone} />`;
 
     // The window range is the view bar's meta line on EVERY view of this panel, not only the Track: it says where in the season you are, and the Board and Repairs are just as much a view of it. Extracted so the conformance mount above can take it: one Composer, two possible positions, never two instances.
+    // 🔴 IT MOVED OUT OF THE MASTHEAD AND INTO THE OVERLAY SLOT, because it is a modal drawer now and this
+    // file already knows where overlays live: "one overlay in the wrong place is a bug; two is the shape of
+    // the thing, and the shape is that overlays do not live in the content tree." Rendered under the
+    // masthead it would have had main's stacking context above its own scrim, exactly as the day drawer did.
     const composerSlot = showAdd ? html`<${Composer} types=${composeTypes()} initialType=${showAdd === true ? null : showAdd}
-                                              onStage=${(kind, fields) => handleAdd(buildSeasonAddOp(kind, fields))}
+                                              onStage=${(kind, fields) => handleAdd(buildSeasonAddOps(kind, fields))}
                                               onStageMany=${handleStageMany}
                                               onLive=${setComposeGhost}
                                               onCancel=${() => { setComposeGhost(null); setShowAdd(null); }} />` : null;
@@ -1192,15 +1239,11 @@ export function SeasonRealm({ session }) {
                           foot=${html`<${PatchRecord} live=${state.live} openId=${openPatchId} onOpen=${setOpenPatchId}
                                                       onPreview=${setRecPreview}
                                                       onPublish=${() => setShowAdd('patchnote')} onStage=${handlePatchStage} />`} />
-               <${StagedPanel} changesets=${changesets} onReview=${() => setView('Board')} onDiscard=${confirmDiscard}
-                               stagedOnly=${stagedOnly} onStagedOnly=${setStagedOnly} />
-               <!-- The keyboard entrance to the day drawer. It opens on TODAY because that is the day
-                    somebody checking "what is running" almost always wants, and the drawer steps from there. -->
-               <!-- Aligned with the staged band above it rather than the panel's own padding edge: measured at
-                    1282 it sat at x=111 while the band sat at x=123, so a single floating pill was the one thing
-                    on the page agreeing with no other left edge. -->
-               ${html`<p class="hint" style="margin:0 22px 14px"><button class="chip" onClick=${() => setDayOpen(todayIso())}
-                                       data-tip="See everything running on one day">Open a day…</button></p>`}
+               <!-- ⚠️ THE STAGED STRIP AND THE DAY CHIP BOTH LIVED HERE AND BOTH LEFT. The strip moved above
+                    the view content, because staging happens on all three views and this one told you about
+                    it on one. The chip moved INTO the Zoomer as "Today": it was a lone floating pill agreeing
+                    with no other left edge on the page, and opening a day is a Track control, so it belongs
+                    in the Track's own toolbar beside the zoom it shares a job with. -->
 `
         : view === 'Repairs'
             ? html`<${Repairs} data=${trackData} window=${visibleWindow} season=${state.live} onClamp=${handleDragCommit} />`
@@ -1244,14 +1287,14 @@ export function SeasonRealm({ session }) {
         <${Shell} realm="season" session=${session} busy=${load.hostClass} view=${view} viewOptions=${['Track', 'Board', 'Repairs']} onSetView=${setView}
                   stateKey=${['saved', 'staged', 'conflict'].filter((k) => allRows.some((r) => (r.state === 'live' ? 'saved' : r.state) === k))}
                   badges=${{ review: stagedCount }} exports=${exportScopes} exportLabel="Export" overlayFor=${overlay}
-                  tools=${view === 'Track' ? html`<${Zoomer} win=${visibleWindow} full=${fullWindow} onWindow=${setZoomedWindow} />` : null}
+                  tools=${view === 'Track' ? html`<${Zoomer} win=${visibleWindow} full=${fullWindow} onWindow=${setZoomedWindow}
+                                                              onToday=${() => setDayOpen(todayIso())} />` : null}
                   meta=${`${TL.fmt(visibleWindow.start)} → ${TL.fmt(visibleWindow.end)}`}
                   masthead=${html`<${Masthead} eyebrow=${html`<${Eyebrow} live=${liveNow} staged=${stagedCount} flags=${flagCount} />`}
                                                title=${state.live?.currentSeasonTitle || 'Season'}
                                                sub="Everything scheduled this season on one axis — and whether it still fits inside the season’s own deadlines." 
                                                aside=${html`<${SeasonClock} season=${state.live} today=${todayIso()} />`}
-                                               actions=${html`<${AddChips} onAdd=${(key) => setShowAdd(key)} />`}
-                                               below=${composerSlot} />`}
+                                               actions=${html`<${AddChips} onAdd=${(key) => setShowAdd(key)} />`} />`}
                   contextSlot=${html`
                       <!-- The season's identity and its draft live ABOVE the view layer, not inside it —
                            they are the context the Track is read against, and they do not change when the
@@ -1272,8 +1315,10 @@ export function SeasonRealm({ session }) {
                       ${pageError ? html`
                           <p class="errmsg" role="alert">${pageError}
                               <button class="chip" onClick=${() => setPageError('')}>Dismiss</button></p>` : null}
+                      <${StagedPanel} changesets=${changesets} onReview=${() => { location.hash = '#/review'; }}
+                                      onDiscardAll=${confirmDiscardAll} />
                       ${viewSlot}`}
-                  overlaySlot=${html`${overlay.render()}${recPreview ? html`
+                  overlaySlot=${html`${overlay.render()}${composerSlot}${recPreview ? html`
                       <${RecordPreview} note=${recPreview} onClose=${() => setRecPreview(null)} />` : null}${dayOpen ? html`
                       <${DayDrawer} day=${dayOpen} live=${trackData} draft=${draftData}
                                     withDraft=${dayWithDraft} onWithDraft=${setDayWithDraft}

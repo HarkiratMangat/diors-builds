@@ -254,12 +254,7 @@ const server = http.createServer((req, res) => {
         });
         return;
     }
-    // 🔴 THE PORTAL IS SERVED AT THE ROOT AND THE MOCKUP UNDER A PREFIX, NOT THE OTHER WAY ROUND, AND
-    // THE FIRST VERSION HAD IT BACKWARDS. `harness.html`'s import map names ABSOLUTE `/ui/*.js` paths,
-    // so under a `/pt/` prefix every module resolved to `/ui/...` at the root — which fell through to
-    // the shell, returned 200 with `text/html`, and the frame rendered BLANK with no error anyone
-    // would see. A 200 that hands back the wrong content-type is the worst kind of not-found. The
-    // mockup's paths are all relative, so it is the side that can safely live under a prefix.
+    // 🔴 THE PORTAL IS SERVED AT THE ROOT AND THE MOCKUP UNDER A PREFIX, NOT THE OTHER WAY ROUND, AND THE FIRST VERSION HAD IT BACKWARDS. `harness.html`'s import map names ABSOLUTE `/ui/*.js` paths, so under a `/pt/` prefix every module resolved to `/ui/...` at the root — which fell through to the shell, returned 200 with `text/html`, and the frame rendered BLANK with no error anyone would see. A 200 that hands back the wrong content-type is the worst kind of not-found. The mockup's paths are all relative, so it is the side that can safely live under a prefix.
     if (u.pathname.startsWith('/mk/')) return sendFile(res, MK, decodeURIComponent(u.pathname.slice(4)));
     if (u.pathname === '/' || u.pathname === '') {
         const realm = REALMS[u.searchParams.get('realm')] ? u.searchParams.get('realm') : 'season';

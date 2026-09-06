@@ -506,6 +506,26 @@ const ROUTES = [
         }).filter(Boolean);
         return { kind, rows };
     }],
+    // 🔴 THE DRAWER'S TIER PREVIEW NEEDS THIS OR IT SHOWS ITS EMPTY STATE WITH TEXT IN THE BOX. Narrower than
+    // utils/adminParser.js on purpose, same as parse-date/parse-bulk: the four shorthands the placeholder
+    // itself teaches, so the stub cannot teach a grammar the product does not have.
+    [/^\/api\/parse-items$/, (params, body) => {
+        const TIER = { m: 'mythic', l: 'legendary', lg: 'legacy', e: 'epic' };
+        const items = []; const errors = [];
+        String((body && body.text) || '').split('\n').forEach((raw, i) => {
+            const line = raw.trim();
+            if (!line) return;
+            if (/^-#\s*/.test(line)) {
+                const name = line.replace(/^-#\s*/, '');
+                if (!name) { errors.push({ line: i + 1, text: line }); return; }
+                items.push({ tier: 'comment', name });
+                return;
+            }
+            const m = line.match(/^(\S+)\s+(.+)$/);
+            items.push(m ? { tier: TIER[m[1].toLowerCase()] || m[1], name: m[2] } : { tier: 'epic', name: line });
+        });
+        return { items, errors };
+    }],
     [/^\/api\/parse-date$/, (params) => {
         const q = (params.get('q') || '').trim().toLowerCase();
         const day = (d) => new Date(d).toISOString().slice(0, 10);

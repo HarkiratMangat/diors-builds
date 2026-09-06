@@ -288,18 +288,52 @@ function buildSeasonAddOp(kind, fields) {
     //
     // ⚠️ The op is `patchnote.addSeason`, whose payload keys are its OWN (`titleOverride`, `releaseDate`) and not the calendar's — `resolveReleaseDate()` in core/ops/patchnotes.js reads `releaseDate`, so sending `endDate` here would parse an empty string. Description and image URLs are genuinely absent rather than defaulted: the composer collects a name and a date, and /manage is where the rest of a patch note is written.
     if (kind === 'patchnote') {
+        // 🔴 THE DESCRIPTION AND THE IMAGE SLOTS ARE COLLECTED NOW, AND THEY USED TO BE HARDCODED EMPTY.
+        // /manage's own Add New Season modal takes all four (commands/manage.js's buildPatchAddSeasonModal:
+        // season title override, release date, additional info, and two URL paragraphs), so the portal's
+        // control created a publication with no content in it and sent the reader to Discord to finish the
+        // job. The keys are the op's own — resolveReleaseDate() in core/ops/patchnotes.js reads `releaseDate`.
         return { type: 'patchnote.addSeason', target: null,
-                 payload: { titleOverride: fields.title, releaseDate: fields.endDate, description: '', urls1: [], urls2: [] } };
+                 payload: { titleOverride: fields.title, releaseDate: fields.endDate,
+                            description: fields.description || '', urls1: fields.urls1 || [], urls2: fields.urls2 || [] } };
     }
     const entity = KIND_TO_ENTITY[kind];
     if (entity === 'draw') {
         // core/ops/draws.js validates payload.date (matching the SeasonalData schema's newDraws/ returningDraws[].date field, and utils/adminParser.js's parseBulkDrawList -- draws have no separate start/end, unlike calendar events, whose schema genuinely has both).
-        return { type: 'draw.add', target: null, payload: { title: fields.title, category: KIND_TO_DRAW_CATEGORY[kind], date: fields.endDate, items: fields.items || [] } };
+        // ⚠️ `windowEnd` IS DELIBERATELY NOT SPREAD IN. A draw's record has one date and no window (see
+        // buildSeasonAddOps below), so the payload is written key by key rather than from `...fields` —
+        // a spread would put a field the schema does not declare onto the subdocument, which Mongoose
+        // silently drops on the next fetch and nothing would report.
+        const payload = { title: fields.title, category: KIND_TO_DRAW_CATEGORY[kind], date: fields.endDate, items: fields.items || [] };
+        if (fields.thumbnailUrl) payload.thumbnailUrl = fields.thumbnailUrl;
+        return { type: 'draw.add', target: null, payload };
     }
     // 🔴 THE CATEGORY IS LOOKED UP, NEVER DEFAULTED. The line above used to read `category: fields.category || (kind === 'playlist' ? 'Playlist' : 'Event')`, so ANY kind that reached here and was not `playlist` was filed as an Event -- which is exactly how the patch-note chip staged a calendar event (see the comment at the top of this function). Adding a third calendar kind would have repeated it silently, under a control labelled "Draw window". An unknown kind now throws by name instead.
     const category = fields.category || KIND_TO_CALENDAR_CATEGORY[kind];
     if (!category) throw new Error(`buildSeasonAddOp: no calendar category for kind "${kind}"`);
     return { type: 'calendar.add', target: null, payload: { title: fields.title, startDate: fields.startDate, endDate: fields.endDate, category, isOngoing: !!fields.isOngoing, isDoubleCP: !!fields.isDoubleCP } };
+}
+
+// 🔴 ONE COMPOSER ENTRY, TWO OPS — AND THAT IS WHY "DRAW WINDOW" IS NO LONGER A KIND YOU PICK.
+// A draw window is not a thing anybody sets out to create: it is the answer to "how long can this draw be
+// bought for", which is a property of the draw you are already describing. Offering it as a seventh chip
+// made the reader compose the same draw twice, in two controls, and hope the two titles matched — and
+// nothing checked that they did, which is exactly what the Track's own "orphan window" repair finding is
+// for. So the draw form takes an optional closing date, and when it is set this stages the draw AND the
+// `calendar.add` row that is its window, in one changeset, under one title, by construction.
+//
+// ⚠️ THE WINDOW OPENS ON THE RELEASE DATE, never on today: a draw window that starts before the draw exists
+// is a row the Track would draw running past its own subject.
+//
+// ⚠️ It reuses KIND_TO_CALENDAR_CATEGORY's `drawwindow` entry rather than writing 'Draw' here. The mapping
+// is still the one table that says what each kind stores, and a literal at this call site would be a second
+// copy of it that could drift while agreeing with itself.
+function buildSeasonAddOps(kind, fields) {
+    const ops = [buildSeasonAddOp(kind, fields)];
+    if (fields && fields.windowEnd) {
+        ops.push(buildSeasonAddOp('drawwindow', { title: fields.title, startDate: fields.endDate, endDate: fields.windowEnd }));
+    }
+    return ops;
 }
 
 // Edits one field of an existing row, preserving the rest -- draw.edit/calendar.edit's validate() needs the full record, not a partial patch (core/ops/draws.js, core/ops/calendar.js). Dates are passed as bare ISO date strings (YYYY-MM-DD) rather than a full ISO datetime, since validate() re-parses them through chrono-node's parseAdminDate() (an op arriving as JSON over HTTP never satisfies the "already a real Date instance" fast path those functions also support) and a bare date is the form that parser is built for.
@@ -378,7 +412,7 @@ function panWindow(win, days, full) {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { inkOn, inkOnTopic, TOPIC_HEX, seasonSpanGeometry, spanBarFor, nowPctIn, buildSeasonAddOp, buildSeasonEditOp, LANE_TO_CATEGORY, KIND_TO_ENTITY, KIND_TO_CALENDAR_CATEGORY, LANE_LABELS, CAL_CATEGORY, calCategoryOf, toManifestRows, stateForElement, seasonWindow, topicVarFor, typeLabelFor, isPlaylist, toBoardItems, newestPatchNoteId };
+    module.exports = { inkOn, inkOnTopic, TOPIC_HEX, seasonSpanGeometry, spanBarFor, nowPctIn, buildSeasonAddOp, buildSeasonAddOps, buildSeasonEditOp, LANE_TO_CATEGORY, KIND_TO_ENTITY, KIND_TO_CALENDAR_CATEGORY, LANE_LABELS, CAL_CATEGORY, calCategoryOf, toManifestRows, stateForElement, seasonWindow, topicVarFor, typeLabelFor, isPlaylist, toBoardItems, newestPatchNoteId };
 }
 
 // ── THE SEASON'S DEADLINE LINES ───────────────────────────────────────────────────────────────

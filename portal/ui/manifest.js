@@ -336,7 +336,7 @@ export function Manifest({ label = null, rows, columns, searchableFields, bulkAc
                                  takes the destructive colour only on hover and focus. -->
                             ${onRemove ? html`
                                 <td class="ra" onClick=${(e) => e.stopPropagation()}>
-                                    <button class="rmv" title=${removeLabel} aria-label=${`${removeLabel} ${row[columns[0].key]}`}
+                                    <button class="rmv" data-tip=${removeLabel} aria-label=${`${removeLabel} ${row[columns[0].key]}`}
                                             onClick=${() => onRemove(row)}>
                                         <!-- The design draws this one inline rather than through the sprite, and the
                                              shapes are not the same glyph: its lid-and-body path is 15px wide against

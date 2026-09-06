@@ -120,6 +120,8 @@ Six surfaces step from `--sunk` through `--desk`, `--paper`, `--raised`, `--hi` 
 
 **Three families, split by kind rather than by hierarchy.** `--ui` (**Space Grotesk**) for interface chrome; `--data` (**JetBrains Mono**) for **every date, count, id and code**, so numerals align in columns; `--display` (**Big Shoulders Display**) for figures and realm titles. The mono assignment is a data-integrity decision, not a texture one.
 
+**The UI type scale moved up half a step on 2026-09-06 01:24 EDT** (build-out decision D6, `typeset`): `--t-micro 9.5 · --t-xs 10.5 · --t-sm 12 · --t-base 13 · --t-md 14.5 · --t-lg 16.5 · --t-xl 19 · --t-hero 26`, with three line-height jobs (`--lh-tight 1.15 · --lh-ui 1.35 · --lh-body 1.5`). Every literal px font-size in `portal/ui/app.css` was mapped onto a step in the same change (316 sites; 17px and 20px stay literal on the Armory rank column; the Discord preview keeps Discord's own sizes). ⚠️ **The mockup package keeps the old scale** (`--t-sm 11.5`, `--t-micro 9`): it is the design as approved, and the portal is deliberately ahead of it here — see Known divergences.
+
 ## Shape carries state
 
 - **solid fill** — live
@@ -174,15 +176,35 @@ Structure is carried by **borders** (`--rule`, `--rule2`) — but "no shadows" i
 
 The package carries **91 `transition` declarations**; `portal/ui/app.css` carries **91**. The previous version of this file said "exactly one", measured against the retired package, and filed the difference as a portal defect. It does not reproduce.
 
-⚠️ **The conformance instrument still cannot see motion, and that is a real limit rather than a design position.** `portalDiff` zeroes transitions and animations so its pixel comparison is deterministic at a frozen clock — so it would score an *added* transition as a regression, and can never reward one. `portalAudit` does not zero them and now samples `transitionProperty` / `transitionDuration`, so a **declared** transition is comparable even though its motion is not. **Motion beyond what is declared is an open design question for the post-conformance phase.**
+⚠️ **The conformance instrument still cannot see motion, and that is a real limit rather than a design position.** `portalDiff` zeroes transitions and animations so its pixel comparison is deterministic at a frozen clock — so it would score an *added* transition as a regression, and can never reward one. `portalAudit` does not zero them and now samples `transitionProperty` / `transitionDuration`, so a **declared** transition is comparable even though its motion is not. **Answered 2026-09-06 01:24 EDT** (build-out, `animate`): ONE page-load orchestration keyed on `--dur-3` (320ms) — the masthead figures rise in order 60ms apart, the rail items stagger once on mount, drawers scale in (they already did). It lives at the foot of `portal/ui/app.css` under the build-out banner, inside `prefers-reduced-motion:no-preference`, and the global reduced-motion kill zeroes it.
 
-## Spacing — deliberately absent, and this is the finding
+## Spacing — a six-step scale, from 2026-09-06 01:24 EDT
 
-**There is no spacing scale, in either the mockups or the portal, and none is invented here.** Measured across the six mockups 2026-08-30: **28 CSS custom properties, zero of them spacing**, and 19 distinct off-4px-grid values in padding/margin/gap — `9px` used 41 times, `11px` 31 times, plus 13/15/17/22/26/34/90px.
+`--s1 4 · --s2 8 · --s3 12 · --s4 16 · --s5 24 · --s6 32` (`portal/ui/tokens.css`, build-out decision D6, `layout`). Structural gaps use s4–s6 — the masthead's padding, `.mh-stats` above the figures, `.panel + .panel` (the view layer and the Manifest sat flush), the record panel's margin, the identity panel's foot; inside a control s1–s3. A literal stays legal where it is optical (a hairline, an 11px diamond); a NEW structural gap on a literal is a defect. Pin 14 ("no breathing room in this entire design") is the finding it answers.
 
-Recording an invented scale would have been the wrong move twice over: it would make an arbitrary set of numbers look decided, and snapping the portal onto a grid would move pixels and **raise** the conformance diff. Per Harkirat's decision 2026-08-30 11:46 EDT: **no action now; revisit once the portal is conformed to the mockups, since that is when redesign work resumes anyway.**
+**Before 2026-09-06 01:24 EDT there was no spacing scale, in either the mockups or the portal, and none was invented.** Measured across the six mockups 2026-08-30: **28 CSS custom properties, zero of them spacing**, and 19 distinct off-4px-grid values in padding/margin/gap — `9px` used 41 times, `11px` 31 times, plus 13/15/17/22/26/34/90px.
 
-## Known divergences — none currently stand
+Recording an invented scale would have been the wrong move twice over: it would make an arbitrary set of numbers look decided, and snapping the portal onto a grid would move pixels and **raise** the conformance diff. Per Harkirat's decision 2026-08-30 11:46 EDT: **no action now; revisit once the portal is conformed to the mockups, since that is when redesign work resumes anyway.** That revisit is the 2026-09-06 01:24 EDT scale above; the mockups keep their off-grid values because they are the approved design, not a live sheet.
+
+## Known divergences — the build-out's deliberate ones
+
+**From 2026-09-06 01:24 EDT the portal is AHEAD of the mockup package on purpose** (Harkirat, 2026-09-06 00:43 EDT: the conformance is done; build out, redesigns included; floors move). The package stays as approved. Each row is a divergence a future measurement will report, and the reason it should NOT be closed:
+
+| Divergence | Portal | Package | Why |
+|---|---|---|---|
+| UI type scale | `--t-sm 12`, `--t-base 13`, `--t-micro 9.5` … (Typography above) | `11.5 / 12.5 / 9` | D6 `typeset`; the detector's top rule was undersized-ui-text |
+| Spacing scale | `--s1…--s6`, structural gaps on s4–s6 | none | D6 `layout`; pin 14 |
+| Realm accents | six distinct hues, Review = ink, Home = ink2 | four alias state colours | D4 `colorize`; the paragraph below records the old state |
+| Masthead wash | radial realm-hue light, 10% at top-left, keyed on `.app[data-realm]` | none | `bolder` — the signature |
+| Topic side-tab | 2px on cards (`.bcard`, tier cards, the composer preview) | 3px | `quieter`; the state callouts (`.flag`, `.callout`, `.failbox`) keep 3px because there the border IS the message |
+| Drawer field label | sentence case, `--t-sm`, `--ui` | 9.5px tracked uppercase | a six-field form is read, not scanned |
+| Manifest delete column | 52px, 12px in, ghost ring at rest, tip on hover | 40px / 8px / transparent ring | pin 22 |
+| Record-panel CTA row | `align-items:center` | `baseline` | pin 8 — a 30px button hung 8px below a 10.5px eyebrow |
+| Record spine | `.rec-mk{justify-self:center}` | left-aligned in its column | pin 9 — the marker sat 4.5px off the line it threads |
+
+*(Rows for what the realm units built — drawers, the Armory rack, the Access grant flow, the Analytics lead — are in `docs/reference/portal-decision-ledger.md` § Superseded 2026-09-06.)*
+
+**Before 2026-09-06 01:24 EDT this section read "none currently stand":**
 
 The previous version listed two, both measured against the retired `2026-08-20-portal` package. **Both were re-measured on the current authority on 2026-08-30 and neither reproduces:** `--ink4:#5C6A75` is declared identically in both token files, and the transition counts hold.
 
@@ -192,4 +214,4 @@ The previous version listed two, both measured against the retired `2026-08-20-p
 
 🔴 **THE STAND-DOWN REGISTER THIS PARAGRAPH POINTED AT NO LONGER EXISTS — corrected 2026-09-04 21:52 EDT.** It said to read `rg -n 'conforming\(\)' portal/ui/*.js` as "the list of divergences that are deliberate". That grep returns **0** and has since 2026-08-31, when the two rendering modes collapsed: all 57 `conforming()` sites and the helper module were deleted, and there is ONE rendering now which is what ships. **A record that tells a reader to run a command whose empty output means "no divergences" is worse than one that says nothing** — the silence reads as a clean bill of health. The register that replaced it is `docs/reference/portal-decision-ledger.md`, where a deliberate divergence is a ROW with a falsifier; `npm run portal:ledger-rows` counts them per realm.
 
-🔴 **AND THE PALETTE'S OWN LAW IS BROKEN AT THE TOKEN LEVEL — measured 2026-09-04 21:52 EDT.** This file states *"colour carries topic; shape carries state"* and calls it load-bearing rather than stylistic. `portal/ui/tokens.css:104-105` then defines four of the six realm accents as ALIASES OF STATE COLOURS: `--r-broadcast:var(--patch)` · `--r-access:var(--info)` · `--r-analytics:var(--ev)` · `--r-review:var(--staged)`. Topic and state are not merely both coloured — on four realms they are the **same hex**, so no reader can tell "this is the Review realm" from "this is staged" by hue alone, and the shape vocabulary degrades from *the* signature to a redundancy. ⚠️ **Whether that is a defect or a deliberate pun** (Review IS where staged work goes) **is a design decision nobody has recorded**, which is precisely why it belongs in this section rather than in a comment.
+✅ **RESOLVED 2026-09-06 01:24 EDT — decision D4, distinct hue per realm** (`--r-broadcast:#E56FA6 · --r-access:#6B8AF7 · --r-analytics:#9CC85A · --r-review:var(--ink) · --r-home:var(--ink2)`; season and armory unchanged). Review is colourless on purpose: it is the one realm with no topic, because it is every topic; Home is the arrival surface, not a territory. The paragraph that follows is the finding as it stood. 🔴 **THE PALETTE'S OWN LAW WAS BROKEN AT THE TOKEN LEVEL — measured 2026-09-04 21:52 EDT.** This file states *"colour carries topic; shape carries state"* and calls it load-bearing rather than stylistic. `portal/ui/tokens.css:104-105` then defines four of the six realm accents as ALIASES OF STATE COLOURS: `--r-broadcast:var(--patch)` · `--r-access:var(--info)` · `--r-analytics:var(--ev)` · `--r-review:var(--staged)`. Topic and state are not merely both coloured — on four realms they are the **same hex**, so no reader can tell "this is the Review realm" from "this is staged" by hue alone, and the shape vocabulary degrades from *the* signature to a redundancy. ⚠️ **Whether that is a defect or a deliberate pun** (Review IS where staged work goes) **is a design decision nobody has recorded**, which is precisely why it belongs in this section rather than in a comment.

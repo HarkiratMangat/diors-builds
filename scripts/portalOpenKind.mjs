@@ -29,9 +29,7 @@ const REALMS = val('--realm') ? [val('--realm')] : ALL;
 // The mockup page each realm maps to. Home is `index.html`; the rest are named.
 const PAGE = { season: 'season.html', armory: 'armory.html', broadcast: 'broadcast.html', access: 'access.html', analytics: 'analytics.html', review: 'review.html', home: 'index.html' };
 
-// 🔴 THE CLASSIFIER, AND IT IS THE WHOLE INSTRUMENT. Everything else here is plumbing.
-// `swap` is listed FIRST because it is the defect that started this: a control that opens a form AND
-// tears the page out from under it reads as "something opened" to any naive check.
+// 🔴 THE CLASSIFIER, AND IT IS THE WHOLE INSTRUMENT. Everything else here is plumbing. `swap` is listed FIRST because it is the defect that started this: a control that opens a form AND tears the page out from under it reads as "something opened" to any naive check.
 export function classify(before, after) {
     if (after.modal > before.modal) return 'modal';
     if (after.nodes < before.nodes - 200) return 'swap';
@@ -52,13 +50,11 @@ const LIST = () => {
     const out = [];
     for (const e of document.querySelectorAll('button,a,[role="button"],summary')) {
         if (e.offsetParent === null) continue;
-        // Inherited verbatim from portalAudit's --triggers: a data row is not a control, and an
-        // unfiltered inventory on Armory comes back as a hundred build names.
+        // Inherited verbatim from portalAudit's --triggers: a data row is not a control, and an unfiltered inventory on Armory comes back as a hundred build names.
         if (e.closest('tr,li[data-id],[data-id],.bcard,.mtable tbody,.daylist,.explist,.exs')) continue;
         const t = norm(e.textContent) || norm(e.getAttribute('aria-label'));
         if (!t || t.length > 60) continue;
-        // Only controls that plausibly OPEN something. A tab, a filter chip and a sort header all
-        // change the page without opening a surface, and including them buries the signal.
+        // Only controls that plausibly OPEN something. A tab, a filter chip and a sort header all change the page without opening a surface, and including them buries the signal.
         if (!/^(\+|new |add |post |grant |create |edit |compose |export)/i.test(t) && !/^(draw|returning draw|draw window|event|playlist|patch note)$/i.test(t)) continue;
         out.push(t);
     }
@@ -95,9 +91,7 @@ async function kindOf(page, label) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {
-    // 🔴 THE FALSIFIER RUNS FIRST AND THE PROGRAM REFUSES WITHOUT IT. Four instruments in this repo
-    // shipped green while blind; the classifier is this one's entire claim, so it proves it can tell
-    // the four kinds apart on constructed input before it reports on any real page.
+    // 🔴 THE FALSIFIER RUNS FIRST AND THE PROGRAM REFUSES WITHOUT IT. Four instruments in this repo shipped green while blind; the classifier is this one's entire claim, so it proves it can tell the four kinds apart on constructed input before it reports on any real page.
     const b = { nodes: 1000, modal: 0, text: 500 };
     const cases = [
         ['modal', { nodes: 1120, modal: 1, text: 600 }, 'modal'],
@@ -133,11 +127,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToP
             const ptPage = await open(`http://127.0.0.1:${pt.port}/harness.html${mkq ? mkq + '&' : '?'}b=${Date.now()}#/${realm}`);
             const mkControls = await mkPage.evaluate(LIST);
             const ptControls = await ptPage.evaluate(LIST);
-            // 🔴 THE FIRST RUN PAIRED NOTHING ON THE CREATE CHIPS AND SAID SO ONLY IN AN ASIDE. The portal
-            // appends its keyboard shortcut to the label -- `New DMZ build D` against the design's `New DMZ
-            // build` -- so an exact match dropped both chips out of the comparison while the run still exited
-            // with a finding about a different control. That is a silent under-report on exactly the control
-            // that motivated the tool. Labels are compared with a trailing single-letter shortcut stripped.
+            // 🔴 THE FIRST RUN PAIRED NOTHING ON THE CREATE CHIPS AND SAID SO ONLY IN AN ASIDE. The portal appends its keyboard shortcut to the label -- `New DMZ build D` against the design's `New DMZ build` -- so an exact match dropped both chips out of the comparison while the run still exited with a finding about a different control. That is a silent under-report on exactly the control that motivated the tool. Labels are compared with a trailing single-letter shortcut stripped.
             const bare = (t) => t.replace(/\s+[A-Z]$/, '').trim();
             const ptBy = new Map(ptControls.map((c) => [bare(c), c]));
             const shared = mkControls.filter((c) => ptBy.has(bare(c)));
