@@ -22,6 +22,8 @@
     "portal:gapsplit": "node scripts/portalGapSplit.mjs",
     "portal:orphans": "node scripts/portalOrphans.mjs",
     "portal:reverse-orphans": "node scripts/portalReverseOrphans.mjs",
+    "portal:openkind": "node scripts/portalOpenKind.mjs",
+    "portal:sync": "node scripts/portalSync.mjs",
     "portal:reverse-orphans:test": "node scripts/portalReverseOrphans.test.mjs",
     "portal:geometry": "node scripts/portalGeometry.mjs",
     "portal:geometry:test": "node scripts/portalGeometry.test.mjs",
