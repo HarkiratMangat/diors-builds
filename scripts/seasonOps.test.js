@@ -140,11 +140,7 @@ check('toManifestRows treats every row as live when no changesets are open', () 
     assert.strictEqual(rows[0].state, 'live');
 });
 
-// 🔴 THE COMPOSER CAN NOW EMIT TWO OPS FROM ONE ENTRY, AND BOTH HAVE TO BE REAL. buildSeasonAddOps turns a
-// draw with a closing date into draw.add + calendar.add — the second is the draw WINDOW, which stopped being
-// a kind you pick on 2026-09-06 01:29 EDT. The payload shapes are asserted in scripts/composerForm.test.js;
-// what only THIS file can check is that the two types it names are types core/ops actually registers, since
-// an op type that resolves to nothing stages a changeset that can never commit.
+// 🔴 THE COMPOSER CAN NOW EMIT TWO OPS FROM ONE ENTRY, AND BOTH HAVE TO BE REAL. buildSeasonAddOps turns a draw with a closing date into draw.add + calendar.add — the second is the draw WINDOW, which stopped being a kind you pick on 2026-09-06 01:29 EDT. The payload shapes are asserted in scripts/composerForm.test.js; what only THIS file can check is that the two types it names are types core/ops actually registers, since an op type that resolves to nothing stages a changeset that can never commit.
 check('both op types the composer can emit from one entry are registered ops', () => {
     const { buildSeasonAddOps } = require('../portal/ui/season.logic');
     const pair = buildSeasonAddOps('draw', { title: 'X', startDate: '', endDate: '2026-09-21', windowEnd: '2026-10-05' });

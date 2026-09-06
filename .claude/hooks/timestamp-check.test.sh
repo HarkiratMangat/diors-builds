@@ -148,7 +148,8 @@ a "wrapped future stamp still denied" pre "deny:" yes "$(printf '# filed %s\n# %
 a "a historical stamp beside today's placeholder is untouched" pre "2026-08-03 18:12" yes "filed ${TODAY} 18:xx ${LOCALTZ} — see the 2026-08-03 18:12 ${LOCALTZ} incident"
 a "and today's placeholder in that same line IS fixed"         pre "FIXED<filed ${TODAY} $(date '+%H:%M')" yes "filed ${TODAY} 18:xx ${LOCALTZ} — see the 2026-08-03 18:12 ${LOCALTZ} incident"
 # The character class [0-9xX?] matches real digits, so the pattern must also refuse a CORRECT stamp.
-a "a correct stamp for TODAY is left alone"                    pre "SILENT" yes "filed ${TODAY} 09:30 ${LOCALTZ}"
+# 00:01, not 09:30 (2026-09-06 09:02 EDT): a fixed clock time on TODAY is in the FUTURE for anyone running the suite before it, and the hook then correctly DENIES it — this case failed at 09:01 while the hook was right. A minute past midnight is in the past on every run of the day.
+a "a correct stamp for TODAY is left alone"                    pre "SILENT" yes "filed ${TODAY} 00:01 ${LOCALTZ}"
 
 # ── a placeholder on a PAST date is DELIBERATE, not forgotten ──────────────── Added 2026-09-02 16:58 EDT. The suite passed 57/57 with this narrowing already in place, which is precisely the problem: nothing exercised it, so the branch was a claim rather than a check. A stamp like `2026-09-01 16:0x EDT` is an intentionally imprecise historical reference and this repo is full of them -- four in memory-index-check.sh alone. Substituting there does not repair anything; it INVENTS a precise time for a past event, which is the exact fabrication this whole file exists to prevent, committed by the fix instead of the author.
 YESTERDAY=$(when '-1d' | cut -d' ' -f1)
